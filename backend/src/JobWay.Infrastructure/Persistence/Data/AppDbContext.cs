@@ -1,7 +1,7 @@
 using JobWay.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace JobWay.Infrastructure.Persistence;
+namespace JobWay.Infrastructure.Persistence.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

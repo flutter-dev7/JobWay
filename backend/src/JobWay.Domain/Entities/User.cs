@@ -1,3 +1,4 @@
+// Domain/Entities/User.cs — заменить целиком
 using JobWay.Domain.Common;
 using JobWay.Domain.Enums;
 
@@ -9,7 +10,7 @@ public class User : BaseEntity
     public string? PhoneNumber { get; set; }
     public string PasswordHash { get; set; } = null!;
     public UserRole Role { get; set; }
-    public string PreferredLanguage { get; set; } = "ru"; // "ru" или "tj"
+    public string PreferredLanguage { get; set; } = "ru";
     public bool IsActive { get; set; } = true;
 
     public CandidateProfile? CandidateProfile { get; set; }
