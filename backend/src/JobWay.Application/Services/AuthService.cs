@@ -1,3 +1,4 @@
+// Application/Services/AuthService.cs — заменить целиком
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.Auth.Request;
 using JobWay.Application.DTOs.Auth.Response;
@@ -42,17 +43,10 @@ public class AuthService : IAuthService
         if (request.Role is not (UserRole.Candidate or UserRole.Employer))
             return Result<AuthResponse>.Fail("Registration with this role is not allowed", ErrorType.Validation);
 
-        if (request.Role == UserRole.Candidate &&
-            (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName)))
-            return Result<AuthResponse>.Fail("First name and last name are required", ErrorType.Validation);
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return Result<AuthResponse>.Fail("Name is required", ErrorType.Validation);
 
-        if (request.Role == UserRole.Employer && string.IsNullOrWhiteSpace(request.CompanyName))
-            return Result<AuthResponse>.Fail("Company name is required", ErrorType.Validation);
-
-        var exists = await _unitOfWork.Repository<User>()
-            .ExistsAsync(u => u.Email == request.Email, cancellationToken);
-
-        if (exists)
+        if (await _unitOfWork.Users.ExistsAsync(request.Email, cancellationToken))
             return Result<AuthResponse>.Fail("A user with this email already exists", ErrorType.Conflict);
 
         var user = new User
@@ -64,11 +58,11 @@ public class AuthService : IAuthService
         };
 
         if (request.Role == UserRole.Candidate)
-            user.CandidateProfile = new CandidateProfile { FullName = $"{request.FirstName} {request.LastName}".Trim() };
+            user.CandidateProfile = new CandidateProfile { FullName = request.Name };
         else
-            user.CompanyProfile = new CompanyProfile { CompanyName = request.CompanyName! };
+            user.CompanyProfile = new CompanyProfile { CompanyName = request.Name };
 
-        await _unitOfWork.AddAsync(user, cancellationToken);
+        await _unitOfWork.Users.AddAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<AuthResponse>.Ok(BuildAuthResponse(user));
@@ -76,8 +70,7 @@ public class AuthService : IAuthService
 
     public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
-        var user = await _unitOfWork.Repository<User>()
-            .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
+        var user = await _unitOfWork.Users.GetByEmailAsync(request.Email, cancellationToken);
 
         if (user is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
             return Result<AuthResponse>.Fail("Invalid email or password", ErrorType.Unauthorized);
@@ -90,8 +83,7 @@ public class AuthService : IAuthService
 
     public async Task<Result<string>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken)
     {
-        var user = await _unitOfWork.Repository<User>()
-            .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
+        var user = await _unitOfWork.Users.GetByEmailAsync(request.Email, cancellationToken);
 
         if (user is null)
             return Result<string>.Fail("User not found", ErrorType.NotFound);
@@ -125,14 +117,13 @@ public class AuthService : IAuthService
         if (!verified)
             return Result<string>.Fail("Reset code was not verified", ErrorType.Validation);
 
-        var user = await _unitOfWork.Repository<User>()
-            .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
+        var user = await _unitOfWork.Users.GetByEmailAsync(request.Email, cancellationToken);
 
         if (user is null)
             return Result<string>.Fail("User not found", ErrorType.NotFound);
 
         user.PasswordHash = _passwordHasher.Hash(request.NewPassword);
-        _unitOfWork.Repository<User>().Update(user);
+        _unitOfWork.Users.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         await _cacheService.RemoveAsync(ResetCodeKeyPrefix + request.Email, cancellationToken);
@@ -143,7 +134,7 @@ public class AuthService : IAuthService
 
     public async Task<Result<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken)
     {
-        var user = await _unitOfWork.Repository<User>().GetByIdAsync(userId, cancellationToken);
+        var user = await _unitOfWork.Users.GetByIdAsync(userId, cancellationToken);
 
         if (user is null)
             return Result<string>.Fail("User not found", ErrorType.NotFound);
@@ -152,7 +143,7 @@ public class AuthService : IAuthService
             return Result<string>.Fail("Old password is incorrect", ErrorType.Validation);
 
         user.PasswordHash = _passwordHasher.Hash(request.NewPassword);
-        _unitOfWork.Repository<User>().Update(user);
+        _unitOfWork.Users.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Ok("Password changed successfully");

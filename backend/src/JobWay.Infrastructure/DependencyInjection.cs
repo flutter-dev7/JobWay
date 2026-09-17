@@ -33,6 +33,16 @@ public static class DependencyInjection
         
         services.AddMemoryCache();
         services.AddScoped<ICacheService, MemoryCacheService>();
+        
+        services.AddScoped<ISkillService, SkillService>();
+        services.AddScoped<ICandidateProfileService, CandidateProfileService>();
+        services.AddScoped<ICompanyProfileService, CompanyProfileService>();
+        
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ICandidateProfileRepository, CandidateProfileRepository>();
+        services.AddScoped<ICompanyProfileRepository, CompanyProfileRepository>();
+        services.AddScoped<ISkillRepository, SkillRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

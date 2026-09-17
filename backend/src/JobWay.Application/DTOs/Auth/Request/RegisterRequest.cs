@@ -9,9 +9,5 @@ public class RegisterRequest
     public string ConfirmPassword { get; set; } = null!;
     public string? PhoneNumber { get; set; }
     public UserRole Role { get; set; }
-
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-
-    public string? CompanyName { get; set; }
+    public string Name { get; set; } = null!;
 }
