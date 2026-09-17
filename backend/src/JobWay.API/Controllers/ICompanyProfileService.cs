@@ -1,0 +1,27 @@
+using JobWay.Application.DTOs.CompanyProfile.Request;
+using JobWay.Application.Interfaces.Services;
+using JobWay.Domain.Constants;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace JobWay.API.Controllers;
+
+[Authorize(Roles = Roles.Employer)]
+[Route("api/company-profile")]
+public class CompanyProfileController : BaseApiController
+{
+    private readonly ICompanyProfileService _companyProfileService;
+
+    public CompanyProfileController(ICompanyProfileService companyProfileService)
+    {
+        _companyProfileService = companyProfileService;
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
+        => HandleError(await _companyProfileService.GetMyProfileAsync(CurrentUserId, cancellationToken));
+
+    [HttpPut("me")]
+    public async Task<IActionResult> UpdateMyProfile(UpdateCompanyProfileRequest request, CancellationToken cancellationToken)
+        => HandleError(await _companyProfileService.UpdateMyProfileAsync(CurrentUserId, request, cancellationToken));
+}
