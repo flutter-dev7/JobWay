@@ -43,6 +43,18 @@ public static class DependencyInjection
         services.AddScoped<ICompanyProfileRepository, CompanyProfileRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
+        services.AddScoped<IVacancyRepository, VacancyRepository>();
+        services.AddScoped<IVacancyService, VacancyService>();
+        
+        services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
+        services.AddScoped<IMatchingService, MatchingService>();
+        services.AddScoped<IJobApplicationService, JobApplicationService>();
+        
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<INotificationService, NotificationService>();
+        
+        services.AddScoped<IAdminService, AdminService>();
 
         return services;
     }
