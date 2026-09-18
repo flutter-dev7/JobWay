@@ -6,6 +6,9 @@ public interface IUnitOfWork
     ICandidateProfileRepository CandidateProfiles { get; }
     ICompanyProfileRepository CompanyProfiles { get; }
     ISkillRepository Skills { get; }
+    IVacancyRepository Vacancies { get; }
+    IJobApplicationRepository JobApplications { get; }
+    INotificationRepository Notifications { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
