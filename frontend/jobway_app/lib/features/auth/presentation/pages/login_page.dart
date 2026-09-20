@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/network/api_exception.dart';
 import 'package:jobway_app/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:jobway_app/features/home/presentation/pages/home_page.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -31,7 +32,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           if (result != null) {
             _emailController.clear();
             _passwordController.clear();
-            // TODO: навигация на главный экран после логина
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomePage(role: result.role)),
+            );
           }
         },
       );
@@ -95,7 +99,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF9CA3AF),
+                              foregroundColor: Colors.blue,
                             ),
                             onPressed: () {
                               Navigator.push(
@@ -129,7 +133,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                             TextButton(
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF6B7280),
+                                foregroundColor: Colors.blue,
                               ),
                               onPressed: () {
                                 Navigator.push(

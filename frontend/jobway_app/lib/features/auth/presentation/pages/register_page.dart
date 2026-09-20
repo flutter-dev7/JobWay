@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/network/api_exception.dart';
+import 'package:jobway_app/features/home/presentation/pages/home_page.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -35,7 +36,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             _emailController.clear();
             _passwordController.clear();
             _confirmPasswordController.clear();
-            // TODO: навигация на главный экран после регистрации
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomePage(role: result.role)),
+            );
           }
         },
       );
@@ -140,7 +144,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             ),
                             TextButton(
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF6B7280),
+                                foregroundColor: Colors.blue,
                               ),
                               onPressed: () => Navigator.pop(context),
                               child: const Text(

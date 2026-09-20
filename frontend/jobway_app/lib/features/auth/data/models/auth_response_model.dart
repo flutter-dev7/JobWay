@@ -1,3 +1,5 @@
+// features/auth/data/models/auth_response_model.dart — заменить factory
+import '../../../../core/network/api_response.dart';
 import '../../domain/entities/auth_result.dart';
 
 class AuthResponseModel {
@@ -14,7 +16,7 @@ class AuthResponseModel {
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? json;
+    final data = ApiResponse.unwrap(json);
     return AuthResponseModel(
       userId: data['userId'],
       role: data['role'],
