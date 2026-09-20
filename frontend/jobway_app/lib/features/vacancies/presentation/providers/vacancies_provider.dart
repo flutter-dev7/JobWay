@@ -1,3 +1,4 @@
+// features/vacancies/presentation/providers/vacancies_provider.dart — заменить целиком
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/providers/core_providers.dart';
@@ -6,8 +7,12 @@ import '../../data/repository/vacancies_repository_impl.dart';
 import '../../domain/entities/vacancy.dart';
 import '../../domain/entities/vacancy_filter.dart';
 import '../../domain/repository/vacancies_repository.dart';
+import '../../domain/usecases/close_vacancy_usecase.dart';
+import '../../domain/usecases/create_vacancy_usecase.dart';
 import '../../domain/usecases/get_active_vacancies_usecase.dart';
+import '../../domain/usecases/get_my_vacancies_usecase.dart';
 import '../../domain/usecases/get_vacancy_by_id_usecase.dart';
+import '../../domain/usecases/publish_vacancy_usecase.dart';
 
 final vacanciesRemoteDataSourceProvider = Provider(
   (ref) => VacanciesRemoteDataSource(ref.read(dioClientProvider).dio),
@@ -22,6 +27,23 @@ final getActiveVacanciesUseCaseProvider =
 
 final getVacancyByIdUseCaseProvider =
     Provider((ref) => GetVacancyByIdUseCase(ref.read(vacanciesRepositoryProvider)));
+
+final getMyVacanciesUseCaseProvider =
+    Provider((ref) => GetMyVacanciesUseCase(ref.read(vacanciesRepositoryProvider)));
+
+final createVacancyUseCaseProvider =
+    Provider((ref) => CreateVacancyUseCase(ref.read(vacanciesRepositoryProvider)));
+
+final publishVacancyUseCaseProvider =
+    Provider((ref) => PublishVacancyUseCase(ref.read(vacanciesRepositoryProvider)));
+
+final closeVacancyUseCaseProvider =
+    Provider((ref) => CloseVacancyUseCase(ref.read(vacanciesRepositoryProvider)));
+
+final myVacanciesProvider =
+    FutureProvider.autoDispose<List<Vacancy>>((ref) => ref.read(getMyVacanciesUseCaseProvider)());
+
+// --- существующее (список активных вакансий для кандидата) ---
 
 class VacanciesState {
   final List<Vacancy> items;

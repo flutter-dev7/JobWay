@@ -25,4 +25,46 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
     final model = await _remoteDataSource.getById(id);
     return model.toEntity();
   }
+
+  @override
+  Future<List<Vacancy>> getMyVacancies() async {
+    final models = await _remoteDataSource.getMyVacancies();
+    return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
+  Future<Vacancy> create({
+    required String title,
+    required String description,
+    required String employmentType,
+    required String experienceLevel,
+    String? location,
+    double? salaryFrom,
+    double? salaryTo,
+    required List<String> skillIds,
+  }) async {
+    final model = await _remoteDataSource.create(
+      title: title,
+      description: description,
+      employmentType: employmentType,
+      experienceLevel: experienceLevel,
+      location: location,
+      salaryFrom: salaryFrom,
+      salaryTo: salaryTo,
+      skillIds: skillIds,
+    );
+    return model.toEntity();
+  }
+
+  @override
+  Future<Vacancy> publish(String id) async {
+    final model = await _remoteDataSource.publish(id);
+    return model.toEntity();
+  }
+
+  @override
+  Future<Vacancy> close(String id) async {
+    final model = await _remoteDataSource.close(id);
+    return model.toEntity();
+  }
 }

@@ -21,4 +21,18 @@ class ApplicationsRemoteDataSource {
     final list = ApiResponse.unwrap(response.data) as List;
     return list.map((json) => JobApplicationModel.fromJson(json)).toList();
   }
+
+  Future<List<JobApplicationModel>> getByVacancy(String vacancyId) async {
+    final response = await _dio.get(ApiConstants.vacancyApplications(vacancyId));
+    final list = ApiResponse.unwrap(response.data) as List;
+    return list.map((json) => JobApplicationModel.fromJson(json)).toList();
+  }
+
+  Future<JobApplicationModel> updateStatus(String applicationId, String status) async {
+    final response = await _dio.put(
+      ApiConstants.applicationStatus(applicationId),
+      data: {'status': status},
+    );
+    return JobApplicationModel.fromJson(ApiResponse.unwrap(response.data));
+  }
 }
