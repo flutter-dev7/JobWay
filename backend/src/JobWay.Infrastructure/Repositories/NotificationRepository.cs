@@ -1,6 +1,5 @@
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
-using JobWay.Infrastructure.Persistence;
 using JobWay.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +21,11 @@ public class NotificationRepository : INotificationRepository
         => _context.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+    public Task<List<Notification>> GetUnreadByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        => _context.Notifications
+            .Where(n => n.UserId == userId && !n.IsRead)
             .ToListAsync(cancellationToken);
 
     public void Add(Notification notification) => _context.Notifications.Add(notification);

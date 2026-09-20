@@ -1,6 +1,7 @@
 // features/vacancies/presentation/pages/vacancies_list_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/widgets/notification_bell.dart';
 import '../../domain/entities/vacancy_filter.dart';
 import '../providers/vacancies_provider.dart';
 import '../widgets/vacancy_card.dart';
@@ -32,7 +33,8 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       ref.read(vacanciesControllerProvider.notifier).loadMore();
     }
   }
@@ -42,17 +44,22 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => VacancyFilterSheet(
         currentFilter: currentFilter,
-        onApply: (filter) => ref.read(vacanciesControllerProvider.notifier).applyFilter(filter),
+        onApply: (filter) =>
+            ref.read(vacanciesControllerProvider.notifier).applyFilter(filter),
       ),
     );
   }
 
   void _onSearchSubmitted(String value) {
     final current = ref.read(vacanciesControllerProvider).filter;
-    ref.read(vacanciesControllerProvider.notifier).applyFilter(
+    ref
+        .read(vacanciesControllerProvider.notifier)
+        .applyFilter(
           current.copyWith(search: value.trim().isEmpty ? null : value.trim()),
         );
   }
@@ -67,8 +74,15 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
         backgroundColor: const Color(0xFFF7F8FA),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Вакансии',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        title: const Text(
+          'Вакансии',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF111827),
+          ),
+        ),
+        actions: const [NotificationBell()],
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(vacanciesControllerProvider.notifier).load(),
@@ -82,13 +96,19 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
                   children: [
                     Expanded(
                       child: Container(
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                         child: TextField(
                           controller: _searchController,
                           onSubmitted: _onSearchSubmitted,
                           decoration: const InputDecoration(
                             hintText: 'Поиск вакансий',
-                            prefixIcon: Icon(Icons.search, color: Color(0xFF9CA3AF)),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Color(0xFF9CA3AF),
+                            ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 14),
                           ),
@@ -101,8 +121,14 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
                       child: Container(
                         width: 48,
                         height: 48,
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-                        child: const Icon(Icons.tune_rounded, color: Color(0xFF111827)),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.tune_rounded,
+                          color: Color(0xFF111827),
+                        ),
                       ),
                     ),
                   ],
@@ -110,46 +136,60 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
               ),
             ),
             if (state.isLoading)
-              const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+              const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              )
             else if (state.error != null)
               SliverFillRemaining(
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Text(state.error!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+                    child: Text(
+                      state.error!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
                   ),
                 ),
               )
             else if (state.items.isEmpty)
               const SliverFillRemaining(
-                child: Center(child: Text('Вакансии не найдены', style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)))),
+                child: Center(
+                  child: Text(
+                    'Вакансии не найдены',
+                    style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                  ),
+                ),
               )
             else
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index == state.items.length) {
-                        return state.isLoadingMore
-                            ? const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Center(child: CircularProgressIndicator()),
-                              )
-                            : const SizedBox.shrink();
-                      }
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    if (index == state.items.length) {
+                      return state.isLoadingMore
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : const SizedBox.shrink();
+                    }
 
-                      final vacancy = state.items[index];
-                      return VacancyCard(
-                        vacancy: vacancy,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => VacancyDetailPage(vacancyId: vacancy.id)),
+                    final vacancy = state.items[index];
+                    return VacancyCard(
+                      vacancy: vacancy,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              VacancyDetailPage(vacancyId: vacancy.id),
                         ),
-                      );
-                    },
-                    childCount: state.items.length + 1,
-                  ),
+                      ),
+                    );
+                  }, childCount: state.items.length + 1),
                 ),
               ),
           ],

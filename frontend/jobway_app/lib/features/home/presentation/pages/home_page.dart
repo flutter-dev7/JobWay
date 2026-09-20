@@ -1,12 +1,14 @@
-// features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
-import 'package:jobway_app/features/applications/presentation/pages/applications_overview_page.dart';
-import 'package:jobway_app/features/applications/presentation/pages/my_applications_page.dart';
-import 'package:jobway_app/features/candidate_profile/presentation/pages/candidate_profile_page.dart';
-import 'package:jobway_app/features/company_profile/presentation/pages/company_profile_page.dart';
-import 'package:jobway_app/features/vacancies/presentation/pages/my_vacancies_page.dart';
-import 'package:jobway_app/features/vacancies/presentation/pages/vacancies_list_page.dart';
 import '../../../../core/widgets/floating_nav_bar.dart';
+import '../../../admin/presentation/pages/admin_companies_page.dart';
+import '../../../admin/presentation/pages/admin_profile_page.dart';
+import '../../../admin/presentation/pages/admin_users_page.dart';
+import '../../../applications/presentation/pages/applications_overview_page.dart';
+import '../../../applications/presentation/pages/my_applications_page.dart';
+import '../../../candidate_profile/presentation/pages/candidate_profile_page.dart';
+import '../../../company_profile/presentation/pages/company_profile_page.dart';
+import '../../../vacancies/presentation/pages/my_vacancies_page.dart';
+import '../../../vacancies/presentation/pages/vacancies_list_page.dart';
 
 class HomePage extends StatefulWidget {
   final String role;
@@ -20,29 +22,42 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  late final List<FloatingNavItem> _navItems = widget.role == 'Employer'
-      ? [
+  late final List<FloatingNavItem> _navItems = _buildNavItems();
+  late final List<Widget> _pages = _buildPages();
+
+  List<FloatingNavItem> _buildNavItems() {
+    switch (widget.role) {
+      case 'Employer':
+        return [
           FloatingNavItem(icon: Icons.work_outline, label: 'Вакансии'),
           FloatingNavItem(icon: Icons.people_outline, label: 'Отклики'),
           FloatingNavItem(icon: Icons.business_outlined, label: 'Компания'),
-        ]
-      : [
+        ];
+      case 'Admin':
+        return [
+          FloatingNavItem(icon: Icons.business_outlined, label: 'Компании'),
+          FloatingNavItem(icon: Icons.people_outline, label: 'Юзеры'),
+          FloatingNavItem(icon: Icons.person_outline, label: 'Профиль'),
+        ];
+      default:
+        return [
           FloatingNavItem(icon: Icons.search, label: 'Вакансии'),
           FloatingNavItem(icon: Icons.assignment_outlined, label: 'Отклики'),
           FloatingNavItem(icon: Icons.person_outline, label: 'Профиль'),
         ];
+    }
+  }
 
-  late final List<Widget> _pages = widget.role == 'Employer'
-      ? [
-          const MyVacanciesPage(),
-          const ApplicationsOverviewPage(),
-          const CompanyProfilePage(),
-        ]
-      : [
-          const VacanciesListPage(),
-          const MyApplicationsPage(),
-          const CandidateProfilePage(),
-        ];
+  List<Widget> _buildPages() {
+    switch (widget.role) {
+      case 'Employer':
+        return const [MyVacanciesPage(), ApplicationsOverviewPage(), CompanyProfilePage()];
+      case 'Admin':
+        return const [AdminCompaniesPage(), AdminUsersPage(), AdminProfilePage()];
+      default:
+        return const [VacanciesListPage(), MyApplicationsPage(), CandidateProfilePage()];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,31 +81,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: const Color(0xFFF9FAFB),
-        elevation: 0,
-        foregroundColor: const Color(0xFF111827),
-      ),
-      body: Center(
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 16, color: Color(0xFF9CA3AF)),
-        ),
       ),
     );
   }
