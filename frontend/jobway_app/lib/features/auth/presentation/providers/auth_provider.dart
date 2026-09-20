@@ -1,17 +1,11 @@
-// features/auth/presentation/providers/auth_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../core/storage/token_storage.dart';
+import '../../../../core/providers/core_providers.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
 import '../../data/repository/auth_repository_impl.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/repository/auth_repository.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
-
-final tokenStorageProvider = Provider((ref) => TokenStorage());
-
-final dioClientProvider = Provider((ref) => DioClient(ref.read(tokenStorageProvider)));
 
 final authRemoteDataSourceProvider = Provider(
   (ref) => AuthRemoteDataSource(ref.read(dioClientProvider).dio),

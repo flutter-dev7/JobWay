@@ -12,10 +12,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthResult> login(String email, String password) async {
     final model = await _remoteDataSource.login(email, password);
-    await _tokenStorage.saveTokens(
-      accessToken: model.accessToken,
-      refreshToken: model.refreshToken,
-    );
+    await _tokenStorage.saveTokens(accessToken: model.accessToken, refreshToken: model.refreshToken);
+    await _tokenStorage.saveRole(model.role);
     return model.toEntity();
   }
 
@@ -36,27 +34,20 @@ class AuthRepositoryImpl implements AuthRepository {
       name: name,
       phoneNumber: phoneNumber,
     );
-    await _tokenStorage.saveTokens(
-      accessToken: model.accessToken,
-      refreshToken: model.refreshToken,
-    );
+    await _tokenStorage.saveTokens(accessToken: model.accessToken, refreshToken: model.refreshToken);
+    await _tokenStorage.saveRole(model.role);
     return model.toEntity();
   }
 
   @override
-  Future<void> forgotPassword(String email) =>
-      _remoteDataSource.forgotPassword(email);
+  Future<void> forgotPassword(String email) => _remoteDataSource.forgotPassword(email);
 
   @override
-  Future<void> verifyResetCode(String email, String code) =>
-      _remoteDataSource.verifyResetCode(email, code);
+  Future<void> verifyResetCode(String email, String code) => _remoteDataSource.verifyResetCode(email, code);
 
   @override
-  Future<void> resetPassword(
-    String email,
-    String newPassword,
-    String confirmPassword,
-  ) => _remoteDataSource.resetPassword(email, newPassword, confirmPassword);
+  Future<void> resetPassword(String email, String newPassword, String confirmPassword) =>
+      _remoteDataSource.resetPassword(email, newPassword, confirmPassword);
 
   @override
   Future<void> logout() => _tokenStorage.clear();
