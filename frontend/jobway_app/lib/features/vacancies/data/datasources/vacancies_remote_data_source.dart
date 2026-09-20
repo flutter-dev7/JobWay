@@ -39,4 +39,43 @@ class VacanciesRemoteDataSource {
     final response = await _dio.get(ApiConstants.vacancyById(id));
     return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
   }
+
+  Future<List<VacancyModel>> getMyVacancies() async {
+    final response = await _dio.get(ApiConstants.myVacancies);
+    final list = ApiResponse.unwrap(response.data) as List;
+    return list.map((v) => VacancyModel.fromJson(v)).toList();
+  }
+
+  Future<VacancyModel> create({
+    required String title,
+    required String description,
+    required String employmentType,
+    required String experienceLevel,
+    String? location,
+    double? salaryFrom,
+    double? salaryTo,
+    required List<String> skillIds,
+  }) async {
+    final response = await _dio.post(ApiConstants.vacancies, data: {
+      'title': title,
+      'description': description,
+      'employmentType': employmentType,
+      'experienceLevel': experienceLevel,
+      'location': location,
+      'salaryFrom': salaryFrom,
+      'salaryTo': salaryTo,
+      'skillIds': skillIds,
+    });
+    return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
+  }
+
+  Future<VacancyModel> publish(String id) async {
+    final response = await _dio.post(ApiConstants.publishVacancy(id));
+    return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
+  }
+
+  Future<VacancyModel> close(String id) async {
+    final response = await _dio.post(ApiConstants.closeVacancy(id));
+    return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
+  }
 }

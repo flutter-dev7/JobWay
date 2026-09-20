@@ -18,4 +18,16 @@ class ApplicationsRepositoryImpl implements ApplicationsRepository {
     final models = await _remoteDataSource.getMyApplications();
     return models.map((m) => m.toEntity()).toList();
   }
+
+  @override
+  Future<List<JobApplication>> getByVacancy(String vacancyId) async {
+    final models = await _remoteDataSource.getByVacancy(vacancyId);
+    return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
+  Future<JobApplication> updateStatus(String applicationId, String status) async {
+    final model = await _remoteDataSource.updateStatus(applicationId, status);
+    return model.toEntity();
+  }
 }

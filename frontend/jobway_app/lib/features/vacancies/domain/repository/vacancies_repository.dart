@@ -5,4 +5,19 @@ import '../entities/vacancy_filter.dart';
 abstract class VacanciesRepository {
   Future<VacanciesPage> getActive(VacancyFilter filter);
   Future<Vacancy> getById(String id);
+  Future<List<Vacancy>> getMyVacancies();
+
+  Future<Vacancy> create({
+    required String title,
+    required String description,
+    required String employmentType,
+    required String experienceLevel,
+    String? location,
+    double? salaryFrom,
+    double? salaryTo,
+    required List<String> skillIds,
+  });
+
+  Future<Vacancy> publish(String id);
+  Future<Vacancy> close(String id);
 }

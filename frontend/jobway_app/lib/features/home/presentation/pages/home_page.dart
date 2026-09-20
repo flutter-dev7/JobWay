@@ -1,8 +1,10 @@
 // features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:jobway_app/features/applications/presentation/pages/applications_overview_page.dart';
 import 'package:jobway_app/features/applications/presentation/pages/my_applications_page.dart';
 import 'package:jobway_app/features/candidate_profile/presentation/pages/candidate_profile_page.dart';
 import 'package:jobway_app/features/company_profile/presentation/pages/company_profile_page.dart';
+import 'package:jobway_app/features/vacancies/presentation/pages/my_vacancies_page.dart';
 import 'package:jobway_app/features/vacancies/presentation/pages/vacancies_list_page.dart';
 import '../../../../core/widgets/floating_nav_bar.dart';
 
@@ -32,8 +34,8 @@ class _HomePageState extends State<HomePage> {
 
   late final List<Widget> _pages = widget.role == 'Employer'
       ? [
-          const _PlaceholderPage(title: 'Мои вакансии'),
-          const _PlaceholderPage(title: 'Отклики'),
+          const MyVacanciesPage(),
+          const ApplicationsOverviewPage(),
           const CompanyProfilePage(),
         ]
       : [
