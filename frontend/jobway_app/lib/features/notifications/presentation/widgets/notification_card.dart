@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import '../../domain/entities/notification.dart';
+
+class NotificationCard extends StatelessWidget {
+  final AppNotification notification;
+  final VoidCallback onTap;
+
+  const NotificationCard({super.key, required this.notification, required this.onTap});
+
+  IconData _icon() {
+    switch (notification.type) {
+      case 'NewApplication':
+        return Icons.person_add_outlined;
+      case 'ApplicationStatusChanged':
+        return Icons.update_rounded;
+      case 'NewMatchingVacancy':
+        return Icons.work_outline_rounded;
+      default:
+        return Icons.notifications_outlined;
+    }
+  }
+
+  String _timeAgo() {
+    final diff = DateTime.now().difference(notification.createdAt);
+    if (diff.inMinutes < 1) return 'только что';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} мин назад';
+    if (diff.inHours < 24) return '${diff.inHours} ч назад';
+    return '${diff.inDays} дн назад';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: notification.isRead ? Colors.white : const Color(0xFFF3F5FF),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: notification.isRead ? const Color(0xFFF3F4F6) : const Color(0xFFDCE5FF),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(_icon(), size: 19, color: const Color(0xFF3157D5)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(notification.title,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+                  const SizedBox(height: 3),
+                  Text(notification.message, style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
+                  const SizedBox(height: 6),
+                  Text(_timeAgo(), style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF))),
+                ],
+              ),
+            ),
+            if (!notification.isRead)
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(top: 4),
+                decoration: const BoxDecoration(color: Color(0xFF3157D5), shape: BoxShape.circle),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

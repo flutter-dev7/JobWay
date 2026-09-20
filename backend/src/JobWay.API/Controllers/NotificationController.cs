@@ -20,4 +20,8 @@ public class NotificationController : BaseApiController
     [HttpPut("{id:guid}/read")]
     public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken cancellationToken)
         => HandleError(await _notificationService.MarkAsReadAsync(CurrentUserId, id, cancellationToken));
+
+    [HttpPut("read-all")]
+    public async Task<IActionResult> MarkAllAsRead(CancellationToken cancellationToken)
+        => HandleError(await _notificationService.MarkAllAsReadAsync(CurrentUserId, cancellationToken));
 }

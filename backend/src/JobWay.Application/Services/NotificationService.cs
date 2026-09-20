@@ -36,6 +36,21 @@ public class NotificationService : INotificationService
 
         return Result<string>.Ok("Notification marked as read");
     }
+    
+    public async Task<Result<string>> MarkAllAsReadAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var unread = await _unitOfWork.Notifications.GetUnreadByUserIdAsync(userId, cancellationToken);
+
+        foreach (var notification in unread)
+        {
+            notification.IsRead = true;
+            _unitOfWork.Notifications.Update(notification);
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<string>.Ok("All notifications marked as read");
+    }
 
     public async Task CreateAsync(Guid userId, NotificationType type, string title, string message, Guid? relatedEntityId, CancellationToken cancellationToken)
     {

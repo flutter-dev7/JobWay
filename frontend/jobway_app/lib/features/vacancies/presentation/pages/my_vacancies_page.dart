@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/widgets/notification_bell.dart';
 import 'package:jobway_app/features/applications/presentation/pages/vacancy_applications_page.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/app_snackbar.dart';
@@ -62,6 +63,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
           ),
         ),
         actions: [
+          const NotificationBell(),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(

@@ -24,12 +24,24 @@ class ApiConstants {
   static const String myVacancies = '/vacancies/my';
 
   // Applications
-  static String applyToVacancy(String vacancyId) => '/vacancies/$vacancyId/applications';
-  static String vacancyApplications(String vacancyId) => '/vacancies/$vacancyId/applications';
+  static String applyToVacancy(String vacancyId) =>
+      '/vacancies/$vacancyId/applications';
+  static String vacancyApplications(String vacancyId) =>
+      '/vacancies/$vacancyId/applications';
   static const String myApplications = '/applications/my';
-  static String applicationStatus(String applicationId) => '/applications/$applicationId/status';
+  static String applicationStatus(String applicationId) =>
+      '/applications/$applicationId/status';
 
   // Notifications
   static const String myNotifications = '/notifications/my';
   static String markNotificationRead(String id) => '/notifications/$id/read';
+  static const String markAllNotificationsRead = '/notifications/read-all';
+
+  // Admin
+  static const String adminCompanies = '/admin/companies';
+  static String verifyCompany(String id) => '/admin/companies/$id/verify';
+  static String rejectCompany(String id) => '/admin/companies/$id/reject';
+  static const String adminUsers = '/admin/users';
+  static String blockUser(String id) => '/admin/users/$id/block';
+  static String unblockUser(String id) => '/admin/users/$id/unblock';
 }
