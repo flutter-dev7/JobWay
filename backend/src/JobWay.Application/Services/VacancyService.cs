@@ -88,6 +88,12 @@ public class VacancyService : IVacancyService
 
         return await ChangeStatusAsync(employerUserId, vacancyId, VacancyStatus.Active, cancellationToken);
     }
+    
+    public async Task<Result<int>> GetTodayCountAsync(CancellationToken cancellationToken)
+    {
+        var count = await _unitOfWork.Vacancies.CountCreatedTodayAsync(cancellationToken);
+        return Result<int>.Ok(count);
+    }
 
     public async Task<Result<VacancyResponse>> CloseAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken)
         => await ChangeStatusAsync(employerUserId, vacancyId, VacancyStatus.Closed, cancellationToken);

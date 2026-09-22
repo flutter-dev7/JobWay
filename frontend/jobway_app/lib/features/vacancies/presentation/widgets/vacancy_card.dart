@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/time_ago.dart';
+import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/company_avatar.dart';
 import '../../domain/entities/vacancy.dart';
+import '../providers/vacancies_provider.dart';
 
-class VacancyCard extends StatelessWidget {
+class VacancyCard extends ConsumerWidget {
   final Vacancy vacancy;
   final VoidCallback onTap;
 
@@ -17,7 +23,10 @@ class VacancyCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final savedIds = ref.watch(savedVacancyIdsProvider);
+    final isSaved = savedIds.contains(vacancy.id);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -34,13 +43,9 @@ class VacancyCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(color: const Color(0xFFF3F5FF), borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.business_rounded, size: 22, color: Color(0xFF3157D5)),
-                ),
+                CompanyAvatar(companyName: vacancy.companyName),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -58,6 +63,27 @@ class VacancyCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                GestureDetector(
+                  onTap: () async {
+                    final notifier = ref.read(savedVacancyIdsProvider.notifier);
+                    try {
+                      if (isSaved) {
+                        await ref.read(unsaveVacancyUseCaseProvider).call(vacancy.id);
+                        notifier.update((state) => {...state}..remove(vacancy.id));
+                      } else {
+                        await ref.read(saveVacancyUseCaseProvider).call(vacancy.id);
+                        notifier.update((state) => {...state, vacancy.id});
+                      }
+                    } catch (error) {
+                      AppSnackbar.showError(ApiException.extractMessage(error));
+                    }
+                  },
+                  child: Icon(
+                    isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                    size: 22,
+                    color: isSaved ? const Color(0xFF3157D5) : const Color(0xFF9CA3AF),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 14),
@@ -70,11 +96,27 @@ class VacancyCard extends StatelessWidget {
                 if (vacancy.location != null) _Tag(icon: Icons.location_on_outlined, label: vacancy.location!),
               ],
             ),
-            if (_formatSalary().isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(_formatSalary(),
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF3157D5))),
-            ],
+            const SizedBox(height: 14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (_formatSalary().isNotEmpty)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Зарплата в месяц', style: TextStyle(fontSize: 11, color: Color(0xFF9CA3AF))),
+                        const SizedBox(height: 2),
+                        Text(_formatSalary(),
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF3157D5))),
+                      ],
+                    ),
+                  )
+                else
+                  const Spacer(),
+                Text(TimeAgo.format(vacancy.createdAt), style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
+              ],
+            ),
           ],
         ),
       ),

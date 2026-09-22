@@ -25,6 +25,11 @@ public class AuthController : BaseApiController
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
         => HandleError(await _authService.LoginAsync(request, cancellationToken));
+    
+    [AllowAnonymous]
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest request, CancellationToken cancellationToken)
+        => HandleError(await _authService.RefreshTokenAsync(request, cancellationToken));
 
     [AllowAnonymous]
     [HttpPost("forgot-password")]

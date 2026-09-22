@@ -5,6 +5,7 @@ class AppButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final Color? color;
+  final IconData? icon;
 
   const AppButton({
     super.key,
@@ -12,6 +13,7 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.color,
+    this.icon,
   });
 
   @override
@@ -36,7 +38,17 @@ class AppButton extends StatelessWidget {
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               )
-            : Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  if (icon != null) ...[
+                    const SizedBox(width: 8),
+                    Icon(icon, size: 18),
+                  ],
+                ],
+              ),
       ),
     );
   }

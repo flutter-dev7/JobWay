@@ -1,5 +1,9 @@
 // features/vacancies/presentation/providers/vacancies_provider.dart — заменить целиком
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancies_usecase.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/get_today_vacancies_count_usecase.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/save_vacancy_usecase.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/unsave_vacancy_usecase.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../data/datasources/vacancies_remote_data_source.dart';
@@ -22,26 +26,60 @@ final vacanciesRepositoryProvider = Provider<VacanciesRepository>(
   (ref) => VacanciesRepositoryImpl(ref.read(vacanciesRemoteDataSourceProvider)),
 );
 
-final getActiveVacanciesUseCaseProvider =
-    Provider((ref) => GetActiveVacanciesUseCase(ref.read(vacanciesRepositoryProvider)));
+final getActiveVacanciesUseCaseProvider = Provider(
+  (ref) => GetActiveVacanciesUseCase(ref.read(vacanciesRepositoryProvider)),
+);
 
-final getVacancyByIdUseCaseProvider =
-    Provider((ref) => GetVacancyByIdUseCase(ref.read(vacanciesRepositoryProvider)));
+final getVacancyByIdUseCaseProvider = Provider(
+  (ref) => GetVacancyByIdUseCase(ref.read(vacanciesRepositoryProvider)),
+);
 
-final getMyVacanciesUseCaseProvider =
-    Provider((ref) => GetMyVacanciesUseCase(ref.read(vacanciesRepositoryProvider)));
+final getMyVacanciesUseCaseProvider = Provider(
+  (ref) => GetMyVacanciesUseCase(ref.read(vacanciesRepositoryProvider)),
+);
 
-final createVacancyUseCaseProvider =
-    Provider((ref) => CreateVacancyUseCase(ref.read(vacanciesRepositoryProvider)));
+final createVacancyUseCaseProvider = Provider(
+  (ref) => CreateVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
+);
 
-final publishVacancyUseCaseProvider =
-    Provider((ref) => PublishVacancyUseCase(ref.read(vacanciesRepositoryProvider)));
+final publishVacancyUseCaseProvider = Provider(
+  (ref) => PublishVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
+);
 
-final closeVacancyUseCaseProvider =
-    Provider((ref) => CloseVacancyUseCase(ref.read(vacanciesRepositoryProvider)));
+final closeVacancyUseCaseProvider = Provider(
+  (ref) => CloseVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
+);
 
-final myVacanciesProvider =
-    FutureProvider.autoDispose<List<Vacancy>>((ref) => ref.read(getMyVacanciesUseCaseProvider)());
+final myVacanciesProvider = FutureProvider.autoDispose<List<Vacancy>>(
+  (ref) => ref.read(getMyVacanciesUseCaseProvider)(),
+);
+
+// features/vacancies/presentation/providers/vacancies_provider.dart — добавить
+final saveVacancyUseCaseProvider = Provider(
+  (ref) => SaveVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+final unsaveVacancyUseCaseProvider = Provider(
+  (ref) => UnsaveVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+final getSavedVacanciesUseCaseProvider = Provider(
+  (ref) => GetSavedVacanciesUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+
+final savedVacanciesProvider = FutureProvider.autoDispose<List<Vacancy>>(
+  (ref) => ref.read(getSavedVacanciesUseCaseProvider)(),
+);
+
+final getTodayVacanciesCountUseCaseProvider = Provider(
+  (ref) => GetTodayVacanciesCountUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+
+final todayVacanciesCountProvider = FutureProvider.autoDispose<int>(
+  (ref) => ref.read(getTodayVacanciesCountUseCaseProvider)(),
+);
+
+// Локальный набор Id сохранённых вакансий — для мгновенного toggle bookmark-иконки в списке,
+// без похода на сервер за каждой карточкой
+final savedVacancyIdsProvider = StateProvider<Set<String>>((ref) => {});
 
 // --- существующее (список активных вакансий для кандидата) ---
 
@@ -84,14 +122,17 @@ class VacanciesState {
 class VacanciesController extends StateNotifier<VacanciesState> {
   final GetActiveVacanciesUseCase _getActiveVacanciesUseCase;
 
-  VacanciesController(this._getActiveVacanciesUseCase) : super(const VacanciesState()) {
+  VacanciesController(this._getActiveVacanciesUseCase)
+    : super(const VacanciesState()) {
     load();
   }
 
   Future<void> load() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final page = await _getActiveVacanciesUseCase(state.filter.copyWith(pageNumber: 1));
+      final page = await _getActiveVacanciesUseCase(
+        state.filter.copyWith(pageNumber: 1),
+      );
       state = state.copyWith(
         items: page.items,
         isLoading: false,
@@ -99,7 +140,10 @@ class VacanciesController extends StateNotifier<VacanciesState> {
         filter: state.filter.copyWith(pageNumber: 1),
       );
     } catch (error) {
-      state = state.copyWith(isLoading: false, error: ApiException.extractMessage(error));
+      state = state.copyWith(
+        isLoading: false,
+        error: ApiException.extractMessage(error),
+      );
     }
   }
 
@@ -109,7 +153,9 @@ class VacanciesController extends StateNotifier<VacanciesState> {
     state = state.copyWith(isLoadingMore: true);
     try {
       final nextPage = state.filter.pageNumber + 1;
-      final page = await _getActiveVacanciesUseCase(state.filter.copyWith(pageNumber: nextPage));
+      final page = await _getActiveVacanciesUseCase(
+        state.filter.copyWith(pageNumber: nextPage),
+      );
       state = state.copyWith(
         items: [...state.items, ...page.items],
         isLoadingMore: false,
@@ -127,9 +173,12 @@ class VacanciesController extends StateNotifier<VacanciesState> {
   }
 }
 
-final vacanciesControllerProvider = StateNotifierProvider.autoDispose<VacanciesController, VacanciesState>(
-  (ref) => VacanciesController(ref.read(getActiveVacanciesUseCaseProvider)),
-);
+final vacanciesControllerProvider =
+    StateNotifierProvider.autoDispose<VacanciesController, VacanciesState>(
+      (ref) => VacanciesController(ref.read(getActiveVacanciesUseCaseProvider)),
+    );
 
-final vacancyDetailProvider =
-    FutureProvider.autoDispose.family<Vacancy, String>((ref, id) => ref.read(getVacancyByIdUseCaseProvider)(id));
+final vacancyDetailProvider = FutureProvider.autoDispose
+    .family<Vacancy, String>(
+      (ref, id) => ref.read(getVacancyByIdUseCaseProvider)(id),
+    );

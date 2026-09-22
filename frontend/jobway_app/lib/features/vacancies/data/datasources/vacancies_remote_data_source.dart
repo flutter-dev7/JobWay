@@ -22,10 +22,17 @@ class VacanciesRemoteDataSource {
 
   VacanciesRemoteDataSource(this._dio);
 
-  Future<VacanciesPageResponse> getActive(Map<String, dynamic> queryParams) async {
-    final response = await _dio.get(ApiConstants.vacancies, queryParameters: queryParams);
+  Future<VacanciesPageResponse> getActive(
+    Map<String, dynamic> queryParams,
+  ) async {
+    final response = await _dio.get(
+      ApiConstants.vacancies,
+      queryParameters: queryParams,
+    );
     final data = ApiResponse.unwrap(response.data);
-    final items = (data['items'] as List).map((v) => VacancyModel.fromJson(v)).toList();
+    final items = (data['items'] as List)
+        .map((v) => VacancyModel.fromJson(v))
+        .toList();
 
     return VacanciesPageResponse(
       items: items,
@@ -56,16 +63,19 @@ class VacanciesRemoteDataSource {
     double? salaryTo,
     required List<String> skillIds,
   }) async {
-    final response = await _dio.post(ApiConstants.vacancies, data: {
-      'title': title,
-      'description': description,
-      'employmentType': employmentType,
-      'experienceLevel': experienceLevel,
-      'location': location,
-      'salaryFrom': salaryFrom,
-      'salaryTo': salaryTo,
-      'skillIds': skillIds,
-    });
+    final response = await _dio.post(
+      ApiConstants.vacancies,
+      data: {
+        'title': title,
+        'description': description,
+        'employmentType': employmentType,
+        'experienceLevel': experienceLevel,
+        'location': location,
+        'salaryFrom': salaryFrom,
+        'salaryTo': salaryTo,
+        'skillIds': skillIds,
+      },
+    );
     return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
@@ -77,5 +87,24 @@ class VacanciesRemoteDataSource {
   Future<VacancyModel> close(String id) async {
     final response = await _dio.post(ApiConstants.closeVacancy(id));
     return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
+  }
+
+  Future<int> getTodayCount() async {
+    final response = await _dio.get(ApiConstants.vacanciesTodayCount);
+    return ApiResponse.unwrap(response.data) as int;
+  }
+
+  Future<void> save(String vacancyId) async {
+    await _dio.post(ApiConstants.saveVacancy(vacancyId));
+  }
+
+  Future<void> unsave(String vacancyId) async {
+    await _dio.delete(ApiConstants.saveVacancy(vacancyId));
+  }
+
+  Future<List<VacancyModel>> getSaved() async {
+    final response = await _dio.get(ApiConstants.savedVacancies);
+    final list = ApiResponse.unwrap(response.data) as List;
+    return list.map((v) => VacancyModel.fromJson(v)).toList();
   }
 }

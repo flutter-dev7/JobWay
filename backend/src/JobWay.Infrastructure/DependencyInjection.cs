@@ -47,6 +47,9 @@ public static class DependencyInjection
         services.AddScoped<IVacancyRepository, VacancyRepository>();
         services.AddScoped<IVacancyService, VacancyService>();
         
+        services.AddScoped<ISavedVacancyRepository, SavedVacancyRepository>();
+        services.AddScoped<ISavedVacancyService, SavedVacancyService>();
+        
         services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
         services.AddScoped<IMatchingService, MatchingService>();
         services.AddScoped<IJobApplicationService, JobApplicationService>();

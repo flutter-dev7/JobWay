@@ -15,7 +15,8 @@ public class UnitOfWork : IUnitOfWork
         ISkillRepository skills,
         IVacancyRepository vacancies,
         IJobApplicationRepository jobApplications,
-        INotificationRepository notifications)
+        INotificationRepository notifications,
+        ISavedVacancyRepository savedVacancies)
     {
         _context = context;
         Users = users;
@@ -25,6 +26,7 @@ public class UnitOfWork : IUnitOfWork
         Vacancies = vacancies;
         JobApplications = jobApplications;
         Notifications = notifications;
+        SavedVacancies = savedVacancies;
     }
 
     public IUserRepository Users { get; }
@@ -34,6 +36,7 @@ public class UnitOfWork : IUnitOfWork
     public IVacancyRepository Vacancies { get; }
     public IJobApplicationRepository JobApplications { get; }
     public INotificationRepository Notifications { get; }
+    public ISavedVacancyRepository SavedVacancies { get; }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         => _context.SaveChangesAsync(cancellationToken);

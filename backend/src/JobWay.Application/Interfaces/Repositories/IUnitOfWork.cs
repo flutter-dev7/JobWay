@@ -9,6 +9,7 @@ public interface IUnitOfWork
     IVacancyRepository Vacancies { get; }
     IJobApplicationRepository JobApplications { get; }
     INotificationRepository Notifications { get; }
+    ISavedVacancyRepository SavedVacancies { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
