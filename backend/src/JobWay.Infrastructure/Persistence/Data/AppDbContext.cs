@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Vacancy> Vacancies => Set<Vacancy>();
     public DbSet<JobApplication> JobApplications => Set<JobApplication>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<SavedVacancy> SavedVacancies => Set<SavedVacancy>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -18,6 +18,12 @@ abstract class VacanciesRepository {
     required List<String> skillIds,
   });
 
+  Future<int> getTodayCount();
+
   Future<Vacancy> publish(String id);
   Future<Vacancy> close(String id);
+
+  Future<void> save(String vacancyId);
+  Future<void> unsave(String vacancyId);
+  Future<List<Vacancy>> getSaved();
 }

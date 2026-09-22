@@ -10,10 +10,12 @@ namespace JobWay.API.Controllers;
 public class VacancyController : BaseApiController
 {
     private readonly IVacancyService _vacancyService;
+    private readonly ISavedVacancyService _savedVacancyService;
 
-    public VacancyController(IVacancyService vacancyService)
+    public VacancyController(IVacancyService vacancyService, ISavedVacancyService savedVacancyService)
     {
         _vacancyService = vacancyService;
+        _savedVacancyService = savedVacancyService;
     }
 
     [HttpGet]
@@ -48,4 +50,23 @@ public class VacancyController : BaseApiController
     [HttpPost("{id:guid}/close")]
     public async Task<IActionResult> Close(Guid id, CancellationToken cancellationToken)
         => HandleError(await _vacancyService.CloseAsync(CurrentUserId, id, cancellationToken));
+    
+    [HttpGet("today-count")]
+    public async Task<IActionResult> GetTodayCount(CancellationToken cancellationToken)
+        => HandleError(await _vacancyService.GetTodayCountAsync(cancellationToken));
+    
+    [Authorize(Roles = Roles.Candidate)]
+    [HttpPost("{id:guid}/save")]
+    public async Task<IActionResult> Save(Guid id, CancellationToken cancellationToken)
+        => HandleError(await _savedVacancyService.SaveAsync(CurrentUserId, id, cancellationToken));
+
+    [Authorize(Roles = Roles.Candidate)]
+    [HttpDelete("{id:guid}/save")]
+    public async Task<IActionResult> Unsave(Guid id, CancellationToken cancellationToken)
+        => HandleError(await _savedVacancyService.UnsaveAsync(CurrentUserId, id, cancellationToken));
+
+    [Authorize(Roles = Roles.Candidate)]
+    [HttpGet("saved")]
+    public async Task<IActionResult> GetSaved(CancellationToken cancellationToken)
+        => HandleError(await _savedVacancyService.GetSavedAsync(CurrentUserId, cancellationToken));
 }

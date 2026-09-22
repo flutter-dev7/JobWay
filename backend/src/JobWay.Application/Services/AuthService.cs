@@ -1,4 +1,3 @@
-// Application/Services/AuthService.cs — заменить целиком
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.Auth.Request;
 using JobWay.Application.DTOs.Auth.Response;
@@ -6,6 +5,7 @@ using JobWay.Application.Interfaces.Repositories;
 using JobWay.Application.Interfaces.Services;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
+using Microsoft.Extensions.Options;
 
 namespace JobWay.Application.Services;
 
@@ -20,19 +20,22 @@ public class AuthService : IAuthService
     private readonly IJwtService _jwtService;
     private readonly IEmailService _emailService;
     private readonly ICacheService _cacheService;
+    private readonly JwtSettings _jwtSettings;
 
     public AuthService(
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
         IJwtService jwtService,
         IEmailService emailService,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        IOptions<JwtSettings> jwtSettings)
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _emailService = emailService;
         _cacheService = cacheService;
+        _jwtSettings = jwtSettings.Value;
     }
 
     public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
@@ -65,7 +68,7 @@ public class AuthService : IAuthService
         await _unitOfWork.Users.AddAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<AuthResponse>.Ok(BuildAuthResponse(user));
+        return Result<AuthResponse>.Ok(await BuildAuthResponseAsync(user, cancellationToken));
     }
 
     public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
@@ -78,7 +81,20 @@ public class AuthService : IAuthService
         if (!user.IsActive)
             return Result<AuthResponse>.Fail("Account is blocked", ErrorType.Forbidden);
 
-        return Result<AuthResponse>.Ok(BuildAuthResponse(user));
+        return Result<AuthResponse>.Ok(await BuildAuthResponseAsync(user, cancellationToken));
+    }
+
+    public async Task<Result<AuthResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var user = await _unitOfWork.Users.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
+
+        if (user is null || user.RefreshTokenExpiresAt is null || user.RefreshTokenExpiresAt < DateTime.UtcNow)
+            return Result<AuthResponse>.Fail("Invalid or expired refresh token", ErrorType.Unauthorized);
+
+        if (!user.IsActive)
+            return Result<AuthResponse>.Fail("Account is blocked", ErrorType.Forbidden);
+
+        return Result<AuthResponse>.Ok(await BuildAuthResponseAsync(user, cancellationToken));
     }
 
     public async Task<Result<string>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken)
@@ -123,6 +139,8 @@ public class AuthService : IAuthService
             return Result<string>.Fail("User not found", ErrorType.NotFound);
 
         user.PasswordHash = _passwordHasher.Hash(request.NewPassword);
+        user.RefreshToken = null;
+        user.RefreshTokenExpiresAt = null;
         _unitOfWork.Users.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -149,11 +167,23 @@ public class AuthService : IAuthService
         return Result<string>.Ok("Password changed successfully");
     }
 
-    private AuthResponse BuildAuthResponse(User user) => new()
+    private async Task<AuthResponse> BuildAuthResponseAsync(User user, CancellationToken cancellationToken)
     {
-        UserId = user.Id,
-        Role = user.Role,
-        AccessToken = _jwtService.GenerateAccessToken(user),
-        RefreshToken = _jwtService.GenerateRefreshToken()
-    };
+        var accessToken = _jwtService.GenerateAccessToken(user);
+        var refreshToken = _jwtService.GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
+
+        _unitOfWork.Users.Update(user);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new AuthResponse
+        {
+            UserId = user.Id,
+            Role = user.Role,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
+    }
 }

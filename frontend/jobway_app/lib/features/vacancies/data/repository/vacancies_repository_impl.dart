@@ -67,4 +67,19 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
     final model = await _remoteDataSource.close(id);
     return model.toEntity();
   }
+
+  @override
+  Future<int> getTodayCount() => _remoteDataSource.getTodayCount();
+
+  @override
+  Future<void> save(String vacancyId) => _remoteDataSource.save(vacancyId);
+
+  @override
+  Future<void> unsave(String vacancyId) => _remoteDataSource.unsave(vacancyId);
+
+  @override
+  Future<List<Vacancy>> getSaved() async {
+    final models = await _remoteDataSource.getSaved();
+    return models.map((m) => m.toEntity()).toList();
+  }
 }

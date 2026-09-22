@@ -21,6 +21,9 @@ public class UserRepository : IUserRepository
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         => _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
+    public Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        => _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken);
+
     public Task<bool> ExistsAsync(string email, CancellationToken cancellationToken)
         => _context.Users.AnyAsync(u => u.Email == email, cancellationToken);
 

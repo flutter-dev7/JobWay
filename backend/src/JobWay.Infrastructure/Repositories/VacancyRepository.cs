@@ -55,6 +55,16 @@ public class VacancyRepository : IVacancyRepository
 
         return (items, totalCount);
     }
+    
+    public Task<int> CountCreatedTodayAsync(CancellationToken cancellationToken)
+    {
+        var todayStart = DateTime.UtcNow.Date;
+        var tomorrowStart = todayStart.AddDays(1);
+
+        return _context.Vacancies
+            .Where(v => v.Status == VacancyStatus.Active && v.CreatedAt >= todayStart && v.CreatedAt < tomorrowStart)
+            .CountAsync(cancellationToken);
+    }
 
     public Task<List<Vacancy>> GetByCompanyProfileIdAsync(Guid companyProfileId, CancellationToken cancellationToken)
         => _context.Vacancies

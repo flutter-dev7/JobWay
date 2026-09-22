@@ -13,4 +13,5 @@ public interface IVacancyService
     Task<Result<VacancyResponse>> GetByIdAsync(Guid vacancyId, CancellationToken cancellationToken);
     Task<Result<PagedResult<VacancyResponse>>> GetActiveAsync(VacancyFilterRequest filter, CancellationToken cancellationToken);
     Task<Result<List<VacancyResponse>>> GetMyVacanciesAsync(Guid employerUserId, CancellationToken cancellationToken);
+    Task<Result<int>> GetTodayCountAsync(CancellationToken cancellationToken);
 }

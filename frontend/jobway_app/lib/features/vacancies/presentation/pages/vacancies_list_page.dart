@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/widgets/notification_bell.dart';
+import 'package:jobway_app/features/vacancies/presentation/widgets/quick_filter_chips.dart';
 import '../../domain/entities/vacancy_filter.dart';
 import '../providers/vacancies_provider.dart';
 import '../widgets/vacancy_card.dart';
@@ -68,6 +69,14 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(vacanciesControllerProvider);
 
+    ref.listen(savedVacanciesProvider, (previous, next) {
+      next.whenData((vacancies) {
+        ref.read(savedVacancyIdsProvider.notifier).state = vacancies
+            .map((v) => v.id)
+            .toSet();
+      });
+    });
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       appBar: AppBar(
@@ -89,6 +98,55 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
+            // features/vacancies/presentation/pages/vacancies_list_page.dart
+            // заменить блок целиком
+            SliverToBoxAdapter(
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final countAsync = ref.watch(todayVacanciesCountProvider);
+                  final count = countAsync.valueOrNull;
+
+                  if (count == null || count == 0)
+                    return const SizedBox.shrink();
+
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDCE5FF),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF3157D5),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '$count новых сегодня',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF3157D5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -132,6 +190,24 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: QuickFilterChips(
+                  selectedEmploymentType: state.filter.employmentType,
+                  onSelected: (value) {
+                    ref
+                        .read(vacanciesControllerProvider.notifier)
+                        .applyFilter(
+                          state.filter.copyWith(
+                            employmentType: value,
+                            clearEmploymentType: value == null,
+                          ),
+                        );
+                  },
                 ),
               ),
             ),
