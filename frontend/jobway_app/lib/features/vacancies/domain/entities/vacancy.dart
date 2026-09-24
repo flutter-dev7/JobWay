@@ -9,6 +9,7 @@ class Vacancy {
   final String employmentType;
   final String experienceLevel;
   final String? location;
+  final String? companyLogoUrl;
   final double? salaryFrom;
   final double? salaryTo;
   final String status;
@@ -24,6 +25,7 @@ class Vacancy {
     required this.employmentType,
     required this.experienceLevel,
     this.location,
+    this.companyLogoUrl,
     this.salaryFrom,
     this.salaryTo,
     required this.status,

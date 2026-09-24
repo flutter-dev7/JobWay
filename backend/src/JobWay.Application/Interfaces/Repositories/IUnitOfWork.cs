@@ -10,6 +10,7 @@ public interface IUnitOfWork
     IJobApplicationRepository JobApplications { get; }
     INotificationRepository Notifications { get; }
     ISavedVacancyRepository SavedVacancies { get; }
+    IDeviceTokenRepository DeviceTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

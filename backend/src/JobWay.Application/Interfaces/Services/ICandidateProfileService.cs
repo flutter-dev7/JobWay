@@ -8,4 +8,6 @@ public interface ICandidateProfileService
 {
     Task<Result<CandidateProfileResponse>> GetMyProfileAsync(Guid userId, CancellationToken cancellationToken);
     Task<Result<CandidateProfileResponse>> UpdateMyProfileAsync(Guid userId, UpdateCandidateProfileRequest request, CancellationToken cancellationToken);
+    Task<Result<CandidateProfileResponse>> UploadResumeAsync(Guid userId, UploadResumeRequest request, CancellationToken cancellationToken);
+    Task<Result<CandidateProfileResponse>> UploadPhotoAsync(Guid userId, UploadPhotoRequest request, CancellationToken cancellationToken);
 }

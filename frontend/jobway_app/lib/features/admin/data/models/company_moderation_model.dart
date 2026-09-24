@@ -5,6 +5,7 @@ class CompanyModerationModel {
   final String companyName;
   final String? industry;
   final String? location;
+  final String? logoUrl;
   final String verificationStatus;
 
   CompanyModerationModel({
@@ -12,6 +13,7 @@ class CompanyModerationModel {
     required this.companyName,
     this.industry,
     this.location,
+    this.logoUrl,
     required this.verificationStatus,
   });
 
@@ -21,6 +23,7 @@ class CompanyModerationModel {
       companyName: json['companyName'],
       industry: json['industry'],
       location: json['location'],
+      logoUrl: json['logoUrl'],
       verificationStatus: json['verificationStatus'],
     );
   }
@@ -30,6 +33,7 @@ class CompanyModerationModel {
         companyName: companyName,
         industry: industry,
         location: location,
+        logoUrl: logoUrl,
         verificationStatus: verificationStatus,
       );
 }

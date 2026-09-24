@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/utils/enum_labels.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../../../../core/widgets/app_snackbar.dart';
@@ -18,7 +19,8 @@ class VacancyCard extends ConsumerWidget {
     if (vacancy.salaryFrom != null && vacancy.salaryTo != null) {
       return '${vacancy.salaryFrom!.toStringAsFixed(0)} – ${vacancy.salaryTo!.toStringAsFixed(0)} TJS';
     }
-    if (vacancy.salaryFrom != null) return 'от ${vacancy.salaryFrom!.toStringAsFixed(0)} TJS';
+    if (vacancy.salaryFrom != null)
+      return 'от ${vacancy.salaryFrom!.toStringAsFixed(0)} TJS';
     return 'до ${vacancy.salaryTo!.toStringAsFixed(0)} TJS';
   }
 
@@ -36,7 +38,11 @@ class VacancyCard extends ConsumerWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 14, offset: const Offset(0, 4)),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
@@ -45,21 +51,35 @@ class VacancyCard extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CompanyAvatar(companyName: vacancy.companyName),
+                CompanyAvatar(
+                  companyName: vacancy.companyName,
+                  logoUrl: vacancy.companyLogoUrl,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(vacancy.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+                      Text(
+                        vacancy.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
                       const SizedBox(height: 2),
-                      Text(vacancy.companyName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
+                      Text(
+                        vacancy.companyName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -68,10 +88,16 @@ class VacancyCard extends ConsumerWidget {
                     final notifier = ref.read(savedVacancyIdsProvider.notifier);
                     try {
                       if (isSaved) {
-                        await ref.read(unsaveVacancyUseCaseProvider).call(vacancy.id);
-                        notifier.update((state) => {...state}..remove(vacancy.id));
+                        await ref
+                            .read(unsaveVacancyUseCaseProvider)
+                            .call(vacancy.id);
+                        notifier.update(
+                          (state) => {...state}..remove(vacancy.id),
+                        );
                       } else {
-                        await ref.read(saveVacancyUseCaseProvider).call(vacancy.id);
+                        await ref
+                            .read(saveVacancyUseCaseProvider)
+                            .call(vacancy.id);
                         notifier.update((state) => {...state, vacancy.id});
                       }
                     } catch (error) {
@@ -79,9 +105,13 @@ class VacancyCard extends ConsumerWidget {
                     }
                   },
                   child: Icon(
-                    isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                    isSaved
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
                     size: 22,
-                    color: isSaved ? const Color(0xFF3157D5) : const Color(0xFF9CA3AF),
+                    color: isSaved
+                        ? const Color(0xFF3157D5)
+                        : const Color(0xFF9CA3AF),
                   ),
                 ),
               ],
@@ -91,9 +121,19 @@ class VacancyCard extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _Tag(icon: Icons.work_outline_rounded, label: vacancy.employmentType),
-                _Tag(icon: Icons.trending_up_rounded, label: vacancy.experienceLevel),
-                if (vacancy.location != null) _Tag(icon: Icons.location_on_outlined, label: vacancy.location!),
+                _Tag(
+                  icon: Icons.work_outline_rounded,
+                  label: employmentTypeLabel(vacancy.employmentType),
+                ),
+                _Tag(
+                  icon: Icons.trending_up_rounded,
+                  label: experienceLevelLabel(vacancy.experienceLevel),
+                ),
+                if (vacancy.location != null)
+                  _Tag(
+                    icon: Icons.location_on_outlined,
+                    label: vacancy.location!,
+                  ),
               ],
             ),
             const SizedBox(height: 14),
@@ -105,16 +145,34 @@ class VacancyCard extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Зарплата в месяц', style: TextStyle(fontSize: 11, color: Color(0xFF9CA3AF))),
+                        const Text(
+                          'Зарплата в месяц',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(_formatSalary(),
-                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF3157D5))),
+                        Text(
+                          _formatSalary(),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF3157D5),
+                          ),
+                        ),
                       ],
                     ),
                   )
                 else
                   const Spacer(),
-                Text(TimeAgo.format(vacancy.createdAt), style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
+                Text(
+                  TimeAgo.format(vacancy.createdAt),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                ),
               ],
             ),
           ],
@@ -134,13 +192,19 @@ class _Tag extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: const Color(0xFFF4F6FA), borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F6FA),
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 13, color: const Color(0xFF6B7280)),
           const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280))),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+          ),
         ],
       ),
     );

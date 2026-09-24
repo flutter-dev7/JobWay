@@ -18,6 +18,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        InitializeFirebase(configuration);
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
@@ -58,7 +59,25 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         
         services.AddScoped<IAdminService, AdminService>();
+        
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        
+        services.AddScoped<IPushNotificationService, FcmPushNotificationService>();
+        services.AddScoped<IDeviceTokenRepository, DeviceTokenRepository>();
 
         return services;
+    }
+    
+    private static void InitializeFirebase(IConfiguration configuration)
+    {
+        if (FirebaseAdmin.FirebaseApp.DefaultInstance is not null) return;
+
+        var credentialsPath = configuration["Firebase:CredentialsPath"];
+        if (string.IsNullOrWhiteSpace(credentialsPath) || !File.Exists(credentialsPath)) return;
+
+        FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions
+        {
+            Credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromFile(credentialsPath)
+        });
     }
 }

@@ -13,6 +13,7 @@ public class CandidateProfile : BaseEntity
     public string? Location { get; set; }
     public string? Bio { get; set; }
     public string? ResumeFileUrl { get; set; }
+    public string? PhotoUrl { get; set; }
     public ExperienceLevel ExperienceLevel { get; set; }
     public EmploymentType DesiredEmploymentType { get; set; }
 

@@ -17,18 +17,35 @@ class ApplicationsOverviewPage extends ConsumerWidget {
         backgroundColor: const Color(0xFFF7F8FA),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Отклики',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        title: const Text(
+          'Отклики',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF111827),
+          ),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(myVacanciesProvider),
         child: vacanciesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
-            child: Padding(padding: const EdgeInsets.all(24), child: Text(ApiException.extractMessage(error), textAlign: TextAlign.center)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                ApiException.extractMessage(error),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
           data: (vacancies) => vacancies.isEmpty
-              ? const Center(child: Text('У вас пока нет вакансий', style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF))))
+              ? const Center(
+                  child: Text(
+                    'У вас пока нет вакансий',
+                    style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                  ),
+                )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
                   itemCount: vacancies.length,
@@ -38,7 +55,11 @@ class ApplicationsOverviewPage extends ConsumerWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => VacancyApplicationsPage(vacancyId: vacancy.id, vacancyTitle: vacancy.title),
+                          builder: (_) => VacancyApplicationsPage(
+                            vacancyId: vacancy.id,
+                            vacancyTitle: vacancy.title,
+                            vacancyStatus: vacancy.status,
+                          ),
                         ),
                       ),
                       child: Container(
@@ -47,24 +68,46 @@ class ApplicationsOverviewPage extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4))],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
                             Container(
                               width: 40,
                               height: 40,
-                              decoration: BoxDecoration(color: const Color(0xFFF3F5FF), borderRadius: BorderRadius.circular(10)),
-                              child: const Icon(Icons.people_outline_rounded, size: 20, color: Color(0xFF3157D5)),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F5FF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.people_outline_rounded,
+                                size: 20,
+                                color: Color(0xFF3157D5),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Text(vacancy.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF111827))),
+                              child: Text(
+                                vacancy.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF111827),
+                                ),
+                              ),
                             ),
-                            const Icon(Icons.chevron_right_rounded, color: Color(0xFF9CA3AF)),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              color: Color(0xFF9CA3AF),
+                            ),
                           ],
                         ),
                       ),

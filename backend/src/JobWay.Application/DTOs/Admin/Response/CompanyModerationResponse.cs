@@ -8,5 +8,6 @@ public class CompanyModerationResponse
     public string CompanyName { get; set; } = null!;
     public string? Industry { get; set; }
     public string? Location { get; set; }
+    public string? LogoUrl { get; set; }
     public VerificationStatus VerificationStatus { get; set; }
 }

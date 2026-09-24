@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../domain/entities/company_profile.dart';
 import '../../domain/repository/company_profile_repository.dart';
 import '../datasources/company_profile_remote_data_source.dart';
@@ -30,6 +32,12 @@ class CompanyProfileRepositoryImpl implements CompanyProfileRepository {
       website: website,
       location: location,
     );
+    return model.toEntity();
+  }
+
+  @override
+  Future<CompanyProfile> uploadLogo(File file) async {
+    final model = await _remoteDataSource.uploadLogo(file);
     return model.toEntity();
   }
 }

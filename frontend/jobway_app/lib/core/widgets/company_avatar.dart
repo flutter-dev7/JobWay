@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:jobway_app/core/constants/api_constants.dart';
 
 class CompanyAvatar extends StatelessWidget {
   final String companyName;
   final double size;
+  final String? logoUrl;
 
-  const CompanyAvatar({super.key, required this.companyName, this.size = 44});
+  const CompanyAvatar({
+    super.key,
+    required this.companyName,
+    this.size = 44,
+    this.logoUrl,
+  });
 
   static const List<Color> _palette = [
     Color(0xFFDCE5FF), // индиго
@@ -38,16 +45,38 @@ class CompanyAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final index = _colorIndex();
+    if (logoUrl != null && logoUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.28),
+        child: Image.network(
+          '${ApiConstants.fileBaseUrl}$logoUrl',
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildInitials(),
+        ),
+      );
+    }
+    return _buildInitials();
+  }
 
+  Widget _buildInitials() {
+    final index = _colorIndex();
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: _palette[index], borderRadius: BorderRadius.circular(size * 0.28)),
+      decoration: BoxDecoration(
+        color: _palette[index],
+        borderRadius: BorderRadius.circular(size * 0.28),
+      ),
       child: Center(
         child: Text(
           _initials(),
-          style: TextStyle(fontSize: size * 0.36, fontWeight: FontWeight.w700, color: _textPalette[index]),
+          style: TextStyle(
+            fontSize: size * 0.36,
+            fontWeight: FontWeight.w700,
+            color: _textPalette[index],
+          ),
         ),
       ),
     );

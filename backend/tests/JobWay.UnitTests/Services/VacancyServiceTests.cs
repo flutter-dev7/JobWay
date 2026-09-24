@@ -1,6 +1,8 @@
+// tests/JobWay.UnitTests/Services/VacancyServiceTests.cs — заменить целиком
 using FluentAssertions;
 using JobWay.Application.DTOs.Vacancy.Request;
 using JobWay.Application.Interfaces.Repositories;
+using JobWay.Application.Interfaces.Services;
 using JobWay.Application.Services;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
@@ -15,6 +17,7 @@ public class VacancyServiceTests
     private readonly Mock<ICompanyProfileRepository> _companyProfileRepositoryMock = new();
     private readonly Mock<IVacancyRepository> _vacancyRepositoryMock = new();
     private readonly Mock<ISkillRepository> _skillRepositoryMock = new();
+    private readonly Mock<ICacheService> _cacheServiceMock = new();
 
     private readonly VacancyService _sut;
 
@@ -24,7 +27,12 @@ public class VacancyServiceTests
         _unitOfWorkMock.Setup(u => u.Vacancies).Returns(_vacancyRepositoryMock.Object);
         _unitOfWorkMock.Setup(u => u.Skills).Returns(_skillRepositoryMock.Object);
 
-        _sut = new VacancyService(_unitOfWorkMock.Object);
+        // всегда возвращаем "нет в кэше", чтобы тесты работали с реальными данными из репозиториев, не из кэша
+        _cacheServiceMock
+            .Setup(c => c.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string?)null);
+
+        _sut = new VacancyService(_unitOfWorkMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]

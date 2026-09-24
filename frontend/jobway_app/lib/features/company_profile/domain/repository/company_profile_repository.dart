@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../entities/company_profile.dart';
 
 abstract class CompanyProfileRepository {
@@ -11,4 +13,6 @@ abstract class CompanyProfileRepository {
     String? website,
     String? location,
   });
+
+  Future<CompanyProfile> uploadLogo(File file);
 }

@@ -1,3 +1,5 @@
+// Application/Services/VacancyService.cs — заменить целиком
+using System.Text.Json;
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.Skill.Response;
 using JobWay.Application.DTOs.Vacancy.Request;
@@ -11,12 +13,18 @@ namespace JobWay.Application.Services;
 
 public class VacancyService : IVacancyService
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private const string TodayCountCacheKey = "vacancies:today-count";
 
-    public VacancyService(IUnitOfWork unitOfWork)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
+
+    public VacancyService(IUnitOfWork unitOfWork, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
+
+    private static string VacancyCacheKey(Guid id) => $"vacancy:{id}";
 
     public async Task<Result<VacancyResponse>> CreateAsync(Guid employerUserId, CreateVacancyRequest request, CancellationToken cancellationToken)
     {
@@ -43,6 +51,8 @@ public class VacancyService : IVacancyService
 
         _unitOfWork.Vacancies.Add(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(TodayCountCacheKey, cancellationToken);
 
         return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
     }
@@ -74,6 +84,8 @@ public class VacancyService : IVacancyService
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
+
         return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
     }
 
@@ -88,10 +100,16 @@ public class VacancyService : IVacancyService
 
         return await ChangeStatusAsync(employerUserId, vacancyId, VacancyStatus.Active, cancellationToken);
     }
-    
+
     public async Task<Result<int>> GetTodayCountAsync(CancellationToken cancellationToken)
     {
+        var cached = await _cacheService.GetAsync(TodayCountCacheKey, cancellationToken);
+        if (cached is not null && int.TryParse(cached, out var cachedCount))
+            return Result<int>.Ok(cachedCount);
+
         var count = await _unitOfWork.Vacancies.CountCreatedTodayAsync(cancellationToken);
+        await _cacheService.SetAsync(TodayCountCacheKey, count.ToString(), TimeSpan.FromMinutes(5), cancellationToken);
+
         return Result<int>.Ok(count);
     }
 
@@ -100,12 +118,19 @@ public class VacancyService : IVacancyService
 
     public async Task<Result<VacancyResponse>> GetByIdAsync(Guid vacancyId, CancellationToken cancellationToken)
     {
+        var cached = await _cacheService.GetAsync(VacancyCacheKey(vacancyId), cancellationToken);
+        if (cached is not null)
+            return Result<VacancyResponse>.Ok(JsonSerializer.Deserialize<VacancyResponse>(cached));
+
         var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
 
         if (vacancy is null)
             return Result<VacancyResponse>.Fail("Vacancy not found", ErrorType.NotFound);
 
-        return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
+        var response = MapToResponse(vacancy);
+        await _cacheService.SetAsync(VacancyCacheKey(vacancyId), JsonSerializer.Serialize(response), TimeSpan.FromMinutes(5), cancellationToken);
+
+        return Result<VacancyResponse>.Ok(response);
     }
 
     public async Task<Result<PagedResult<VacancyResponse>>> GetActiveAsync(VacancyFilterRequest filter, CancellationToken cancellationToken)
@@ -152,6 +177,8 @@ public class VacancyService : IVacancyService
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
+
         return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
     }
 
@@ -168,6 +195,7 @@ public class VacancyService : IVacancyService
         SalaryFrom = vacancy.SalaryFrom,
         SalaryTo = vacancy.SalaryTo,
         Status = vacancy.Status,
+        CompanyLogoUrl = vacancy.CompanyProfile.LogoUrl,
         Skills = vacancy.RequiredSkills.Select(s => new SkillResponse
         {
             Id = s.Id,
