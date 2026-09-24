@@ -14,6 +14,7 @@ class JobApplicationModel {
   final List<SkillModel> matchedSkills;
   final List<SkillModel> missingSkills;
   final String? coverMessage;
+  final String? companyLogoUrl;
   final DateTime createdAt;
 
   JobApplicationModel({
@@ -28,6 +29,7 @@ class JobApplicationModel {
     required this.matchedSkills,
     required this.missingSkills,
     this.coverMessage,
+    this.companyLogoUrl,
     required this.createdAt,
   });
 
@@ -42,25 +44,31 @@ class JobApplicationModel {
       candidateFullName: data['candidateFullName'],
       status: data['status'],
       matchScore: data['matchScore'],
-      matchedSkills: (data['matchedSkills'] as List).map((s) => SkillModel.fromJson(s)).toList(),
-      missingSkills: (data['missingSkills'] as List).map((s) => SkillModel.fromJson(s)).toList(),
+      matchedSkills: (data['matchedSkills'] as List)
+          .map((s) => SkillModel.fromJson(s))
+          .toList(),
+      missingSkills: (data['missingSkills'] as List)
+          .map((s) => SkillModel.fromJson(s))
+          .toList(),
       coverMessage: data['coverMessage'],
+      companyLogoUrl: data['companyLogoUrl'],
       createdAt: DateTime.parse(data['createdAt']),
     );
   }
 
   JobApplication toEntity() => JobApplication(
-        id: id,
-        vacancyId: vacancyId,
-        vacancyTitle: vacancyTitle,
-        companyName: companyName,
-        candidateProfileId: candidateProfileId,
-        candidateFullName: candidateFullName,
-        status: status,
-        matchScore: matchScore,
-        matchedSkills: matchedSkills.map((s) => s.toEntity()).toList(),
-        missingSkills: missingSkills.map((s) => s.toEntity()).toList(),
-        coverMessage: coverMessage,
-        createdAt: createdAt,
-      );
+    id: id,
+    vacancyId: vacancyId,
+    vacancyTitle: vacancyTitle,
+    companyName: companyName,
+    candidateProfileId: candidateProfileId,
+    candidateFullName: candidateFullName,
+    status: status,
+    matchScore: matchScore,
+    matchedSkills: matchedSkills.map((s) => s.toEntity()).toList(),
+    missingSkills: missingSkills.map((s) => s.toEntity()).toList(),
+    coverMessage: coverMessage,
+    companyLogoUrl: companyLogoUrl,
+    createdAt: createdAt,
+  );
 }

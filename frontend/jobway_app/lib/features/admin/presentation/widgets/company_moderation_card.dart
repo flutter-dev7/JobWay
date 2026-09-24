@@ -1,4 +1,6 @@
+// features/admin/presentation/widgets/company_moderation_card.dart — заменить целиком
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/company_avatar.dart';
 import '../../domain/entities/company_moderation.dart';
 
 class CompanyModerationCard extends StatelessWidget {
@@ -56,11 +58,29 @@ class CompanyModerationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              CompanyAvatar(companyName: company.companyName, logoUrl: company.logoUrl, size: 44),
+              const SizedBox(width: 12),
               Expanded(
-                child: Text(company.companyName,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(company.companyName,
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+                    if (company.industry != null || company.location != null) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        [company.industry, company.location].where((e) => e != null && e.isNotEmpty).join(' · '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                      ),
+                    ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
@@ -68,38 +88,37 @@ class CompanyModerationCard extends StatelessWidget {
               ),
             ],
           ),
-          if (company.industry != null || company.location != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              [company.industry, company.location].where((e) => e != null && e.isNotEmpty).join(' · '),
-              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
-            ),
-          ],
           if (!isFinal) ...[
+            const SizedBox(height: 14),
+            const Divider(height: 1, color: Color(0xFFF3F4F6)),
             const SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: OutlinedButton.icon(
                     onPressed: isUpdating ? null : onVerify,
+                    icon: const Icon(Icons.verified_outlined, size: 16),
+                    label: const Text('Верифицировать'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF059669),
                       side: const BorderSide(color: Color(0xFFBBF7D0)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Верифицировать'),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: OutlinedButton(
+                  child: OutlinedButton.icon(
                     onPressed: isUpdating ? null : onReject,
+                    icon: const Icon(Icons.close_rounded, size: 16),
+                    label: const Text('Отклонить'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFDC2626),
                       side: const BorderSide(color: Color(0xFFFECACA)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Отклонить'),
                   ),
                 ),
               ],

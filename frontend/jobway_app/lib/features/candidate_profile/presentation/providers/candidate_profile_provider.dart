@@ -1,5 +1,7 @@
 // features/candidate_profile/presentation/providers/candidate_profile_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/features/candidate_profile/domain/usecases/upload_photo_usecase.dart';
+import 'package:jobway_app/features/candidate_profile/domain/usecases/upload_resume_usecase.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../data/datasources/candidate_profile_remote_data_source.dart';
 import '../../data/repository/candidate_profile_repository_impl.dart';
@@ -13,14 +15,31 @@ final candidateProfileRemoteDataSourceProvider = Provider(
 );
 
 final candidateProfileRepositoryProvider = Provider<CandidateProfileRepository>(
-  (ref) => CandidateProfileRepositoryImpl(ref.read(candidateProfileRemoteDataSourceProvider)),
+  (ref) => CandidateProfileRepositoryImpl(
+    ref.read(candidateProfileRemoteDataSourceProvider),
+  ),
 );
 
-final getCandidateProfileUseCaseProvider =
-    Provider((ref) => GetCandidateProfileUseCase(ref.read(candidateProfileRepositoryProvider)));
+final getCandidateProfileUseCaseProvider = Provider(
+  (ref) =>
+      GetCandidateProfileUseCase(ref.read(candidateProfileRepositoryProvider)),
+);
 
-final updateCandidateProfileUseCaseProvider =
-    Provider((ref) => UpdateCandidateProfileUseCase(ref.read(candidateProfileRepositoryProvider)));
+final updateCandidateProfileUseCaseProvider = Provider(
+  (ref) => UpdateCandidateProfileUseCase(
+    ref.read(candidateProfileRepositoryProvider),
+  ),
+);
 
-final candidateProfileProvider =
-    FutureProvider.autoDispose<CandidateProfile>((ref) => ref.read(getCandidateProfileUseCaseProvider)());
+final candidateProfileProvider = FutureProvider.autoDispose<CandidateProfile>(
+  (ref) => ref.read(getCandidateProfileUseCaseProvider)(),
+);
+
+final uploadResumeUseCaseProvider = Provider(
+  (ref) => UploadResumeUseCase(ref.read(candidateProfileRepositoryProvider)),
+);
+
+final uploadCandidatePhotoUseCaseProvider = Provider(
+  (ref) =>
+      UploadCandidatePhotoUseCase(ref.read(candidateProfileRepositoryProvider)),
+);

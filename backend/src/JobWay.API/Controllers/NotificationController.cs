@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.Notification.Request;
 using JobWay.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,4 +25,8 @@ public class NotificationController : BaseApiController
     [HttpPut("read-all")]
     public async Task<IActionResult> MarkAllAsRead(CancellationToken cancellationToken)
         => HandleError(await _notificationService.MarkAllAsReadAsync(CurrentUserId, cancellationToken));
+    
+    [HttpPost("device-token")]
+    public async Task<IActionResult> RegisterDeviceToken(RegisterDeviceTokenRequest request, CancellationToken cancellationToken)
+        => HandleError(await _notificationService.RegisterDeviceTokenAsync(CurrentUserId, request, cancellationToken));
 }

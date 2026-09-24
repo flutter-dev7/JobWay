@@ -1,3 +1,4 @@
+// features/applications/presentation/widgets/vacancy_application_card.dart — заменить целиком
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/skill_chip.dart';
 import '../../domain/entities/job_application.dart';
@@ -6,12 +7,14 @@ class VacancyApplicationCard extends StatelessWidget {
   final JobApplication application;
   final ValueChanged<String> onStatusChanged;
   final bool isUpdating;
+  final bool isLocked;
 
   const VacancyApplicationCard({
     super.key,
     required this.application,
     required this.onStatusChanged,
     this.isUpdating = false,
+    this.isLocked = false,
   });
 
   static const _statuses = ['Pending', 'Viewed', 'Interview', 'Accepted', 'Rejected'];
@@ -63,25 +66,43 @@ class VacancyApplicationCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(application.candidateFullName,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
-              ),
               Container(
                 width: 44,
                 height: 44,
                 decoration: const BoxDecoration(color: Color(0xFFF3F5FF), shape: BoxShape.circle),
                 child: Center(
+                  child: Text(
+                    application.candidateFullName.trim().isNotEmpty
+                        ? application.candidateFullName.trim()[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF3157D5)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(application.candidateFullName,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+              ),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(color: Color(0xFFF3F5FF), shape: BoxShape.circle),
+                child: Center(
                   child: Text('${application.matchScore}%',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF3157D5))),
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF3157D5))),
                 ),
               ),
             ],
           ),
           if (application.coverMessage != null && application.coverMessage!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(application.coverMessage!,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)), maxLines: 3, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: const Color(0xFFF9FAFB), borderRadius: BorderRadius.circular(10)),
+              child: Text(application.coverMessage!,
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)), maxLines: 3, overflow: TextOverflow.ellipsis),
+            ),
           ],
           if (application.matchedSkills.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -96,14 +117,23 @@ class VacancyApplicationCard extends StatelessWidget {
                       child: Text(_statusLabel(s), style: TextStyle(color: _statusColor(s), fontWeight: FontWeight.w600)),
                     ))
                 .toList(),
-            onChanged: isUpdating ? null : (value) { if (value != null) onStatusChanged(value); },
+            onChanged: (isLocked || isUpdating)
+                ? null
+                : (value) {
+                    if (value == null || value == application.status) return;
+                    onStatusChanged(value);
+                  },
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFFF9FAFB),
+              fillColor: isLocked ? const Color(0xFFF3F4F6) : const Color(0xFFF9FAFB),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
             ),
           ),
+          if (isLocked) ...[
+            const SizedBox(height: 6),
+            const Text('Вакансия закрыта — статус нельзя изменить', style: TextStyle(fontSize: 11, color: Color(0xFF9CA3AF))),
+          ],
         ],
       ),
     );

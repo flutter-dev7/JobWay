@@ -18,4 +18,5 @@ public class VacancyResponse
     public VacancyStatus Status { get; set; }
     public List<SkillResponse> Skills { get; set; } = [];
     public DateTime CreatedAt { get; set; }
+    public string? CompanyLogoUrl { get; set; }
 }

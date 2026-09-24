@@ -1,6 +1,5 @@
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
-using JobWay.Infrastructure.Persistence;
 using JobWay.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +18,9 @@ public class CandidateProfileRepository : ICandidateProfileRepository
         => _context.CandidateProfiles
             .Include(p => p.Skills)
             .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
+
+    public Task<List<CandidateProfile>> GetAllAsync(CancellationToken cancellationToken)
+        => _context.CandidateProfiles.ToListAsync(cancellationToken);
 
     public void Update(CandidateProfile profile) => _context.CandidateProfiles.Update(profile);
 }

@@ -9,6 +9,7 @@ class CandidateProfileModel {
   final String? location;
   final String? bio;
   final String? resumeFileUrl;
+  final String? photoUrl;
   final String experienceLevel;
   final String desiredEmploymentType;
   final List<SkillModel> skills;
@@ -20,6 +21,7 @@ class CandidateProfileModel {
     this.location,
     this.bio,
     this.resumeFileUrl,
+    this.photoUrl,
     required this.experienceLevel,
     required this.desiredEmploymentType,
     required this.skills,
@@ -34,6 +36,7 @@ class CandidateProfileModel {
       location: data['location'],
       bio: data['bio'],
       resumeFileUrl: data['resumeFileUrl'],
+      photoUrl: data['photoUrl'],
       experienceLevel: data['experienceLevel'],
       desiredEmploymentType: data['desiredEmploymentType'],
       skills: (data['skills'] as List).map((s) => SkillModel.fromJson(s)).toList(),
@@ -47,6 +50,7 @@ class CandidateProfileModel {
         location: location,
         bio: bio,
         resumeFileUrl: resumeFileUrl,
+        photoUrl: photoUrl,
         experienceLevel: experienceLevel,
         desiredEmploymentType: desiredEmploymentType,
         skills: skills.map((s) => s.toEntity()).toList(),

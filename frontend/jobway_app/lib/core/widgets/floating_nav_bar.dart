@@ -19,6 +19,8 @@ class FloatingNavBar extends StatelessWidget {
     required this.items,
   });
 
+  static const double _itemWidth = 64;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,26 +47,14 @@ class FloatingNavBar extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              width: _itemWidth,
+              height: 48,
+              padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: selected ? const Color(0xFFE5E5E5) : Colors.transparent,
                 borderRadius: BorderRadius.circular(26),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(items[index].icon, size: 21, color: Colors.black),
-                  const SizedBox(height: 2),
-                  Text(
-                    items[index].label,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
+              child: Icon(items[index].icon, size: 24, color: Colors.black),
             ),
           );
         }),

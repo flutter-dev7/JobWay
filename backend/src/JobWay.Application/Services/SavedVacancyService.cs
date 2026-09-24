@@ -60,6 +60,7 @@ public class SavedVacancyService : ISavedVacancyService
         EmploymentType = vacancy.EmploymentType,
         ExperienceLevel = vacancy.ExperienceLevel,
         Location = vacancy.Location,
+        CompanyLogoUrl = vacancy.CompanyProfile.LogoUrl,
         SalaryFrom = vacancy.SalaryFrom,
         SalaryTo = vacancy.SalaryTo,
         Status = vacancy.Status,

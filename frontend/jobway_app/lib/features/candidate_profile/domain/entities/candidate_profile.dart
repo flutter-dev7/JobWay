@@ -7,6 +7,7 @@ class CandidateProfile {
   final String? location;
   final String? bio;
   final String? resumeFileUrl;
+  final String? photoUrl;
   final String experienceLevel;
   final String desiredEmploymentType;
   final List<Skill> skills;
@@ -18,6 +19,7 @@ class CandidateProfile {
     this.location,
     this.bio,
     this.resumeFileUrl,
+    this.photoUrl,
     required this.experienceLevel,
     required this.desiredEmploymentType,
     required this.skills,

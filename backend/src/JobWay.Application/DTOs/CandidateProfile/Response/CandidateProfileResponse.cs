@@ -11,6 +11,7 @@ public class CandidateProfileResponse
     public string? Location { get; set; }
     public string? Bio { get; set; }
     public string? ResumeFileUrl { get; set; }
+    public string? PhotoUrl { get; set; }
     public ExperienceLevel ExperienceLevel { get; set; }
     public EmploymentType DesiredEmploymentType { get; set; }
     public List<SkillResponse> Skills { get; set; } = [];

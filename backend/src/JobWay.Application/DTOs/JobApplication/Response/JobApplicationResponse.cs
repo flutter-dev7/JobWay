@@ -16,5 +16,6 @@ public class JobApplicationResponse
     public List<SkillResponse> MatchedSkills { get; set; } = [];
     public List<SkillResponse> MissingSkills { get; set; } = [];
     public string? CoverMessage { get; set; }
+    public string? CompanyLogoUrl { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -67,6 +67,9 @@ namespace JobWay.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("ResumeFileUrl")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -131,6 +134,39 @@ namespace JobWay.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("CompanyProfiles");
+                });
+
+            modelBuilder.Entity("JobWay.Domain.Entities.DeviceToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DeviceTokens");
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.JobApplication", b =>
@@ -419,6 +455,17 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasOne("JobWay.Domain.Entities.User", "User")
                         .WithOne("CompanyProfile")
                         .HasForeignKey("JobWay.Domain.Entities.CompanyProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JobWay.Domain.Entities.DeviceToken", b =>
+                {
+                    b.HasOne("JobWay.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

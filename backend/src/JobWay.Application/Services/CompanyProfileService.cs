@@ -1,3 +1,5 @@
+// Application/Services/CompanyProfileService.cs — заменить целиком
+using System.Text.Json;
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.CompanyProfile.Request;
 using JobWay.Application.DTOs.CompanyProfile.Response;
@@ -10,21 +12,36 @@ namespace JobWay.Application.Services;
 
 public class CompanyProfileService : ICompanyProfileService
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
 
-    public CompanyProfileService(IUnitOfWork unitOfWork)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IFileStorageService _fileStorageService;
+    private readonly ICacheService _cacheService;
+
+    public CompanyProfileService(IUnitOfWork unitOfWork, IFileStorageService fileStorageService, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
+        _fileStorageService = fileStorageService;
+        _cacheService = cacheService;
     }
+
+    private static string CacheKey(Guid userId) => $"company-profile:{userId}";
 
     public async Task<Result<CompanyProfileResponse>> GetMyProfileAsync(Guid userId, CancellationToken cancellationToken)
     {
+        var cached = await _cacheService.GetAsync(CacheKey(userId), cancellationToken);
+        if (cached is not null)
+            return Result<CompanyProfileResponse>.Ok(JsonSerializer.Deserialize<CompanyProfileResponse>(cached));
+
         var profile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(userId, cancellationToken);
 
         if (profile is null)
             return Result<CompanyProfileResponse>.Fail("Profile not found", ErrorType.NotFound);
 
-        return Result<CompanyProfileResponse>.Ok(MapToResponse(profile));
+        var response = MapToResponse(profile);
+        await _cacheService.SetAsync(CacheKey(userId), JsonSerializer.Serialize(response), TimeSpan.FromMinutes(10), cancellationToken);
+
+        return Result<CompanyProfileResponse>.Ok(response);
     }
 
     public async Task<Result<CompanyProfileResponse>> UpdateMyProfileAsync(Guid userId, UpdateCompanyProfileRequest request, CancellationToken cancellationToken)
@@ -37,12 +54,36 @@ public class CompanyProfileService : ICompanyProfileService
         profile.CompanyName = request.CompanyName;
         profile.Description = request.Description;
         profile.Industry = request.Industry;
-        profile.LogoUrl = request.LogoUrl;
         profile.Website = request.Website;
         profile.Location = request.Location;
 
         _unitOfWork.CompanyProfiles.Update(profile);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKey(userId), cancellationToken);
+
+        return Result<CompanyProfileResponse>.Ok(MapToResponse(profile));
+    }
+
+    public async Task<Result<CompanyProfileResponse>> UploadLogoAsync(Guid userId, UploadLogoRequest request, CancellationToken cancellationToken)
+    {
+        var profile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(userId, cancellationToken);
+
+        if (profile is null)
+            return Result<CompanyProfileResponse>.Fail("Profile not found", ErrorType.NotFound);
+
+        var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
+        if (!AllowedImageExtensions.Contains(extension))
+            return Result<CompanyProfileResponse>.Fail("Only JPG and PNG images are allowed", ErrorType.Validation);
+
+        var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
+        var url = await _fileStorageService.SaveAsync("photos", storedFileName, request.Content, cancellationToken);
+
+        profile.LogoUrl = url;
+        _unitOfWork.CompanyProfiles.Update(profile);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKey(userId), cancellationToken);
 
         return Result<CompanyProfileResponse>.Ok(MapToResponse(profile));
     }

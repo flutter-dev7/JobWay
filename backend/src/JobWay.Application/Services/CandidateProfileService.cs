@@ -1,3 +1,5 @@
+// Application/Services/CandidateProfileService.cs — заменить целиком
+using System.Text.Json;
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.CandidateProfile.Request;
 using JobWay.Application.DTOs.CandidateProfile.Response;
@@ -11,21 +13,37 @@ namespace JobWay.Application.Services;
 
 public class CandidateProfileService : ICandidateProfileService
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private static readonly string[] AllowedResumeExtensions = [".pdf", ".doc", ".docx"];
+    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
 
-    public CandidateProfileService(IUnitOfWork unitOfWork)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IFileStorageService _fileStorageService;
+    private readonly ICacheService _cacheService;
+
+    public CandidateProfileService(IUnitOfWork unitOfWork, IFileStorageService fileStorageService, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
+        _fileStorageService = fileStorageService;
+        _cacheService = cacheService;
     }
+
+    private static string CacheKey(Guid userId) => $"candidate-profile:{userId}";
 
     public async Task<Result<CandidateProfileResponse>> GetMyProfileAsync(Guid userId, CancellationToken cancellationToken)
     {
+        var cached = await _cacheService.GetAsync(CacheKey(userId), cancellationToken);
+        if (cached is not null)
+            return Result<CandidateProfileResponse>.Ok(JsonSerializer.Deserialize<CandidateProfileResponse>(cached));
+
         var profile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(userId, cancellationToken);
 
         if (profile is null)
             return Result<CandidateProfileResponse>.Fail("Profile not found", ErrorType.NotFound);
 
-        return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
+        var response = MapToResponse(profile);
+        await _cacheService.SetAsync(CacheKey(userId), JsonSerializer.Serialize(response), TimeSpan.FromMinutes(10), cancellationToken);
+
+        return Result<CandidateProfileResponse>.Ok(response);
     }
 
     public async Task<Result<CandidateProfileResponse>> UpdateMyProfileAsync(Guid userId, UpdateCandidateProfileRequest request, CancellationToken cancellationToken)
@@ -49,6 +67,54 @@ public class CandidateProfileService : ICandidateProfileService
         _unitOfWork.CandidateProfiles.Update(profile);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _cacheService.RemoveAsync(CacheKey(userId), cancellationToken);
+
+        return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
+    }
+
+    public async Task<Result<CandidateProfileResponse>> UploadResumeAsync(Guid userId, UploadResumeRequest request, CancellationToken cancellationToken)
+    {
+        var profile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(userId, cancellationToken);
+
+        if (profile is null)
+            return Result<CandidateProfileResponse>.Fail("Profile not found", ErrorType.NotFound);
+
+        var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
+        if (!AllowedResumeExtensions.Contains(extension))
+            return Result<CandidateProfileResponse>.Fail("Only PDF and Word documents are allowed", ErrorType.Validation);
+
+        var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
+        var url = await _fileStorageService.SaveAsync("resumes", storedFileName, request.Content, cancellationToken);
+
+        profile.ResumeFileUrl = url;
+        _unitOfWork.CandidateProfiles.Update(profile);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKey(userId), cancellationToken);
+
+        return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
+    }
+
+    public async Task<Result<CandidateProfileResponse>> UploadPhotoAsync(Guid userId, UploadPhotoRequest request, CancellationToken cancellationToken)
+    {
+        var profile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(userId, cancellationToken);
+
+        if (profile is null)
+            return Result<CandidateProfileResponse>.Fail("Profile not found", ErrorType.NotFound);
+
+        var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
+        if (!AllowedImageExtensions.Contains(extension))
+            return Result<CandidateProfileResponse>.Fail("Only JPG and PNG images are allowed", ErrorType.Validation);
+
+        var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
+        var url = await _fileStorageService.SaveAsync("photos", storedFileName, request.Content, cancellationToken);
+
+        profile.PhotoUrl = url;
+        _unitOfWork.CandidateProfiles.Update(profile);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKey(userId), cancellationToken);
+
         return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
     }
 
@@ -60,6 +126,7 @@ public class CandidateProfileService : ICandidateProfileService
         Location = profile.Location,
         Bio = profile.Bio,
         ResumeFileUrl = profile.ResumeFileUrl,
+        PhotoUrl = profile.PhotoUrl,
         ExperienceLevel = profile.ExperienceLevel,
         DesiredEmploymentType = profile.DesiredEmploymentType,
         Skills = profile.Skills.Select(s => new SkillResponse

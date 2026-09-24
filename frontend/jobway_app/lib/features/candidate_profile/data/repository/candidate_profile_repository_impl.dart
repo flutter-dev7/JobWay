@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../domain/entities/candidate_profile.dart';
 import '../../domain/repository/candidate_profile_repository.dart';
 import '../datasources/candidate_profile_remote_data_source.dart';
@@ -34,6 +36,18 @@ class CandidateProfileRepositoryImpl implements CandidateProfileRepository {
       desiredEmploymentType: desiredEmploymentType,
       skillIds: skillIds,
     );
+    return model.toEntity();
+  }
+
+  @override
+  Future<CandidateProfile> uploadResume(File file) async {
+    final model = await _remoteDataSource.uploadResume(file);
+    return model.toEntity();
+  }
+
+  @override
+  Future<CandidateProfile> uploadPhoto(File file) async {
+    final model = await _remoteDataSource.uploadPhoto(file);
     return model.toEntity();
   }
 }

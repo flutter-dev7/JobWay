@@ -1,14 +1,17 @@
-// features/candidate_profile/presentation/pages/edit_candidate_profile_page.dart — заменить целиком
+// features/candidate_profile/presentation/pages/edit_candidate_profile_page.dart
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/utils/enum_labels.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/section_card.dart';
 import '../../../skills/presentation/widgets/skills_selector.dart';
 import '../../domain/entities/candidate_profile.dart';
 import '../providers/candidate_profile_provider.dart';
-import '../../../../core/widgets/section_card.dart';
 
 class EditCandidateProfilePage extends ConsumerStatefulWidget {
   final CandidateProfile profile;
@@ -25,13 +28,14 @@ class _EditCandidateProfilePageState
   late final TextEditingController _fullNameController;
   late final TextEditingController _locationController;
   late final TextEditingController _bioController;
-  late final TextEditingController _resumeUrlController;
   late final TextEditingController _birthDateController;
   late String _experienceLevel;
   late String _employmentType;
   late List<String> _selectedSkillIds;
+  late String? _resumeFileUrl;
   DateTime? _birthDate;
   bool _isLoading = false;
+  bool _isUploadingResume = false;
 
   static const _experienceLevels = [
     'NoExperience',
@@ -54,14 +58,12 @@ class _EditCandidateProfilePageState
       text: widget.profile.location ?? '',
     );
     _bioController = TextEditingController(text: widget.profile.bio ?? '');
-    _resumeUrlController = TextEditingController(
-      text: widget.profile.resumeFileUrl ?? '',
-    );
     _experienceLevel = widget.profile.experienceLevel;
     _employmentType = widget.profile.desiredEmploymentType;
     _selectedSkillIds = widget.profile.skills.map((s) => s.id).toList();
     _birthDate = widget.profile.birthDate;
     _birthDateController = TextEditingController(text: _formatDate(_birthDate));
+    _resumeFileUrl = widget.profile.resumeFileUrl;
   }
 
   @override
@@ -69,7 +71,6 @@ class _EditCandidateProfilePageState
     _fullNameController.dispose();
     _locationController.dispose();
     _bioController.dispose();
-    _resumeUrlController.dispose();
     _birthDateController.dispose();
     super.dispose();
   }
@@ -94,6 +95,31 @@ class _EditCandidateProfilePageState
     }
   }
 
+  Future<void> _pickAndUploadResume() async {
+    final file = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+
+    if (file == null || file.path == null) return;
+
+    final selectedFile = File(file.path!);
+
+    setState(() => _isUploadingResume = true);
+
+    try {
+      await ref.read(uploadResumeUseCaseProvider).call(selectedFile);
+      ref.invalidate(candidateProfileProvider);
+      AppSnackbar.showSuccess('Резюме загружено');
+    } catch (error) {
+      AppSnackbar.showError(ApiException.extractMessage(error));
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingResume = false);
+      }
+    }
+  }
+
   Future<void> _save() async {
     if (_fullNameController.text.trim().isEmpty) {
       AppSnackbar.showError('Введите имя');
@@ -113,9 +139,7 @@ class _EditCandidateProfilePageState
             bio: _bioController.text.trim().isEmpty
                 ? null
                 : _bioController.text.trim(),
-            resumeFileUrl: _resumeUrlController.text.trim().isEmpty
-                ? null
-                : _resumeUrlController.text.trim(),
+            resumeFileUrl: _resumeFileUrl,
             experienceLevel: _experienceLevel,
             desiredEmploymentType: _employmentType,
             skillIds: _selectedSkillIds,
@@ -194,20 +218,10 @@ class _EditCandidateProfilePageState
           SectionCard(
             title: 'О себе',
             icon: Icons.notes_rounded,
-            child: Column(
-              children: [
-                AppTextField(
-                  controller: _bioController,
-                  label: 'Расскажите о себе',
-                  icon: Icons.info_outline,
-                ),
-                const SizedBox(height: 14),
-                AppTextField(
-                  controller: _resumeUrlController,
-                  label: 'Ссылка на резюме',
-                  icon: Icons.link,
-                ),
-              ],
+            child: AppTextField(
+              controller: _bioController,
+              label: 'Расскажите о себе',
+              icon: Icons.info_outline,
             ),
           ),
           const SizedBox(height: 16),
@@ -219,20 +233,43 @@ class _EditCandidateProfilePageState
                 DropdownButtonFormField<String>(
                   value: _experienceLevel,
                   items: _experienceLevels
-                      .map((l) => DropdownMenuItem(value: l, child: Text(l)))
+                      .map(
+                        (level) => DropdownMenuItem(
+                          value: level, // отправляем в API: Junior, Senior...
+                          child: Text(
+                            experienceLevelLabel(
+                              level,
+                            ), // показываем: Junior, Senior...
+                          ),
+                        ),
+                      )
                       .toList(),
-                  onChanged: (value) =>
-                      setState(() => _experienceLevel = value!),
+                  onChanged: (value) {
+                    setState(() => _experienceLevel = value!);
+                  },
                   decoration: _dropdownDecoration(),
                 ),
+
                 const SizedBox(height: 14),
+
                 DropdownButtonFormField<String>(
                   value: _employmentType,
                   items: _employmentTypes
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value:
+                              type, 
+                          child: Text(
+                            employmentTypeLabel(
+                              type,
+                            ),
+                          ),
+                        ),
+                      )
                       .toList(),
-                  onChanged: (value) =>
-                      setState(() => _employmentType = value!),
+                  onChanged: (value) {
+                    setState(() => _employmentType = value!);
+                  },
                   decoration: _dropdownDecoration(),
                 ),
               ],
@@ -246,6 +283,81 @@ class _EditCandidateProfilePageState
               selectedSkillIds: _selectedSkillIds,
               onChanged: (ids) => setState(() => _selectedSkillIds = ids),
             ),
+          ),
+          const SizedBox(height: 16),
+          SectionCard(
+            title: 'Резюме',
+            icon: Icons.attach_file_rounded,
+            child: _resumeFileUrl == null || _resumeFileUrl!.isEmpty
+                ? AppButton(
+                    label: 'Загрузить резюме',
+                    icon: Icons.upload_file_outlined,
+                    isLoading: _isUploadingResume,
+                    onPressed: _pickAndUploadResume,
+                  )
+                : Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEE2E2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.picture_as_pdf_outlined,
+                                size: 20,
+                                color: Color(0xFFDC2626),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _resumeFileUrl!.split('/').last,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF111827),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          onPressed: _isUploadingResume
+                              ? null
+                              : _pickAndUploadResume,
+                          icon: _isUploadingResume
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh_rounded, size: 16),
+                          label: const Text('Заменить файл'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFF3157D5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
           const SizedBox(height: 28),
           AppButton(

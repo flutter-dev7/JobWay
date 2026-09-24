@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.123.37:5025/api';
+  static const String baseUrl = 'http://192.168.123.33:5025/api';
 
   // Auth
   static const String register = '/auth/register';
@@ -48,4 +48,16 @@ class ApiConstants {
   static const String adminUsers = '/admin/users';
   static String blockUser(String id) => '/admin/users/$id/block';
   static String unblockUser(String id) => '/admin/users/$id/unblock';
+
+  static const String uploadResume = '/candidate-profile/me/resume';
+
+  static const String registerDeviceToken = '/notifications/device-token';
+
+  static const String uploadCandidatePhoto = '/candidate-profile/me/photo';
+  static const String uploadCompanyLogo = '/company-profile/me/logo';
+
+  static String get fileBaseUrl {
+    final uri = Uri.parse(baseUrl);
+    return '${uri.scheme}://${uri.authority}';
+  }
 }

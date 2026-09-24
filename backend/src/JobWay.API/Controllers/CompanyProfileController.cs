@@ -24,4 +24,17 @@ public class CompanyProfileController : BaseApiController
     [HttpPut("me")]
     public async Task<IActionResult> UpdateMyProfile(UpdateCompanyProfileRequest request, CancellationToken cancellationToken)
         => HandleError(await _companyProfileService.UpdateMyProfileAsync(CurrentUserId, request, cancellationToken));
+
+    [HttpPost("me/logo")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> UploadLogo(IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file.Length == 0)
+            return BadRequest(new { error = "File is empty" });
+
+        await using var stream = file.OpenReadStream();
+        var request = new UploadLogoRequest { FileName = file.FileName, Content = stream };
+
+        return HandleError(await _companyProfileService.UploadLogoAsync(CurrentUserId, request, cancellationToken));
+    }
 }

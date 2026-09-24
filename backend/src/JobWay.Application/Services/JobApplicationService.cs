@@ -56,8 +56,8 @@ public class JobApplicationService : IJobApplicationService
         await _notificationService.CreateAsync(
             vacancy.CompanyProfile.UserId,
             NotificationType.NewApplication,
-            "New application",
-            $"{candidateProfile.FullName} applied to \"{vacancy.Title}\"",
+            "Новый отклик",
+            $"{candidateProfile.FullName} откликнулся(-ась) на вакансию «{vacancy.Title}»",
             application.Id,
             cancellationToken);
 
@@ -82,8 +82,8 @@ public class JobApplicationService : IJobApplicationService
         await _notificationService.CreateAsync(
             application.CandidateProfile.UserId,
             NotificationType.ApplicationStatusChanged,
-            "Application status updated",
-            $"Your application for \"{application.Vacancy.Title}\" is now {application.Status}",
+            "Статус отклика изменён",
+            $"Ваш отклик на вакансию «{application.Vacancy.Title}»: {_statusLabel(application.Status)}",
             application.Id,
             cancellationToken);
 
@@ -134,7 +134,18 @@ public class JobApplicationService : IJobApplicationService
             MatchedSkills = match.MatchedSkills,
             MissingSkills = match.MissingSkills,
             CoverMessage = application.CoverMessage,
+            CompanyLogoUrl = application.Vacancy.CompanyProfile.LogoUrl,
             CreatedAt = application.CreatedAt
         };
     }
+    
+    private static string _statusLabel(ApplicationStatus status) => status switch
+    {
+        ApplicationStatus.Pending => "на рассмотрении",
+        ApplicationStatus.Viewed => "просмотрен работодателем",
+        ApplicationStatus.Interview => "приглашение на собеседование",
+        ApplicationStatus.Accepted => "принят",
+        ApplicationStatus.Rejected => "отклонён",
+        _ => status.ToString()
+    };
 }

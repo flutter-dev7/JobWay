@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../entities/candidate_profile.dart';
 
 abstract class CandidateProfileRepository {
@@ -13,4 +15,8 @@ abstract class CandidateProfileRepository {
     required String desiredEmploymentType,
     required List<String> skillIds,
   });
+
+  Future<CandidateProfile> uploadResume(File file);
+
+  Future<CandidateProfile> uploadPhoto(File file);
 }

@@ -146,7 +146,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
               children: [
                 Row(
                   children: [
-                    CompanyAvatar(companyName: vacancy.companyName, size: 52),
+                    CompanyAvatar(companyName: vacancy.companyName, size: 52, logoUrl: vacancy.companyLogoUrl,),
                     const Spacer(),
                     if (vacancy.status == 'Active')
                       Container(

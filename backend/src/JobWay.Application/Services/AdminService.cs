@@ -31,7 +31,14 @@ public class AdminService : IAdminService
     public async Task<Result<List<UserModerationResponse>>> GetUsersAsync(CancellationToken cancellationToken)
     {
         var users = await _unitOfWork.Users.GetAllAsync(cancellationToken);
-        return Result<List<UserModerationResponse>>.Ok(users.Select(MapUser).ToList());
+        var candidateProfiles = await _unitOfWork.CandidateProfiles.GetAllAsync(cancellationToken);
+        var companyProfiles = await _unitOfWork.CompanyProfiles.GetAllAsync(cancellationToken);
+
+        var candidatePhotoByUserId = candidateProfiles.ToDictionary(c => c.UserId, c => c.PhotoUrl);
+        var companyLogoByUserId = companyProfiles.ToDictionary(c => c.UserId, c => c.LogoUrl);
+
+        var response = users.Select(u => MapUser(u, candidatePhotoByUserId, companyLogoByUserId)).ToList();
+        return Result<List<UserModerationResponse>>.Ok(response);
     }
 
     public async Task<Result<string>> BlockUserAsync(Guid userId, CancellationToken cancellationToken)
@@ -94,14 +101,26 @@ public class AdminService : IAdminService
         CompanyName = company.CompanyName,
         Industry = company.Industry,
         Location = company.Location,
+        LogoUrl = company.LogoUrl,
         VerificationStatus = company.VerificationStatus
     };
 
-    private static UserModerationResponse MapUser(User user) => new()
+    private static UserModerationResponse MapUser(
+        User user,
+        Dictionary<Guid, string?> candidatePhotoByUserId,
+        Dictionary<Guid, string?> companyLogoByUserId)
     {
-        Id = user.Id,
-        Email = user.Email,
-        Role = user.Role,
-        IsActive = user.IsActive
-    };
+        var photoUrl = candidatePhotoByUserId.TryGetValue(user.Id, out var candidatePhoto)
+            ? candidatePhoto
+            : companyLogoByUserId.GetValueOrDefault(user.Id);
+
+        return new UserModerationResponse
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Role = user.Role,
+            IsActive = user.IsActive,
+            PhotoUrl = photoUrl
+        };
+    }
 }

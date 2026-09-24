@@ -6,6 +6,7 @@ using JobWay.Application.Interfaces.Services;
 using JobWay.Application.Services;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -20,6 +21,15 @@ public class AuthServiceTests
     private readonly Mock<IEmailService> _emailServiceMock = new();
     private readonly Mock<ICacheService> _cacheServiceMock = new();
 
+    private readonly JwtSettings _jwtSettings = new()
+    {
+        SecretKey = "test-secret-key-1234567890123456",
+        Issuer = "JobWay",
+        Audience = "JobWayClient",
+        AccessTokenExpirationMinutes = 60,
+        RefreshTokenExpirationDays = 14
+    };
+
     private readonly AuthService _sut;
 
     public AuthServiceTests()
@@ -31,7 +41,8 @@ public class AuthServiceTests
             _passwordHasherMock.Object,
             _jwtServiceMock.Object,
             _emailServiceMock.Object,
-            _cacheServiceMock.Object);
+            _cacheServiceMock.Object,
+            Options.Create(_jwtSettings));
     }
 
     [Fact]
@@ -105,7 +116,8 @@ public class AuthServiceTests
         result.Data.Role.Should().Be(UserRole.Candidate);
 
         _userRepositoryMock.Verify(r => r.AddAsync(It.Is<User>(u => u.Email == request.Email), It.IsAny<CancellationToken>()), Times.Once);
-        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        // SaveChangesAsync теперь вызывается дважды: раз при создании User, второй раз при сохранении refresh-токена
+        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]

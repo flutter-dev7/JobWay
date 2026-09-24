@@ -3,6 +3,7 @@ class CompanyModeration {
   final String companyName;
   final String? industry;
   final String? location;
+  final String? logoUrl;
   final String verificationStatus;
 
   const CompanyModeration({
@@ -10,6 +11,7 @@ class CompanyModeration {
     required this.companyName,
     this.industry,
     this.location,
+    this.logoUrl,
     required this.verificationStatus,
   });
 }

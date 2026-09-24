@@ -12,11 +12,37 @@ class NotificationCard extends StatelessWidget {
       case 'NewApplication':
         return Icons.person_add_outlined;
       case 'ApplicationStatusChanged':
-        return Icons.update_rounded;
+        return Icons.event_available_outlined;
       case 'NewMatchingVacancy':
-        return Icons.work_outline_rounded;
+        return Icons.notifications_active_outlined;
       default:
-        return Icons.notifications_outlined;
+        return Icons.info_outline;
+    }
+  }
+
+  Color _iconBackground() {
+    switch (notification.type) {
+      case 'NewApplication':
+        return const Color(0xFFDCE5FF);
+      case 'ApplicationStatusChanged':
+        return const Color(0xFFDCFCE7);
+      case 'NewMatchingVacancy':
+        return const Color(0xFFFEF3C7);
+      default:
+        return const Color(0xFFF3F4F6);
+    }
+  }
+
+  Color _iconColor() {
+    switch (notification.type) {
+      case 'NewApplication':
+        return const Color(0xFF3157D5);
+      case 'ApplicationStatusChanged':
+        return const Color(0xFF059669);
+      case 'NewMatchingVacancy':
+        return const Color(0xFFD97706);
+      default:
+        return const Color(0xFF6B7280);
     }
   }
 
@@ -25,6 +51,7 @@ class NotificationCard extends StatelessWidget {
     if (diff.inMinutes < 1) return 'только что';
     if (diff.inMinutes < 60) return '${diff.inMinutes} мин назад';
     if (diff.inHours < 24) return '${diff.inHours} ч назад';
+    if (diff.inDays == 1) return 'вчера';
     return '${diff.inDays} дн назад';
   }
 
@@ -44,13 +71,10 @@ class NotificationCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: notification.isRead ? const Color(0xFFF3F4F6) : const Color(0xFFDCE5FF),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(_icon(), size: 19, color: const Color(0xFF3157D5)),
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(color: _iconBackground(), borderRadius: BorderRadius.circular(12)),
+              child: Icon(_icon(), size: 20, color: _iconColor()),
             ),
             const SizedBox(width: 12),
             Expanded(

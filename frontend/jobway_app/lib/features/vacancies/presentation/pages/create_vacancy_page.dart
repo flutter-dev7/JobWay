@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/utils/enum_labels.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_snackbar.dart';
@@ -26,8 +27,18 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
   List<String> _selectedSkillIds = [];
   bool _isLoading = false;
 
-  static const _employmentTypes = ['FullTime', 'PartTime', 'Remote', 'Internship'];
-  static const _experienceLevels = ['NoExperience', 'Junior', 'Middle', 'Senior'];
+  static const _employmentTypes = [
+    'FullTime',
+    'PartTime',
+    'Remote',
+    'Internship',
+  ];
+  static const _experienceLevels = [
+    'NoExperience',
+    'Junior',
+    'Middle',
+    'Senior',
+  ];
 
   @override
   void dispose() {
@@ -40,21 +51,30 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
   }
 
   Future<void> _create() async {
-    if (_titleController.text.trim().isEmpty || _descriptionController.text.trim().isEmpty) {
+    if (_titleController.text.trim().isEmpty ||
+        _descriptionController.text.trim().isEmpty) {
       AppSnackbar.showError('Заполните название и описание');
       return;
     }
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(createVacancyUseCaseProvider).call(
+      await ref
+          .read(createVacancyUseCaseProvider)
+          .call(
             title: _titleController.text.trim(),
             description: _descriptionController.text.trim(),
             employmentType: _employmentType,
             experienceLevel: _experienceLevel,
-            location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
-            salaryFrom: _salaryFromController.text.trim().isEmpty ? null : double.tryParse(_salaryFromController.text.trim()),
-            salaryTo: _salaryToController.text.trim().isEmpty ? null : double.tryParse(_salaryToController.text.trim()),
+            location: _locationController.text.trim().isEmpty
+                ? null
+                : _locationController.text.trim(),
+            salaryFrom: _salaryFromController.text.trim().isEmpty
+                ? null
+                : double.tryParse(_salaryFromController.text.trim()),
+            salaryTo: _salaryToController.text.trim().isEmpty
+                ? null
+                : double.tryParse(_salaryToController.text.trim()),
             skillIds: _selectedSkillIds,
           );
       if (!mounted) return;
@@ -69,11 +89,14 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
   }
 
   InputDecoration _dropdownDecoration() => InputDecoration(
-        filled: true,
-        fillColor: const Color(0xFFF9FAFB),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
-      );
+    filled: true,
+    fillColor: const Color(0xFFF9FAFB),
+    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +106,14 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
         backgroundColor: const Color(0xFFF7F8FA),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Новая вакансия', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        title: const Text(
+          'Новая вакансия',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF111827),
+          ),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -93,9 +123,17 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
             icon: Icons.work_outline_rounded,
             child: Column(
               children: [
-                AppTextField(controller: _titleController, label: 'Название вакансии', icon: Icons.title),
+                AppTextField(
+                  controller: _titleController,
+                  label: 'Название вакансии',
+                  icon: Icons.title,
+                ),
                 const SizedBox(height: 14),
-                AppTextField(controller: _descriptionController, label: 'Описание', icon: Icons.notes_rounded),
+                AppTextField(
+                  controller: _descriptionController,
+                  label: 'Описание',
+                  icon: Icons.notes_rounded,
+                ),
               ],
             ),
           ),
@@ -107,19 +145,41 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
               children: [
                 DropdownButtonFormField<String>(
                   value: _employmentType,
-                  items: _employmentTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                  onChanged: (value) => setState(() => _employmentType = value!),
+                  items: _employmentTypes
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text(employmentTypeLabel(type)),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) =>
+                      setState(() => _employmentType = value!),
                   decoration: _dropdownDecoration(),
                 ),
+
                 const SizedBox(height: 14),
+
                 DropdownButtonFormField<String>(
                   value: _experienceLevel,
-                  items: _experienceLevels.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-                  onChanged: (value) => setState(() => _experienceLevel = value!),
+                  items: _experienceLevels
+                      .map(
+                        (level) => DropdownMenuItem(
+                          value: level,
+                          child: Text(experienceLevelLabel(level)),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) =>
+                      setState(() => _experienceLevel = value!),
                   decoration: _dropdownDecoration(),
                 ),
                 const SizedBox(height: 14),
-                AppTextField(controller: _locationController, label: 'Локация', icon: Icons.location_on_outlined),
+                AppTextField(
+                  controller: _locationController,
+                  label: 'Локация',
+                  icon: Icons.location_on_outlined,
+                ),
                 const SizedBox(height: 14),
                 Row(
                   children: [
@@ -155,7 +215,11 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
             ),
           ),
           const SizedBox(height: 28),
-          AppButton(label: 'Создать вакансию', isLoading: _isLoading, onPressed: _create),
+          AppButton(
+            label: 'Создать вакансию',
+            isLoading: _isLoading,
+            onPressed: _create,
+          ),
         ],
       ),
     );

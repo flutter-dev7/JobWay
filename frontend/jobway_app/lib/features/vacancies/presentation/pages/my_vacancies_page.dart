@@ -121,6 +121,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
                           builder: (_) => VacancyApplicationsPage(
                             vacancyId: vacancy.id,
                             vacancyTitle: vacancy.title,
+                            vacancyStatus: vacancy.status,
                           ),
                         ),
                       ),
