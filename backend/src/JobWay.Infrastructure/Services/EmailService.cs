@@ -1,10 +1,7 @@
-using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Net.Mail;
 using System.Text.Json.Serialization;
 using JobWay.Application.Common;
-using JobWay.Application.Interfaces;
 using JobWay.Application.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,12 +10,12 @@ namespace JobWay.Infrastructure.Services;
 
 public class EmailService : IEmailService
 {
-    private const string ResendApiUrl = "https://api.resend.com/emails";
- 
+    private const string BrevoApiUrl = "https://api.brevo.com/v3/smtp/email";
+
     private readonly HttpClient _httpClient;
     private readonly EmailSettings _settings;
     private readonly ILogger<EmailService> _logger;
- 
+
     public EmailService(
         HttpClient httpClient,
         IOptions<EmailSettings> settings,
@@ -27,48 +24,93 @@ public class EmailService : IEmailService
         _httpClient = httpClient;
         _settings = settings.Value;
         _logger = logger;
- 
-        _httpClient.BaseAddress ??= new Uri(ResendApiUrl);
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", _settings.ApiKey);
     }
- 
-    public async Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken = default)
+
+    public async Task SendAsync(
+        string to,
+        string subject,
+        string body,
+        CancellationToken cancellationToken = default)
     {
-        var payload = new ResendEmailRequest
+        var payload = new BrevoEmailRequest
         {
-            From = $"{_settings.FromName} <{_settings.FromEmail}>",
-            To = new[] { to },
+            Sender = new BrevoSender
+            {
+                Email = _settings.FromEmail,
+                Name = _settings.FromName
+            },
+            To = new[]
+            {
+                new BrevoRecipient
+                {
+                    Email = to
+                }
+            },
             Subject = subject,
-            Html = body
+            HtmlContent = body
         };
- 
-        using var response = await _httpClient.PostAsJsonAsync(ResendApiUrl, payload, cancellationToken);
- 
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            BrevoApiUrl);
+
+        request.Headers.Add("api-key", _settings.ApiKey);
+        request.Headers.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
+
+        request.Content = JsonContent.Create(payload);
+
+        using var response = await _httpClient.SendAsync(
+            request,
+            cancellationToken);
+
         if (!response.IsSuccessStatusCode)
         {
-            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            var errorBody = await response.Content.ReadAsStringAsync(
+                cancellationToken);
+
             _logger.LogError(
-                "Resend API вернул ошибку {StatusCode} при отправке письма на {To}: {ErrorBody}",
-                response.StatusCode, to, errorBody);
- 
-            throw new InvalidOperationException($"Не удалось отправить письмо через Resend: {response.StatusCode}");
+                "Brevo API вернул ошибку {StatusCode} при отправке письма на {To}: {ErrorBody}",
+                response.StatusCode,
+                to,
+                errorBody);
+
+            throw new InvalidOperationException(
+                $"Не удалось отправить письмо через Brevo: {response.StatusCode}");
         }
+
+        _logger.LogInformation(
+            "Письмо успешно отправлено через Brevo на {To}",
+            to);
     }
- 
-    private class ResendEmailRequest
+
+    private class BrevoEmailRequest
     {
-        [JsonPropertyName("from")]
-        public string From { get; set; } = string.Empty;
- 
+        [JsonPropertyName("sender")]
+        public BrevoSender Sender { get; set; } = new();
+
         [JsonPropertyName("to")]
-        public string[] To { get; set; } = Array.Empty<string>();
- 
+        public BrevoRecipient[] To { get; set; } = Array.Empty<BrevoRecipient>();
+
         [JsonPropertyName("subject")]
         public string Subject { get; set; } = string.Empty;
- 
-        [JsonPropertyName("html")]
-        public string Html { get; set; } = string.Empty;
+
+        [JsonPropertyName("htmlContent")]
+        public string HtmlContent { get; set; } = string.Empty;
+    }
+
+    private class BrevoSender
+    {
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = string.Empty;
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private class BrevoRecipient
+    {
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = string.Empty;
     }
 }
-   
