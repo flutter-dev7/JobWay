@@ -1,6 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.123.33:5025/api';
-
+  static const String baseUrl = 'https://jobway-api.onrender.com/api';
+  
   // Auth
   static const String register = '/auth/register';
   static const String login = '/auth/login';
