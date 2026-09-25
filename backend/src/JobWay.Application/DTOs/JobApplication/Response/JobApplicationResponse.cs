@@ -10,6 +10,7 @@ public class JobApplicationResponse
     public string VacancyTitle { get; set; } = null!;
     public string CompanyName { get; set; } = null!;
     public Guid CandidateProfileId { get; set; }
+    public string? CandidatePhotoUrl { get; set; }
     public string CandidateFullName { get; set; } = null!;
     public ApplicationStatus Status { get; set; }
     public int MatchScore { get; set; }

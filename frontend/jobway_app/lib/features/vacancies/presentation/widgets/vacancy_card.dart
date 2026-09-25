@@ -100,6 +100,9 @@ class VacancyCard extends ConsumerWidget {
                             .call(vacancy.id);
                         notifier.update((state) => {...state, vacancy.id});
                       }
+                      ref.invalidate(
+                        savedVacanciesProvider,
+                      ); 
                     } catch (error) {
                       AppSnackbar.showError(ApiException.extractMessage(error));
                     }

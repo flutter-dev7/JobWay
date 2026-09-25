@@ -133,6 +133,7 @@ public class JobApplicationService : IJobApplicationService
             MatchScore = application.MatchScore,
             MatchedSkills = match.MatchedSkills,
             MissingSkills = match.MissingSkills,
+            CandidatePhotoUrl = application.CandidateProfile.PhotoUrl,
             CoverMessage = application.CoverMessage,
             CompanyLogoUrl = application.Vacancy.CompanyProfile.LogoUrl,
             CreatedAt = application.CreatedAt

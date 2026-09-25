@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobway_app/core/utils/image_utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -75,9 +76,8 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
 
     setState(() => _isUploadingPhoto = true);
     try {
-      await ref
-          .read(uploadCandidatePhotoUseCaseProvider)
-          .call(File(picked.path));
+      final file = await ImageUtils.ensureCompatibleFormat(File(picked.path));
+      await ref.read(uploadCandidatePhotoUseCaseProvider).call(file);
       ref.invalidate(candidateProfileProvider);
       AppSnackbar.showSuccess('Фото обновлено');
     } catch (error) {

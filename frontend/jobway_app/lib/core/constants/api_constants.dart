@@ -9,12 +9,15 @@ class ApiConstants {
   static const String resetPassword = '/auth/reset-password';
   static const String changePassword = '/auth/change-password';
   static const String refreshToken = '/auth/refresh-token';
+  static const String sendRegistrationCode = '/auth/send-registration-code';
+  static const String verifyRegistrationCode = '/auth/verify-registration-code';
 
   // Skills
   static const String skills = '/skills';
 
   // Profiles
   static const String candidateProfileMe = '/candidate-profile/me';
+  static String candidateProfileById(String id) => '/candidate-profile/$id';
   static const String companyProfileMe = '/company-profile/me';
 
   // Vacancies

@@ -1,5 +1,6 @@
 // features/candidate_profile/presentation/providers/candidate_profile_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/features/candidate_profile/domain/usecases/get_candidate_profile_by_id_usecase.dart';
 import 'package:jobway_app/features/candidate_profile/domain/usecases/upload_photo_usecase.dart';
 import 'package:jobway_app/features/candidate_profile/domain/usecases/upload_resume_usecase.dart';
 import '../../../../core/providers/core_providers.dart';
@@ -43,3 +44,14 @@ final uploadCandidatePhotoUseCaseProvider = Provider(
   (ref) =>
       UploadCandidatePhotoUseCase(ref.read(candidateProfileRepositoryProvider)),
 );
+
+final getCandidateProfileByIdUseCaseProvider = Provider(
+  (ref) => GetCandidateProfileByIdUseCase(
+    ref.read(candidateProfileRepositoryProvider),
+  ),
+);
+
+final candidateProfileByIdProvider = FutureProvider.autoDispose
+    .family<CandidateProfile, String>(
+      (ref, id) => ref.read(getCandidateProfileByIdUseCaseProvider)(id),
+    );

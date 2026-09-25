@@ -1,6 +1,9 @@
 import '../entities/auth_result.dart';
 
 abstract class AuthRepository {
+  Future<void> sendRegistrationCode(String email);
+  Future<void> verifyRegistrationCode(String email, String code);
+
   Future<AuthResult> login(String email, String password);
 
   Future<AuthResult> register({

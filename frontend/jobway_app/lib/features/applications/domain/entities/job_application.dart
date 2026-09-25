@@ -13,6 +13,7 @@ class JobApplication {
   final List<Skill> missingSkills;
   final String? coverMessage;
   final String? companyLogoUrl;
+  final String? candidatePhotoUrl;
   final DateTime createdAt;
 
   const JobApplication({
@@ -28,6 +29,7 @@ class JobApplication {
     required this.missingSkills,
     this.coverMessage,
     this.companyLogoUrl,
+    this.candidatePhotoUrl,
     required this.createdAt,
   });
 }

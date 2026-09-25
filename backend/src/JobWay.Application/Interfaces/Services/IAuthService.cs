@@ -6,6 +6,8 @@ namespace JobWay.Application.Interfaces.Services;
 
 public interface IAuthService
 {
+    Task<Result<string>> SendRegistrationCodeAsync(SendRegistrationCodeRequest request, CancellationToken cancellationToken);
+    Task<Result<string>> VerifyRegistrationCodeAsync(VerifyRegistrationCodeRequest request, CancellationToken cancellationToken);
     Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken);
     Task<Result<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
     Task<Result<AuthResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken);
