@@ -7,6 +7,7 @@ using JobWay.Infrastructure.Persistence.Data;
 using JobWay.Infrastructure.Persistence.Seeds;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -102,6 +103,8 @@ app.UseStaticFiles();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    await context.Database.MigrateAsync();
     await DataSeeder.SeedAsync(context);
 }
 
