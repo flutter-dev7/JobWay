@@ -108,11 +108,8 @@ using (var scope = app.Services.CreateScope())
     await DataSeeder.SeedAsync(context);
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseExceptionHandling();
 
