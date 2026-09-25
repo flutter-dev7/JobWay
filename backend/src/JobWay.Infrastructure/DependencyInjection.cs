@@ -21,6 +21,7 @@ public static class DependencyInjection
         InitializeFirebase(configuration);
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        services.AddHttpClient<IEmailService, EmailService>();
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
