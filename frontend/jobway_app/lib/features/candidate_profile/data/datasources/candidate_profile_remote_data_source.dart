@@ -61,4 +61,9 @@ class CandidateProfileRemoteDataSource {
     );
     return CandidateProfileModel.fromJson(ApiResponse.unwrap(response.data));
   }
+
+  Future<CandidateProfileModel> getById(String id) async {
+    final response = await _dio.get(ApiConstants.candidateProfileById(id));
+    return CandidateProfileModel.fromJson(ApiResponse.unwrap(response.data));
+  }
 }

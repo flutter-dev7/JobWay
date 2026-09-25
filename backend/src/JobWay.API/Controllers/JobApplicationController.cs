@@ -10,10 +10,12 @@ namespace JobWay.API.Controllers;
 public class JobApplicationController : BaseApiController
 {
     private readonly IJobApplicationService _jobApplicationService;
+    private readonly ICandidateProfileService _candidateProfileService;
 
-    public JobApplicationController(IJobApplicationService jobApplicationService)
+    public JobApplicationController(IJobApplicationService jobApplicationService,  ICandidateProfileService candidateProfileService)
     {
         _jobApplicationService = jobApplicationService;
+        _candidateProfileService = candidateProfileService;
     }
 
     [Authorize(Roles = Roles.Candidate)]
@@ -35,4 +37,9 @@ public class JobApplicationController : BaseApiController
     [HttpPut("applications/{applicationId:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid applicationId, UpdateJobApplicationStatusRequest request, CancellationToken cancellationToken)
         => HandleError(await _jobApplicationService.UpdateStatusAsync(CurrentUserId, applicationId, request, cancellationToken));
+    
+    [Authorize(Roles = Roles.Employer)]
+    [HttpGet("candidate-profile/{candidateProfileId:guid}")]
+    public async Task<IActionResult> GetCandidateProfile(Guid candidateProfileId, CancellationToken cancellationToken)
+        => HandleError(await _candidateProfileService.GetCandidateProfileForEmployerAsync(CurrentUserId, candidateProfileId, cancellationToken));
 }

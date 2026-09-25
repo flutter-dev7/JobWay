@@ -62,4 +62,15 @@ class AuthRemoteDataSource {
       },
     );
   }
+
+  Future<void> sendRegistrationCode(String email) async {
+    await _dio.post(ApiConstants.sendRegistrationCode, data: {'email': email});
+  }
+
+  Future<void> verifyRegistrationCode(String email, String code) async {
+    await _dio.post(
+      ApiConstants.verifyRegistrationCode,
+      data: {'email': email, 'code': code},
+    );
+  }
 }

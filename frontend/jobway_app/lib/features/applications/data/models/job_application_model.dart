@@ -15,6 +15,7 @@ class JobApplicationModel {
   final List<SkillModel> missingSkills;
   final String? coverMessage;
   final String? companyLogoUrl;
+  final String? candidatePhotoUrl;
   final DateTime createdAt;
 
   JobApplicationModel({
@@ -30,6 +31,7 @@ class JobApplicationModel {
     required this.missingSkills,
     this.coverMessage,
     this.companyLogoUrl,
+    this.candidatePhotoUrl,
     required this.createdAt,
   });
 
@@ -52,6 +54,7 @@ class JobApplicationModel {
           .toList(),
       coverMessage: data['coverMessage'],
       companyLogoUrl: data['companyLogoUrl'],
+      candidatePhotoUrl: data['candidatePhotoUrl'],
       createdAt: DateTime.parse(data['createdAt']),
     );
   }
@@ -69,6 +72,7 @@ class JobApplicationModel {
     missingSkills: missingSkills.map((s) => s.toEntity()).toList(),
     coverMessage: coverMessage,
     companyLogoUrl: companyLogoUrl,
+    candidatePhotoUrl: candidatePhotoUrl,
     createdAt: createdAt,
   );
 }

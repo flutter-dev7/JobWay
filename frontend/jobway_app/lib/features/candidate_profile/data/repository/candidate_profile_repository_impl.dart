@@ -50,4 +50,10 @@ class CandidateProfileRepositoryImpl implements CandidateProfileRepository {
     final model = await _remoteDataSource.uploadPhoto(file);
     return model.toEntity();
   }
+
+  @override
+  Future<CandidateProfile> getById(String id) async {
+    final model = await _remoteDataSource.getById(id);
+    return model.toEntity();
+  }
 }

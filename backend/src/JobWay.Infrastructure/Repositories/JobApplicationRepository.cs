@@ -38,6 +38,9 @@ public class JobApplicationRepository : IJobApplicationRepository
             .Where(a => a.CandidateProfileId == candidateProfileId)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync(cancellationToken);
+    
+    public Task<bool> ExistsForCandidateAndCompanyAsync(Guid candidateProfileId, Guid companyProfileId, CancellationToken cancellationToken)
+        => _context.JobApplications.AnyAsync(a => a.CandidateProfileId == candidateProfileId && a.Vacancy.CompanyProfileId == companyProfileId, cancellationToken);
 
     public void Add(JobApplication application) => _context.JobApplications.Add(application);
     public void Update(JobApplication application) => _context.JobApplications.Update(application);

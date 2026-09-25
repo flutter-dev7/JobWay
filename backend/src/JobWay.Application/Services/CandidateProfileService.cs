@@ -117,6 +117,23 @@ public class CandidateProfileService : ICandidateProfileService
 
         return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
     }
+    
+    public async Task<Result<CandidateProfileResponse>> GetCandidateProfileForEmployerAsync(Guid employerUserId, Guid candidateProfileId, CancellationToken cancellationToken)
+    {
+        var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);
+        if (companyProfile is null)
+            return Result<CandidateProfileResponse>.Fail("Company profile not found", ErrorType.NotFound);
+
+        var hasApplied = await _unitOfWork.JobApplications.ExistsForCandidateAndCompanyAsync(candidateProfileId, companyProfile.Id, cancellationToken);
+        if (!hasApplied)
+            return Result<CandidateProfileResponse>.Fail("You can only view profiles of candidates who applied to your vacancies", ErrorType.Forbidden);
+
+        var profile = await _unitOfWork.CandidateProfiles.GetByIdAsync(candidateProfileId, cancellationToken);
+        if (profile is null)
+            return Result<CandidateProfileResponse>.Fail("Candidate not found", ErrorType.NotFound);
+
+        return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
+    }
 
     private static CandidateProfileResponse MapToResponse(CandidateProfile profile) => new()
     {

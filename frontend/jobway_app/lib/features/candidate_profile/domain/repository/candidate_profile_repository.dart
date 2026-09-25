@@ -19,4 +19,6 @@ abstract class CandidateProfileRepository {
   Future<CandidateProfile> uploadResume(File file);
 
   Future<CandidateProfile> uploadPhoto(File file);
+
+  Future<CandidateProfile> getById(String id);
 }

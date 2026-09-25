@@ -49,4 +49,14 @@ public class AuthController : BaseApiController
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken)
         => HandleError(await _authService.ChangePasswordAsync(CurrentUserId, request, cancellationToken));
+    
+    [AllowAnonymous]
+    [HttpPost("send-registration-code")]
+    public async Task<IActionResult> SendRegistrationCode(SendRegistrationCodeRequest request, CancellationToken cancellationToken)
+        => HandleError(await _authService.SendRegistrationCodeAsync(request, cancellationToken));
+
+    [AllowAnonymous]
+    [HttpPost("verify-registration-code")]
+    public async Task<IActionResult> VerifyRegistrationCode(VerifyRegistrationCodeRequest request, CancellationToken cancellationToken)
+        => HandleError(await _authService.VerifyRegistrationCodeAsync(request, cancellationToken));
 }

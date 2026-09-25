@@ -13,7 +13,10 @@ public class AuthService : IAuthService
 {
     private const string ResetCodeKeyPrefix = "password-reset-code:";
     private const string ResetVerifiedKeyPrefix = "password-reset-verified:";
-    private static readonly TimeSpan ResetCodeExpiry = TimeSpan.FromMinutes(15);
+    private const string RegistrationCodeKeyPrefix = "registration-code:";
+    private const string RegistrationVerifiedKeyPrefix = "registration-verified:";
+    private static readonly TimeSpan CodeExpiry = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan RegistrationVerifiedExpiry = TimeSpan.FromMinutes(30); // хватит пройти шаги пароля/фото
 
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
@@ -38,8 +41,39 @@ public class AuthService : IAuthService
         _jwtSettings = jwtSettings.Value;
     }
 
+    public async Task<Result<string>> SendRegistrationCodeAsync(SendRegistrationCodeRequest request, CancellationToken cancellationToken)
+    {
+        if (await _unitOfWork.Users.ExistsAsync(request.Email, cancellationToken))
+            return Result<string>.Fail("A user with this email already exists", ErrorType.Conflict);
+
+        var code = Random.Shared.Next(0, 1_000_000).ToString("D6");
+
+        await _cacheService.SetAsync(RegistrationCodeKeyPrefix + request.Email, code, CodeExpiry, cancellationToken);
+        await _cacheService.RemoveAsync(RegistrationVerifiedKeyPrefix + request.Email, cancellationToken);
+
+        await _emailService.SendAsync(request.Email, "Код подтверждения email", $"Ваш код подтверждения: {code}", cancellationToken);
+
+        return Result<string>.Ok("Verification code sent to email");
+    }
+
+    public async Task<Result<string>> VerifyRegistrationCodeAsync(VerifyRegistrationCodeRequest request, CancellationToken cancellationToken)
+    {
+        var cachedCode = await _cacheService.GetAsync(RegistrationCodeKeyPrefix + request.Email, cancellationToken);
+
+        if (cachedCode is null || cachedCode != request.Code)
+            return Result<string>.Fail("Invalid or expired code", ErrorType.Validation);
+
+        await _cacheService.SetAsync(RegistrationVerifiedKeyPrefix + request.Email, "true", RegistrationVerifiedExpiry, cancellationToken);
+
+        return Result<string>.Ok("Email verified");
+    }
+
     public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
+        var emailVerified = await _cacheService.ExistsAsync(RegistrationVerifiedKeyPrefix + request.Email, cancellationToken);
+        if (!emailVerified)
+            return Result<AuthResponse>.Fail("Email is not verified", ErrorType.Validation);
+
         if (request.Password != request.ConfirmPassword)
             return Result<AuthResponse>.Fail("Passwords do not match", ErrorType.Validation);
 
@@ -67,6 +101,9 @@ public class AuthService : IAuthService
 
         await _unitOfWork.Users.AddAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(RegistrationVerifiedKeyPrefix + request.Email, cancellationToken);
+        await _cacheService.RemoveAsync(RegistrationCodeKeyPrefix + request.Email, cancellationToken);
 
         return Result<AuthResponse>.Ok(await BuildAuthResponseAsync(user, cancellationToken));
     }
@@ -106,7 +143,7 @@ public class AuthService : IAuthService
 
         var code = Random.Shared.Next(0, 1_000_000).ToString("D6");
 
-        await _cacheService.SetAsync(ResetCodeKeyPrefix + request.Email, code, ResetCodeExpiry, cancellationToken);
+        await _cacheService.SetAsync(ResetCodeKeyPrefix + request.Email, code, CodeExpiry, cancellationToken);
         await _cacheService.RemoveAsync(ResetVerifiedKeyPrefix + request.Email, cancellationToken);
 
         await _emailService.SendAsync(user.Email, "Password reset code", $"Your password reset code: {code}", cancellationToken);
@@ -121,7 +158,7 @@ public class AuthService : IAuthService
         if (cachedCode is null || cachedCode != request.Code)
             return Result<string>.Fail("Invalid or expired code", ErrorType.Validation);
 
-        await _cacheService.SetAsync(ResetVerifiedKeyPrefix + request.Email, "true", ResetCodeExpiry, cancellationToken);
+        await _cacheService.SetAsync(ResetVerifiedKeyPrefix + request.Email, "true", CodeExpiry, cancellationToken);
 
         return Result<string>.Ok("Code verified");
     }

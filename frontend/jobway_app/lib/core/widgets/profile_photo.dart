@@ -1,4 +1,3 @@
-// core/widgets/profile_photo.dart — заменить целиком
 import 'package:flutter/material.dart';
 
 class ProfilePhoto extends StatelessWidget {
