@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
+import 'package:jobway_app/features/candidate_profile/presentation/widgets/info_row.dart';
+import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_dialogs.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/profile_photo.dart';
-import '../../../../core/widgets/section_card.dart';
+import '../../../../core/widgets/feedback/app_dialogs.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/display/profile_photo.dart';
+import '../../../../core/widgets/display/section_card.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/company_profile_provider.dart';
@@ -215,7 +217,7 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                 children: [
                   if (profile.industry != null &&
                       profile.industry!.isNotEmpty) ...[
-                    _InfoLine(label: 'Индустрия', value: profile.industry!),
+                    InfoRow(label: 'Индустрия', value: profile.industry!),
                     const SizedBox(height: 14),
                   ],
                   if (profile.website != null && profile.website!.isNotEmpty)
@@ -223,38 +225,11 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            ReviewsSection(userId: profile.userId),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _InfoLine extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _InfoLine({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF111827),
-          ),
-        ),
-      ],
     );
   }
 }

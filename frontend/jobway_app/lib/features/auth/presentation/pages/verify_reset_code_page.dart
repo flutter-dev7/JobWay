@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/otp_input.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/navigation/app_page_app_bar.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/inputs/otp_input.dart';
+import '../../../../core/widgets/display/step_progress_bar.dart';
 import '../providers/auth_provider.dart';
 import 'reset_password_page.dart';
 
@@ -13,7 +15,8 @@ class VerifyResetCodePage extends ConsumerStatefulWidget {
   const VerifyResetCodePage({super.key, required this.email});
 
   @override
-  ConsumerState<VerifyResetCodePage> createState() => _VerifyResetCodePageState();
+  ConsumerState<VerifyResetCodePage> createState() =>
+      _VerifyResetCodePageState();
 }
 
 class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
@@ -29,9 +32,16 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authRepositoryProvider).verifyResetCode(widget.email, _code);
+      await ref
+          .read(authRepositoryProvider)
+          .verifyResetCode(widget.email, _code);
       if (!mounted) return;
-      Navigator.push(context, MaterialPageRoute(builder: (_) => ResetPasswordPage(email: widget.email)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ResetPasswordPage(email: widget.email),
+        ),
+      );
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
@@ -54,30 +64,38 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, elevation: 0, foregroundColor: const Color(0xFF111827)),
+      backgroundColor: const Color(0xFFF7F8FA),
+      appBar: appPageAppBar(context, 'Введите код'),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 12),
-              const Text('Введите код',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
-              const SizedBox(height: 6),
-              Text('Мы отправили 6-значный код на ${widget.email}',
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
-              const SizedBox(height: 32),
+              const StepProgressBar(currentStep: 1, totalSteps: 3),
+              const SizedBox(height: 20),
+              Text(
+                'Мы отправили 6-значный код на ${widget.email}',
+                style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              ),
+              const SizedBox(height: 28),
               OtpInput(onCompleted: (value) => setState(() => _code = value)),
               const SizedBox(height: 24),
-              AppButton(label: 'Подтвердить', isLoading: _isLoading, onPressed: _verify),
+              AppButton(
+                label: 'Подтвердить',
+                isLoading: _isLoading,
+                onPressed: _verify,
+              ),
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
                   onPressed: _isResending ? null : _resend,
-                  style: TextButton.styleFrom(foregroundColor: const Color(0xFF6B7280)),
-                  child: Text(_isResending ? 'Отправка...' : 'Отправить код повторно'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF6B7280),
+                  ),
+                  child: Text(
+                    _isResending ? 'Отправка...' : 'Отправить код повторно',
+                  ),
                 ),
               ),
             ],

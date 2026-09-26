@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_text_field.dart';
+import '../../../../../core/widgets/buttons/app_button.dart';
+import '../../../../../core/widgets/inputs/app_text_field.dart';
 import '../role_selector.dart';
 
 class RoleNameStep extends StatelessWidget {

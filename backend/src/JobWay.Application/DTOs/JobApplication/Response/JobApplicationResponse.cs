@@ -14,6 +14,7 @@ public class JobApplicationResponse
     public string CandidateFullName { get; set; } = null!;
     public ApplicationStatus Status { get; set; }
     public int MatchScore { get; set; }
+    public bool HasReviewFromCurrentUser { get; set; }
     public List<SkillResponse> MatchedSkills { get; set; } = [];
     public List<SkillResponse> MissingSkills { get; set; } = [];
     public string? CoverMessage { get; set; }

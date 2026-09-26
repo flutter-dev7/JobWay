@@ -1,6 +1,6 @@
 // features/admin/presentation/widgets/company_moderation_card.dart — заменить целиком
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/company_avatar.dart';
+import '../../../../core/widgets/display/company_avatar.dart';
 import '../../domain/entities/company_moderation.dart';
 
 class CompanyModerationCard extends StatelessWidget {

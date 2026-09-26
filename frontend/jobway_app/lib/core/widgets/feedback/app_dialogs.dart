@@ -1,7 +1,7 @@
-// core/widgets/app_dialogs.dart — заменить целиком
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../theme/app_theme_extension.dart';
 
 Future<bool> confirmLogoutDialog(BuildContext context) async {
   final result = await showCupertinoDialog<bool>(
@@ -28,9 +28,11 @@ Future<bool> confirmLogoutDialog(BuildContext context) async {
 }
 
 Future<ImageSource?> pickImageSourceDialog(BuildContext context) {
+  final colors = context.colors;
+
   return showModalBottomSheet<ImageSource>(
     context: context,
-    backgroundColor: Colors.white,
+    backgroundColor: colors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -46,24 +48,24 @@ Future<ImageSource?> pickImageSourceDialog(BuildContext context) {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE5E7EB),
+                  color: colors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Фото профиля',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF111827),
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Выберите способ добавления фото',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              style: TextStyle(fontSize: 13, color: colors.textSecondary),
             ),
             const SizedBox(height: 20),
             _PhotoSourceTile(
@@ -89,7 +91,7 @@ Future<ImageSource?> pickImageSourceDialog(BuildContext context) {
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF6B7280),
+                  foregroundColor: colors.textSecondary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text(
@@ -124,12 +126,14 @@ class _PhotoSourceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
+          color: colors.surfaceMuted,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -150,24 +154,21 @@ class _PhotoSourceTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF9CA3AF),
-                    ),
+                    style: TextStyle(fontSize: 12, color: colors.textMuted),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: Color(0xFF9CA3AF)),
+            Icon(Icons.chevron_right_rounded, color: colors.textMuted),
           ],
         ),
       ),

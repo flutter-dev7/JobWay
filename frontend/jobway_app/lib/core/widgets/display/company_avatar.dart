@@ -13,13 +13,22 @@ class CompanyAvatar extends StatelessWidget {
     this.logoUrl,
   });
 
-  static const List<Color> _palette = [
-    Color(0xFFDCE5FF), // индиго
-    Color(0xFFFFE4E6), // розовый
-    Color(0xFFDCFCE7), // зелёный
-    Color(0xFFFEF3C7), // жёлтый
-    Color(0xFFE0E7FF), // фиолетовый
-    Color(0xFFDDF4FF), // голубой
+  static const List<Color> _lightPalette = [
+    Color(0xFFDCE5FF),
+    Color(0xFFFFE4E6),
+    Color(0xFFDCFCE7),
+    Color(0xFFFEF3C7),
+    Color(0xFFE0E7FF),
+    Color(0xFFDDF4FF),
+  ];
+
+  static const List<Color> _darkPalette = [
+    Color(0xFF2A3563),
+    Color(0xFF4A2530),
+    Color(0xFF1E3A2E),
+    Color(0xFF4A3A1E),
+    Color(0xFF2E2A52),
+    Color(0xFF1E3A45),
   ];
 
   static const List<Color> _textPalette = [
@@ -33,7 +42,7 @@ class CompanyAvatar extends StatelessWidget {
 
   int _colorIndex() {
     final hash = companyName.codeUnits.fold<int>(0, (sum, c) => sum + c);
-    return hash % _palette.length;
+    return hash % _lightPalette.length;
   }
 
   String _initials() {
@@ -53,30 +62,26 @@ class CompanyAvatar extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildInitials(),
+          errorBuilder: (_, __, ___) => _buildInitials(context),
         ),
       );
     }
-    return _buildInitials();
+    return _buildInitials(context);
   }
 
-  Widget _buildInitials() {
+  Widget _buildInitials(BuildContext context) {
     final index = _colorIndex();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? _darkPalette[index] : _lightPalette[index];
+
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: _palette[index],
-        borderRadius: BorderRadius.circular(size * 0.28),
-      ),
+      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(size * 0.28)),
       child: Center(
         child: Text(
           _initials(),
-          style: TextStyle(
-            fontSize: size * 0.36,
-            fontWeight: FontWeight.w700,
-            color: _textPalette[index],
-          ),
+          style: TextStyle(fontSize: size * 0.36, fontWeight: FontWeight.w700, color: _textPalette[index]),
         ),
       ),
     );

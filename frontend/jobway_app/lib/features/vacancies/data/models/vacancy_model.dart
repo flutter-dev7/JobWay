@@ -5,6 +5,7 @@ import '../../domain/entities/vacancy.dart';
 class VacancyModel {
   final String id;
   final String companyProfileId;
+  final String companyUserId;
   final String companyName;
   final String title;
   final String description;
@@ -21,6 +22,7 @@ class VacancyModel {
   VacancyModel({
     required this.id,
     required this.companyProfileId,
+    required this.companyUserId,
     required this.companyName,
     required this.title,
     required this.description,
@@ -38,6 +40,7 @@ class VacancyModel {
   factory VacancyModel.fromJson(Map<String, dynamic> json) => VacancyModel(
     id: json['id'],
     companyProfileId: json['companyProfileId'],
+    companyUserId: json['companyUserId'],
     companyName: json['companyName'],
     title: json['title'],
     description: json['description'],
@@ -57,6 +60,7 @@ class VacancyModel {
   Vacancy toEntity() => Vacancy(
     id: id,
     companyProfileId: companyProfileId,
+    companyUserId: companyUserId,
     companyName: companyName,
     title: title,
     description: description,

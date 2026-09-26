@@ -1,8 +1,9 @@
-// features/applications/presentation/pages/vacancy_applications_page.dart — заменить целиком
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
+import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../providers/applications_provider.dart';
 import '../widgets/vacancy_application_card.dart';
 
@@ -51,21 +52,7 @@ class _VacancyApplicationsPageState
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          widget.vacancyTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
-          ),
-        ),
-      ),
+      appBar: appPageAppBar(context, widget.vacancyTitle),
       body: RefreshIndicator(
         onRefresh: () async =>
             ref.invalidate(vacancyApplicationsProvider(widget.vacancyId)),
@@ -106,6 +93,14 @@ class _VacancyApplicationsPageState
                         isLocked: isLocked,
                         onStatusChanged: (status) =>
                             _updateStatus(application.id, status),
+                        onLeaveReview: () => ReviewBottomSheet.show(
+                          context,
+                          jobApplicationId: application.id,
+                          targetName: application.candidateFullName,
+                          onSubmitted: () => ref.invalidate(
+                            vacancyApplicationsProvider(widget.vacancyId),
+                          ),
+                        ),
                       ),
                     ),
                   ],

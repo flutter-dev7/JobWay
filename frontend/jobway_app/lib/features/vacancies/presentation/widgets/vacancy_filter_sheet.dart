@@ -1,8 +1,8 @@
 // features/vacancies/presentation/widgets/vacancy_filter_sheet.dart — заменить целиком
 import 'package:flutter/material.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/inputs/app_text_field.dart';
 import '../../domain/entities/vacancy_filter.dart';
 
 class VacancyFilterSheet extends StatefulWidget {

@@ -3,6 +3,7 @@ import '../../../skills/domain/entities/skill.dart';
 class Vacancy {
   final String id;
   final String companyProfileId;
+  final String companyUserId;
   final String companyName;
   final String title;
   final String description;
@@ -19,6 +20,7 @@ class Vacancy {
   const Vacancy({
     required this.id,
     required this.companyProfileId,
+    required this.companyUserId,
     required this.companyName,
     required this.title,
     required this.description,

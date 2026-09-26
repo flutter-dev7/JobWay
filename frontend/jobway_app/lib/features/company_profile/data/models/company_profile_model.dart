@@ -3,6 +3,7 @@ import '../../domain/entities/company_profile.dart';
 
 class CompanyProfileModel {
   final String id;
+  final String userId;
   final String companyName;
   final String? description;
   final String? industry;
@@ -13,6 +14,7 @@ class CompanyProfileModel {
 
   CompanyProfileModel({
     required this.id,
+    required this.userId,
     required this.companyName,
     this.description,
     this.industry,
@@ -26,6 +28,7 @@ class CompanyProfileModel {
     final data = ApiResponse.unwrap(json);
     return CompanyProfileModel(
       id: data['id'],
+      userId: data['userId'],
       companyName: data['companyName'],
       description: data['description'],
       industry: data['industry'],
@@ -38,6 +41,7 @@ class CompanyProfileModel {
 
   CompanyProfile toEntity() => CompanyProfile(
         id: id,
+        userId: userId,
         companyName: companyName,
         description: description,
         industry: industry,

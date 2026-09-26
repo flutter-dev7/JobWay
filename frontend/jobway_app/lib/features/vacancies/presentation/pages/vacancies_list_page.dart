@@ -1,7 +1,7 @@
 // features/vacancies/presentation/pages/vacancies_list_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:jobway_app/core/widgets/notification_bell.dart';
+import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import 'package:jobway_app/features/vacancies/presentation/widgets/quick_filter_chips.dart';
 import '../../domain/entities/vacancy_filter.dart';
 import '../providers/vacancies_provider.dart';

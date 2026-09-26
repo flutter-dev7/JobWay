@@ -11,6 +11,7 @@ public interface IUnitOfWork
     INotificationRepository Notifications { get; }
     ISavedVacancyRepository SavedVacancies { get; }
     IDeviceTokenRepository DeviceTokens { get; }
+    public IReviewRepository Reviews { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -2,6 +2,7 @@ import '../../../skills/domain/entities/skill.dart';
 
 class CandidateProfile {
   final String id;
+  final String userId;
   final String fullName;
   final DateTime? birthDate;
   final String? location;
@@ -14,6 +15,7 @@ class CandidateProfile {
 
   const CandidateProfile({
     required this.id,
+    required this.userId,
     required this.fullName,
     this.birthDate,
     this.location,

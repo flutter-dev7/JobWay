@@ -5,5 +5,7 @@ public enum NotificationType
     NewApplication,
     ApplicationStatusChanged,
     NewMatchingVacancy,
-    System
+    System,
+    NewReview,
+    ReviewReminder 
 }

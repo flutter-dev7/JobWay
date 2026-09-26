@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/utils/enum_labels.dart';
+import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/applications/presentation/providers/applications_provider.dart';
+import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/time_ago.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/company_avatar.dart';
-import '../../../../core/widgets/section_card.dart';
-import '../../../../core/widgets/skill_chip.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/display/company_avatar.dart';
+import '../../../../core/widgets/display/info_row.dart';
+import '../../../../core/widgets/display/section_card.dart';
+import '../../../../core/widgets/display/skill_chip.dart';
 import '../../domain/entities/vacancy.dart';
 import '../providers/vacancies_provider.dart';
 
@@ -33,37 +37,9 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
     return 'до ${to!.toStringAsFixed(0)} TJS';
   }
 
-  String _employmentTypeLabel(String type) {
-    switch (type) {
-      case 'FullTime':
-        return 'Полная занятость';
-      case 'PartTime':
-        return 'Частичная занятость';
-      case 'Remote':
-        return 'Удалённо';
-      case 'Internship':
-        return 'Стажировка';
-      default:
-        return type;
-    }
-  }
+  Future<void> _apply(bool hasApplied) async {
+    if (_isApplying || hasApplied) return;
 
-  String _experienceLevelLabel(String level) {
-    switch (level) {
-      case 'NoExperience':
-        return 'Без опыта';
-      case 'Junior':
-        return 'Junior';
-      case 'Middle':
-        return 'Middle';
-      case 'Senior':
-        return 'Senior';
-      default:
-        return level;
-    }
-  }
-
-  Future<void> _apply() async {
     setState(() => _isApplying = true);
     try {
       await ref.read(applyToVacancyUseCaseProvider).call(widget.vacancyId);
@@ -88,7 +64,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
         await ref.read(saveVacancyUseCaseProvider).call(widget.vacancyId);
         notifier.update((state) => {...state, widget.vacancyId});
       }
-      ref.invalidate(savedVacanciesProvider); 
+      ref.invalidate(savedVacanciesProvider);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
@@ -110,22 +86,14 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
     final vacancyAsync = ref.watch(vacancyDetailProvider(widget.vacancyId));
     final savedIds = ref.watch(savedVacancyIdsProvider);
     final isSaved = savedIds.contains(widget.vacancyId);
+    final appliedIds = ref.watch(appliedVacancyIdsProvider);
+    final hasApplied = appliedIds.contains(widget.vacancyId);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Детали вакансии',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
-          ),
-        ),
-        centerTitle: false,
+      appBar: appPageAppBar(
+        context,
+        'Детали вакансии',
         actions: [
           IconButton(
             icon: const Icon(Icons.share, size: 20, color: Color(0xFF111827)),
@@ -241,10 +209,8 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _Pill(label: _employmentTypeLabel(vacancy.employmentType)),
-                    _Pill(
-                      label: _experienceLevelLabel(vacancy.experienceLevel),
-                    ),
+                    _Pill(label: employmentTypeLabel(vacancy.employmentType)),
+                    _Pill(label: experienceLevelLabel(vacancy.experienceLevel)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -253,25 +219,25 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                   icon: Icons.dashboard_outlined,
                   child: Column(
                     children: [
-                      _OverviewRow(
+                      InfoOverviewRow(
                         icon: Icons.work_outline_rounded,
                         label: 'Тип занятости',
-                        value: _employmentTypeLabel(vacancy.employmentType),
+                        value: employmentTypeLabel(vacancy.employmentType),
                       ),
                       const Divider(height: 24, color: Color(0xFFF3F4F6)),
-                      _OverviewRow(
+                      InfoOverviewRow(
                         icon: Icons.trending_up_rounded,
                         label: 'Уровень опыта',
-                        value: _experienceLevelLabel(vacancy.experienceLevel),
+                        value: experienceLevelLabel(vacancy.experienceLevel),
                       ),
                       const Divider(height: 24, color: Color(0xFFF3F4F6)),
-                      _OverviewRow(
+                      InfoOverviewRow(
                         icon: Icons.location_on_outlined,
                         label: 'Локация',
                         value: vacancy.location ?? 'Не указана',
                       ),
                       const Divider(height: 24, color: Color(0xFFF3F4F6)),
-                      _OverviewRow(
+                      InfoOverviewRow(
                         icon: Icons.payments_outlined,
                         label: 'Зарплата',
                         value: _formatSalary(
@@ -316,6 +282,8 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                               .toList(),
                         ),
                 ),
+                const SizedBox(height: 16),
+                ReviewsSection(userId: vacancy.companyUserId),
               ],
             ),
             Positioned(
@@ -346,12 +314,19 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: AppButton(
-                      label: 'Откликнуться',
-                      icon: Icons.arrow_forward_rounded,
-                      isLoading: _isApplying,
-                      onPressed: _apply,
-                    ),
+                    child: hasApplied
+                        ? AppButton(
+                            label: 'Вы откликнулись',
+                            icon: Icons.check_rounded,
+                            color: const Color(0xFF9CA3AF),
+                            onPressed: () {},
+                          )
+                        : AppButton(
+                            label: 'Откликнуться',
+                            icon: Icons.arrow_forward_rounded,
+                            isLoading: _isApplying,
+                            onPressed: () => _apply(hasApplied),
+                          ),
                   ),
                 ],
               ),
@@ -359,44 +334,6 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _OverviewRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  const _OverviewRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: const Color(0xFF9CA3AF)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: valueColor ?? const Color(0xFF111827),
-          ),
-        ),
-      ],
     );
   }
 }

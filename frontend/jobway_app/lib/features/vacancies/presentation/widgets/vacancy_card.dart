@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/time_ago.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/company_avatar.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/display/company_avatar.dart';
 import '../../domain/entities/vacancy.dart';
 import '../providers/vacancies_provider.dart';
 

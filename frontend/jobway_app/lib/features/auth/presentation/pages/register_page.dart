@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_dialogs.dart';
-import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/feedback/app_dialogs.dart';
+import '../../../../core/widgets/navigation/app_page_app_bar.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/display/step_progress_bar.dart';
 import '../../../candidate_profile/presentation/providers/candidate_profile_provider.dart';
 import '../../../company_profile/presentation/providers/company_profile_provider.dart';
 import '../../../home/presentation/pages/home_page.dart';
@@ -132,8 +134,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (source == null) return;
 
     final picked = await ImagePicker().pickImage(
-      source: source, 
-      
+      source: source,
       imageQuality: 85,
     );
     if (picked != null) {
@@ -167,7 +168,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 .call(_pickedPhoto!);
           }
         } catch (photoError) {
-          // регистрация уже прошла успешно — не блокируем вход, но честно предупреждаем
           AppSnackbar.showError(
             'Аккаунт создан, но фото не загрузилось: ${ApiException.extractMessage(photoError)}',
           );
@@ -189,47 +189,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            size: 18,
-            color: Color(0xFF111827),
-          ),
-          onPressed: _back,
-        ),
-      ),
+      backgroundColor: const Color(0xFFF7F8FA),
+      appBar: appMinimalAppBar(context, onBack: _back),
       body: SafeArea(
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: List.generate(_totalSteps, (index) {
-                  final active = index <= _step;
-                  return Expanded(
-                    child: Container(
-                      height: 4,
-                      margin: EdgeInsets.only(
-                        right: index == _totalSteps - 1 ? 0 : 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: active
-                            ? const Color(0xFF111827)
-                            : const Color(0xFFE5E7EB),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  );
-                }),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: StepProgressBar(
+                currentStep: _step,
+                totalSteps: _totalSteps,
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                 child: _buildStep(),
               ),
             ),

@@ -6,6 +6,7 @@ namespace JobWay.Application.DTOs.Vacancy.Response;
 public class VacancyResponse
 {
     public Guid Id { get; set; }
+    public Guid CompanyUserId { get; set; }
     public Guid CompanyProfileId { get; set; }
     public string CompanyName { get; set; } = null!;
     public string Title { get; set; } = null!;

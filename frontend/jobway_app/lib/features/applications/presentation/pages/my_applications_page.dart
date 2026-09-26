@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
 import '../../../../core/network/api_exception.dart';
 import '../providers/applications_provider.dart';
 import '../widgets/application_card.dart';
@@ -17,8 +18,14 @@ class MyApplicationsPage extends ConsumerWidget {
         backgroundColor: const Color(0xFFF7F8FA),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Мои отклики',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        title: const Text(
+          'Мои отклики',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF111827),
+          ),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(myApplicationsProvider),
@@ -27,15 +34,35 @@ class MyApplicationsPage extends ConsumerWidget {
           error: (error, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text(ApiException.extractMessage(error), textAlign: TextAlign.center),
+              child: Text(
+                ApiException.extractMessage(error),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
           data: (applications) => applications.isEmpty
-              ? const Center(child: Text('Вы ещё не откликались на вакансии', style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF))))
+              ? const Center(
+                  child: Text(
+                    'Вы ещё не откликались на вакансии',
+                    style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                  ),
+                )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
                   itemCount: applications.length,
-                  itemBuilder: (context, index) => ApplicationCard(application: applications[index]),
+                  itemBuilder: (context, index) {
+                    final application = applications[index];
+                    return ApplicationCard(
+                      application: application,
+                      onLeaveReview: () => ReviewBottomSheet.show(
+                        context,
+                        jobApplicationId: application.id,
+                        targetName: application.companyName,
+                        onSubmitted: () =>
+                            ref.invalidate(myApplicationsProvider),
+                      ),
+                    );
+                  },
                 ),
         ),
       ),

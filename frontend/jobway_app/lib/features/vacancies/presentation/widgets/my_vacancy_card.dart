@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
-import '../../../../core/widgets/company_avatar.dart';
+import '../../../../core/widgets/display/company_avatar.dart';
 import '../../domain/entities/vacancy.dart';
 
 class MyVacancyCard extends StatelessWidget {

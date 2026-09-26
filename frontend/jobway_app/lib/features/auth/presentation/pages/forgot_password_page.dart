@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/navigation/app_page_app_bar.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/inputs/app_text_field.dart';
+import '../../../../core/widgets/feedback/info_banner.dart';
+import '../../../../core/widgets/display/step_progress_bar.dart';
 import '../providers/auth_provider.dart';
 import 'verify_reset_code_page.dart';
 
@@ -29,7 +32,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     try {
       await ref.read(authRepositoryProvider).forgotPassword(email);
       if (!mounted) return;
-      Navigator.push(context, MaterialPageRoute(builder: (_) => VerifyResetCodePage(email: email)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => VerifyResetCodePage(email: email)),
+      );
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
@@ -40,29 +46,38 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, elevation: 0, foregroundColor: const Color(0xFF111827)),
+      backgroundColor: const Color(0xFFF7F8FA),
+      appBar: appPageAppBar(context, 'Забыли пароль?'),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 12),
-              const Text('Забыли пароль?',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
-              const SizedBox(height: 6),
-              const Text('Введите email — мы отправим код подтверждения',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
-              const SizedBox(height: 28),
+              const StepProgressBar(currentStep: 0, totalSteps: 3),
+              const SizedBox(height: 20),
+              const Text(
+                'Введите email — мы отправим код подтверждения',
+                style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              ),
+              const SizedBox(height: 24),
               AppTextField(
                 controller: _emailController,
                 label: 'Email',
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
               ),
+              const SizedBox(height: 16),
+              const InfoBanner(
+                text:
+                    'Код действителен в течение 10 минут. Проверьте папку «Спам», если письмо не пришло сразу.',
+              ),
               const SizedBox(height: 24),
-              AppButton(label: 'Отправить код', isLoading: _isLoading, onPressed: _sendCode),
+              AppButton(
+                label: 'Отправить код',
+                isLoading: _isLoading,
+                onPressed: _sendCode,
+              ),
             ],
           ),
         ),

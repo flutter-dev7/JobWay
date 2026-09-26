@@ -1,6 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = 'https://jobway-api.onrender.com/api';
-  
+  static const String baseUrl = 'http://192.168.123.34:5025/api';
+
   // Auth
   static const String register = '/auth/register';
   static const String login = '/auth/login';
@@ -51,6 +51,12 @@ class ApiConstants {
   static const String adminUsers = '/admin/users';
   static String blockUser(String id) => '/admin/users/$id/block';
   static String unblockUser(String id) => '/admin/users/$id/unblock';
+
+  // Reviews
+  static const String reviewCreate = '/review/create';
+  static String reviewsForUser(String userId) => '/review/user/$userId';
+  static String reviewAverageRating(String userId) =>
+      '/review/user/$userId/average-rating';
 
   static const String uploadResume = '/candidate-profile/me/resume';
 

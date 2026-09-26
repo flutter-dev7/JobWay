@@ -1,5 +1,6 @@
 class CompanyProfile {
   final String id;
+  final String userId;
   final String companyName;
   final String? description;
   final String? industry;
@@ -10,6 +11,7 @@ class CompanyProfile {
 
   const CompanyProfile({
     required this.id,
+    required this.userId,
     required this.companyName,
     this.description,
     this.industry,

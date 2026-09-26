@@ -1,5 +1,6 @@
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
+using JobWay.Domain.Enums;
 using JobWay.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,16 @@ public class NotificationRepository : INotificationRepository
         => _context.Notifications
             .Where(n => n.UserId == userId && !n.IsRead)
             .ToListAsync(cancellationToken);
+    
+    public async Task<HashSet<Guid>> GetNotifiedRelatedEntityIdsAsync(Guid userId, NotificationType type, List<Guid> relatedEntityIds, CancellationToken cancellationToken)
+    {
+        var ids = await _context.Notifications
+            .Where(n => n.UserId == userId && n.Type == type && n.RelatedEntityId != null && relatedEntityIds.Contains(n.RelatedEntityId.Value))
+            .Select(n => n.RelatedEntityId!.Value)
+            .ToListAsync(cancellationToken);
+
+        return ids.ToHashSet();
+    }
 
     public void Add(Notification notification) => _context.Notifications.Add(notification);
     public void Update(Notification notification) => _context.Notifications.Update(notification);

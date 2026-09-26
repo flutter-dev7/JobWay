@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../constants/api_constants.dart';
 import '../storage/token_storage.dart';
-import '../widgets/app_snackbar.dart';
+import '../widgets/feedback/app_snackbar.dart';
 import 'api_exception.dart';
 import 'api_response.dart';
 

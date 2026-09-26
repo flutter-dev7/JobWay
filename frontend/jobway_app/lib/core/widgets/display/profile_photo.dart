@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme_extension.dart';
 
 class ProfilePhoto extends StatelessWidget {
   final String? photoUrl;
@@ -20,6 +21,8 @@ class ProfilePhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Column(
       children: [
         Stack(
@@ -28,18 +31,20 @@ class ProfilePhoto extends StatelessWidget {
               width: size,
               height: size,
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF3FF),
+                color: colors.surfaceMuted,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: _hasPhoto ? const Color(0xFFDCE5FF) : const Color(0xFFBFD0FF),
+                  color: _hasPhoto ? colors.border : context.accentColor.withOpacity(0.4),
                   width: _hasPhoto ? 3 : 2,
                 ),
                 image: _hasPhoto ? DecorationImage(image: NetworkImage(photoUrl!), fit: BoxFit.cover) : null,
               ),
               child: !_hasPhoto
                   ? Center(
-                      child: Text(fallbackText,
-                          style: TextStyle(fontSize: size * 0.38, fontWeight: FontWeight.w700, color: const Color(0xFF3157D5))),
+                      child: Text(
+                        fallbackText,
+                        style: TextStyle(fontSize: size * 0.38, fontWeight: FontWeight.w700, color: context.accentColor),
+                      ),
                     )
                   : null,
             ),
@@ -53,9 +58,9 @@ class ProfilePhoto extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3157D5),
+                      color: context.accentColor,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: colors.surface, width: 2),
                     ),
                     child: isUploading
                         ? const Padding(
@@ -72,7 +77,10 @@ class ProfilePhoto extends StatelessWidget {
           const SizedBox(height: 8),
           GestureDetector(
             onTap: isUploading ? null : onEdit,
-            child: const Text('Добавить фото', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF3157D5))),
+            child: Text(
+              'Добавить фото',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.accentColor),
+            ),
           ),
         ],
       ],

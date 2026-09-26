@@ -1,11 +1,12 @@
 // features/company_profile/presentation/pages/edit_company_profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/section_card.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/inputs/app_text_field.dart';
+import '../../../../core/widgets/display/section_card.dart';
 import '../../domain/entities/company_profile.dart';
 import '../providers/company_profile_provider.dart';
 
@@ -15,10 +16,12 @@ class EditCompanyProfilePage extends ConsumerStatefulWidget {
   const EditCompanyProfilePage({super.key, required this.profile});
 
   @override
-  ConsumerState<EditCompanyProfilePage> createState() => _EditCompanyProfilePageState();
+  ConsumerState<EditCompanyProfilePage> createState() =>
+      _EditCompanyProfilePageState();
 }
 
-class _EditCompanyProfilePageState extends ConsumerState<EditCompanyProfilePage> {
+class _EditCompanyProfilePageState
+    extends ConsumerState<EditCompanyProfilePage> {
   late final TextEditingController _companyNameController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _industryController;
@@ -29,11 +32,21 @@ class _EditCompanyProfilePageState extends ConsumerState<EditCompanyProfilePage>
   @override
   void initState() {
     super.initState();
-    _companyNameController = TextEditingController(text: widget.profile.companyName);
-    _descriptionController = TextEditingController(text: widget.profile.description ?? '');
-    _industryController = TextEditingController(text: widget.profile.industry ?? '');
-    _websiteController = TextEditingController(text: widget.profile.website ?? '');
-    _locationController = TextEditingController(text: widget.profile.location ?? '');
+    _companyNameController = TextEditingController(
+      text: widget.profile.companyName,
+    );
+    _descriptionController = TextEditingController(
+      text: widget.profile.description ?? '',
+    );
+    _industryController = TextEditingController(
+      text: widget.profile.industry ?? '',
+    );
+    _websiteController = TextEditingController(
+      text: widget.profile.website ?? '',
+    );
+    _locationController = TextEditingController(
+      text: widget.profile.location ?? '',
+    );
   }
 
   @override
@@ -54,12 +67,22 @@ class _EditCompanyProfilePageState extends ConsumerState<EditCompanyProfilePage>
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(updateCompanyProfileUseCaseProvider).call(
+      await ref
+          .read(updateCompanyProfileUseCaseProvider)
+          .call(
             companyName: _companyNameController.text.trim(),
-            description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-            industry: _industryController.text.trim().isEmpty ? null : _industryController.text.trim(),
-            website: _websiteController.text.trim().isEmpty ? null : _websiteController.text.trim(),
-            location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+            description: _descriptionController.text.trim().isEmpty
+                ? null
+                : _descriptionController.text.trim(),
+            industry: _industryController.text.trim().isEmpty
+                ? null
+                : _industryController.text.trim(),
+            website: _websiteController.text.trim().isEmpty
+                ? null
+                : _websiteController.text.trim(),
+            location: _locationController.text.trim().isEmpty
+                ? null
+                : _locationController.text.trim(),
           );
       if (!mounted) return;
       Navigator.pop(context);
@@ -75,13 +98,7 @@ class _EditCompanyProfilePageState extends ConsumerState<EditCompanyProfilePage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Редактировать компанию',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
-      ),
+      appBar: appPageAppBar(context, 'Редактировать компанию'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: [
@@ -90,11 +107,23 @@ class _EditCompanyProfilePageState extends ConsumerState<EditCompanyProfilePage>
             icon: Icons.business_outlined,
             child: Column(
               children: [
-                AppTextField(controller: _companyNameController, label: 'Название компании', icon: Icons.business_rounded),
+                AppTextField(
+                  controller: _companyNameController,
+                  label: 'Название компании',
+                  icon: Icons.business_rounded,
+                ),
                 const SizedBox(height: 14),
-                AppTextField(controller: _industryController, label: 'Индустрия', icon: Icons.category_outlined),
+                AppTextField(
+                  controller: _industryController,
+                  label: 'Индустрия',
+                  icon: Icons.category_outlined,
+                ),
                 const SizedBox(height: 14),
-                AppTextField(controller: _locationController, label: 'Локация', icon: Icons.location_on_outlined),
+                AppTextField(
+                  controller: _locationController,
+                  label: 'Локация',
+                  icon: Icons.location_on_outlined,
+                ),
               ],
             ),
           ),
@@ -104,14 +133,26 @@ class _EditCompanyProfilePageState extends ConsumerState<EditCompanyProfilePage>
             icon: Icons.notes_rounded,
             child: Column(
               children: [
-                AppTextField(controller: _descriptionController, label: 'Описание', icon: Icons.info_outline),
+                AppTextField(
+                  controller: _descriptionController,
+                  label: 'Описание',
+                  icon: Icons.info_outline,
+                ),
                 const SizedBox(height: 14),
-                AppTextField(controller: _websiteController, label: 'Сайт', icon: Icons.link),
+                AppTextField(
+                  controller: _websiteController,
+                  label: 'Сайт',
+                  icon: Icons.link,
+                ),
               ],
             ),
           ),
           const SizedBox(height: 28),
-          AppButton(label: 'Сохранить', isLoading: _isLoading, onPressed: _save),
+          AppButton(
+            label: 'Сохранить',
+            isLoading: _isLoading,
+            onPressed: _save,
+          ),
         ],
       ),
     );

@@ -1,4 +1,3 @@
-// Application/Services/JobApplicationService.cs — заменить целиком
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.JobApplication.Request;
 using JobWay.Application.DTOs.JobApplication.Response;
@@ -61,7 +60,7 @@ public class JobApplicationService : IJobApplicationService
             application.Id,
             cancellationToken);
 
-        return Result<JobApplicationResponse>.Ok(MapToResponse(application));
+        return Result<JobApplicationResponse>.Ok(MapToResponse(application, hasReview: false));
     }
 
     public async Task<Result<JobApplicationResponse>> UpdateStatusAsync(Guid employerUserId, Guid applicationId, UpdateJobApplicationStatusRequest request, CancellationToken cancellationToken)
@@ -87,7 +86,9 @@ public class JobApplicationService : IJobApplicationService
             application.Id,
             cancellationToken);
 
-        return Result<JobApplicationResponse>.Ok(MapToResponse(application));
+        var hasReview = await _unitOfWork.Reviews.GetByApplicationAndTypeAsync(application.Id, ReviewType.CompanyToCandidate, cancellationToken) is not null;
+
+        return Result<JobApplicationResponse>.Ok(MapToResponse(application, hasReview));
     }
 
     public async Task<Result<List<JobApplicationResponse>>> GetByVacancyAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken)
@@ -104,7 +105,14 @@ public class JobApplicationService : IJobApplicationService
             return Result<List<JobApplicationResponse>>.Fail("You do not own this vacancy", ErrorType.Forbidden);
 
         var applications = await _unitOfWork.JobApplications.GetByVacancyIdAsync(vacancyId, cancellationToken);
-        return Result<List<JobApplicationResponse>>.Ok(applications.Select(MapToResponse).ToList());
+
+        var reviewedIds = await _unitOfWork.Reviews.GetReviewedApplicationIdsAsync(
+            applications.Select(a => a.Id).ToList(),
+            ReviewType.CompanyToCandidate,
+            cancellationToken);
+
+        return Result<List<JobApplicationResponse>>.Ok(
+            applications.Select(a => MapToResponse(a, reviewedIds.Contains(a.Id))).ToList());
     }
 
     public async Task<Result<List<JobApplicationResponse>>> GetMyApplicationsAsync(Guid candidateUserId, CancellationToken cancellationToken)
@@ -114,10 +122,17 @@ public class JobApplicationService : IJobApplicationService
             return Result<List<JobApplicationResponse>>.Fail("Candidate profile not found", ErrorType.NotFound);
 
         var applications = await _unitOfWork.JobApplications.GetByCandidateProfileIdAsync(candidateProfile.Id, cancellationToken);
-        return Result<List<JobApplicationResponse>>.Ok(applications.Select(MapToResponse).ToList());
+
+        var reviewedIds = await _unitOfWork.Reviews.GetReviewedApplicationIdsAsync(
+            applications.Select(a => a.Id).ToList(),
+            ReviewType.CandidateToCompany,
+            cancellationToken);
+
+        return Result<List<JobApplicationResponse>>.Ok(
+            applications.Select(a => MapToResponse(a, reviewedIds.Contains(a.Id))).ToList());
     }
 
-    private JobApplicationResponse MapToResponse(JobApplication application)
+    private JobApplicationResponse MapToResponse(JobApplication application, bool hasReview)
     {
         var match = _matchingService.Calculate(application.CandidateProfile.Skills, application.Vacancy.RequiredSkills);
 
@@ -136,7 +151,8 @@ public class JobApplicationService : IJobApplicationService
             CandidatePhotoUrl = application.CandidateProfile.PhotoUrl,
             CoverMessage = application.CoverMessage,
             CompanyLogoUrl = application.Vacancy.CompanyProfile.LogoUrl,
-            CreatedAt = application.CreatedAt
+            CreatedAt = application.CreatedAt,
+            HasReviewFromCurrentUser = hasReview
         };
     }
     

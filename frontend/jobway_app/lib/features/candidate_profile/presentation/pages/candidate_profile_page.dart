@@ -1,18 +1,21 @@
-// features/candidate_profile/presentation/pages/candidate_profile_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
+import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_dialogs.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/profile_photo.dart';
-import '../../../../core/widgets/section_card.dart';
-import '../../../../core/widgets/skill_chip.dart';
+import '../../../../core/theme/app_theme_extension.dart';
+import '../../../../core/widgets/feedback/app_dialogs.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/display/info_row.dart';
+import '../../../../core/widgets/display/profile_photo.dart';
+import '../../../../core/widgets/display/section_card.dart';
+import '../../../../core/widgets/display/skill_chip.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/candidate_profile_provider.dart';
@@ -28,36 +31,6 @@ class CandidateProfilePage extends ConsumerStatefulWidget {
 
 class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
   bool _isUploadingPhoto = false;
-
-  String _experienceLevelLabel(String level) {
-    switch (level) {
-      case 'NoExperience':
-        return 'Без опыта';
-      case 'Junior':
-        return 'Junior';
-      case 'Middle':
-        return 'Middle';
-      case 'Senior':
-        return 'Senior';
-      default:
-        return level;
-    }
-  }
-
-  String _employmentTypeLabel(String type) {
-    switch (type) {
-      case 'FullTime':
-        return 'Полная занятость';
-      case 'PartTime':
-        return 'Частичная занятость';
-      case 'Remote':
-        return 'Удалённо';
-      case 'Internship':
-        return 'Стажировка';
-      default:
-        return type;
-    }
-  }
 
   Future<void> _openResume(String resumeFileUrl) async {
     final uri = Uri.parse('${ApiConstants.fileBaseUrl}$resumeFileUrl');
@@ -103,25 +76,26 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(candidateProfileProvider);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Мой профиль',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
+            color: colors.textPrimary,
           ),
         ),
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: colors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -138,15 +112,15 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(
               style: IconButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: colors.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              icon: const Icon(
+              icon: Icon(
                 Icons.edit_outlined,
                 size: 21,
-                color: Color(0xFF111827),
+                color: colors.textPrimary,
               ),
               onPressed: () async {
                 final profile = profileAsync.valueOrNull;
@@ -172,7 +146,7 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
             child: Text(
               ApiException.extractMessage(error),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              style: TextStyle(fontSize: 14, color: colors.textSecondary),
             ),
           ),
         ),
@@ -182,11 +156,15 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.035),
+                    color: Colors.black.withOpacity(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 0.2
+                          : 0.035,
+                    ),
                     blurRadius: 20,
                     offset: const Offset(0, 6),
                   ),
@@ -209,10 +187,10 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                   Text(
                     profile.fullName,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+                      color: colors.textPrimary,
                     ),
                   ),
                   if (profile.location != null &&
@@ -221,17 +199,17 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_outlined,
                           size: 16,
-                          color: Color(0xFF9CA3AF),
+                          color: colors.textMuted,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           profile.location!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF6B7280),
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
@@ -246,15 +224,15 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                             SharePlus.instance.share(
                               ShareParams(
                                 text:
-                                    '${profile.fullName} — профиль на JobWay\n${_experienceLevelLabel(profile.experienceLevel)} · ${profile.location ?? ""}',
+                                    '${profile.fullName} — профиль на JobWay\n${experienceLevelLabel(profile.experienceLevel)} · ${profile.location ?? ""}',
                               ),
                             );
                           },
                           icon: const Icon(Icons.ios_share_rounded, size: 16),
                           label: const Text('Поделиться'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF111827),
-                            side: const BorderSide(color: Color(0xFFE5E7EB)),
+                            foregroundColor: colors.textPrimary,
+                            side: BorderSide(color: colors.border),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -276,11 +254,10 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                           ),
                           label: const Text('Резюме'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF111827),
-                            disabledBackgroundColor: const Color(
-                              0xFF111827,
-                            ).withOpacity(0.3),
-                            foregroundColor: Colors.white,
+                            backgroundColor: colors.textPrimary,
+                            disabledBackgroundColor: colors.textPrimary
+                                .withOpacity(0.3),
+                            foregroundColor: colors.surface,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
@@ -300,16 +277,16 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
               icon: Icons.person_outline_rounded,
               child: Column(
                 children: [
-                  _InfoRow(
+                  InfoRow(
                     icon: Icons.trending_up_rounded,
                     label: 'Уровень опыта',
-                    value: _experienceLevelLabel(profile.experienceLevel),
+                    value: experienceLevelLabel(profile.experienceLevel),
                   ),
                   const SizedBox(height: 16),
-                  _InfoRow(
+                  InfoRow(
                     icon: Icons.work_outline_rounded,
                     label: 'Тип занятости',
-                    value: _employmentTypeLabel(profile.desiredEmploymentType),
+                    value: employmentTypeLabel(profile.desiredEmploymentType),
                   ),
                 ],
               ),
@@ -321,10 +298,10 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                 icon: Icons.notes_rounded,
                 child: Text(
                   profile.bio!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     height: 1.6,
-                    color: Color(0xFF4B5563),
+                    color: colors.textSecondary,
                   ),
                 ),
               ),
@@ -334,9 +311,9 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
               title: 'Навыки',
               icon: Icons.auto_awesome_outlined,
               child: profile.skills.isEmpty
-                  ? const Text(
+                  ? Text(
                       'Навыки пока не добавлены',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                      style: TextStyle(fontSize: 14, color: colors.textMuted),
                     )
                   : Wrap(
                       spacing: 8,
@@ -353,16 +330,16 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
               child:
                   profile.resumeFileUrl == null ||
                       profile.resumeFileUrl!.isEmpty
-                  ? const Text(
+                  ? Text(
                       'Резюме не загружено — добавьте его в редактировании профиля',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                      style: TextStyle(fontSize: 14, color: colors.textMuted),
                     )
                   : GestureDetector(
                       onTap: () => _openResume(profile.resumeFileUrl!),
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
+                          color: colors.surfaceMuted,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -386,76 +363,28 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                                 profile.resumeFileUrl!.split('/').last,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF111827),
+                                  color: colors.textPrimary,
                                 ),
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.open_in_new_rounded,
                               size: 18,
-                              color: Color(0xFF9CA3AF),
+                              color: colors.textMuted,
                             ),
                           ],
                         ),
                       ),
                     ),
             ),
+            const SizedBox(height: 16),
+            ReviewsSection(userId: profile.userId),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 19, color: const Color(0xFF6B7280)),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF111827),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

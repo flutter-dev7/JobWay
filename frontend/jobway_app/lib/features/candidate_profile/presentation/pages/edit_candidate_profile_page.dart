@@ -1,14 +1,14 @@
-// features/candidate_profile/presentation/pages/edit_candidate_profile_page.dart
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
+import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/section_card.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/inputs/app_text_field.dart';
+import '../../../../core/widgets/display/section_card.dart';
 import '../../../skills/presentation/widgets/skills_selector.dart';
 import '../../domain/entities/candidate_profile.dart';
 import '../providers/candidate_profile_provider.dart';
@@ -168,19 +168,7 @@ class _EditCandidateProfilePageState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Редактировать профиль',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
-          ),
-        ),
-      ),
+      appBar: appPageAppBar(context, 'Редактировать профиль'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: [
@@ -257,13 +245,8 @@ class _EditCandidateProfilePageState
                   items: _employmentTypes
                       .map(
                         (type) => DropdownMenuItem(
-                          value:
-                              type, 
-                          child: Text(
-                            employmentTypeLabel(
-                              type,
-                            ),
-                          ),
+                          value: type,
+                          child: Text(employmentTypeLabel(type)),
                         ),
                       )
                       .toList(),

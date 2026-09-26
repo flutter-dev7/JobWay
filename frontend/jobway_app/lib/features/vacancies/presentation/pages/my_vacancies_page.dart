@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:jobway_app/core/widgets/notification_bell.dart';
+import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import 'package:jobway_app/features/applications/presentation/pages/vacancy_applications_page.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../providers/vacancies_provider.dart';
 import '../widgets/my_vacancy_card.dart';
 import 'create_vacancy_page.dart';

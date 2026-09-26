@@ -1,50 +1,24 @@
-// features/applications/presentation/widgets/application_card.dart
 import 'package:flutter/material.dart';
+import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
-import '../../../../core/widgets/company_avatar.dart';
-import '../../../../core/widgets/skill_chip.dart';
+import '../../../../core/widgets/display/company_avatar.dart';
+import '../../../../core/widgets/display/skill_chip.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
 import '../../domain/entities/job_application.dart';
 
 class ApplicationCard extends StatelessWidget {
   final JobApplication application;
+  final VoidCallback? onLeaveReview;
 
-  const ApplicationCard({super.key, required this.application});
-
-  Color _statusColor() {
-    switch (application.status) {
-      case 'Accepted':
-        return const Color(0xFF059669);
-      case 'Rejected':
-        return const Color(0xFFDC2626);
-      case 'Interview':
-        return const Color(0xFF3157D5);
-      case 'Viewed':
-        return const Color(0xFFD97706);
-      default:
-        return const Color(0xFF6B7280);
-    }
-  }
-
-  String _statusLabel() {
-    switch (application.status) {
-      case 'Pending':
-        return 'На рассмотрении';
-      case 'Viewed':
-        return 'Просмотрено';
-      case 'Interview':
-        return 'Собеседование';
-      case 'Accepted':
-        return 'Принято';
-      case 'Rejected':
-        return 'Отклонено';
-      default:
-        return application.status;
-    }
-  }
+  const ApplicationCard({
+    super.key,
+    required this.application,
+    this.onLeaveReview,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColor();
+    final statusColor = applicationStatusColor(application.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -66,7 +40,11 @@ class ApplicationCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CompanyAvatar(companyName: application.companyName, size: 44, logoUrl: application.companyLogoUrl,),
+              CompanyAvatar(
+                companyName: application.companyName,
+                size: 44,
+                logoUrl: application.companyLogoUrl,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -136,7 +114,7 @@ class ApplicationCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  _statusLabel(),
+                  applicationStatusLabel(application.status),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -165,6 +143,17 @@ class ApplicationCard extends StatelessWidget {
               style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
             ),
           ),
+          if ((application.status == 'Accepted' ||
+                  application.status == 'Rejected') &&
+              !application.hasReviewFromCurrentUser &&
+              onLeaveReview != null) ...[
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'Оценить компанию',
+              color: const Color(0xFF3157D5),
+              onPressed: onLeaveReview,
+            ),
+          ],
         ],
       ),
     );

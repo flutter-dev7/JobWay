@@ -24,3 +24,7 @@ wwwroot/uploads/
 
 firebase-credentials.json
 google-services.json
+
+## Android signing
+android/key.properties
+*.jks

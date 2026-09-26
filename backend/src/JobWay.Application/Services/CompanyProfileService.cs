@@ -91,6 +91,7 @@ public class CompanyProfileService : ICompanyProfileService
     private static CompanyProfileResponse MapToResponse(CompanyProfile profile) => new()
     {
         Id = profile.Id,
+        UserId = profile.UserId,
         CompanyName = profile.CompanyName,
         Description = profile.Description,
         Industry = profile.Industry,

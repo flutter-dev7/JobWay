@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme_extension.dart';
 
 class FloatingNavItem {
   final IconData icon;
@@ -23,14 +24,16 @@ class FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.08),
             blurRadius: 18,
             offset: const Offset(0, 4),
           ),
@@ -51,10 +54,10 @@ class FloatingNavBar extends StatelessWidget {
               height: 48,
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: selected ? const Color(0xFFE5E5E5) : Colors.transparent,
+                color: selected ? colors.surfaceMuted : Colors.transparent,
                 borderRadius: BorderRadius.circular(26),
               ),
-              child: Icon(items[index].icon, size: 24, color: Colors.black),
+              child: Icon(items[index].icon, size: 24, color: colors.textPrimary),
             ),
           );
         }),

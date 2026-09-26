@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:jobway_app/core/widgets/app_dialogs.dart';
-import '../../../../core/widgets/app_button.dart';
+import 'package:jobway_app/core/widgets/feedback/app_dialogs.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 

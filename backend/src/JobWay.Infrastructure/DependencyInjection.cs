@@ -1,9 +1,9 @@
-// Infrastructure/DependencyInjection.cs
 using JobWay.Application.Common;
 using JobWay.Application.Interfaces;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Application.Interfaces.Services;
 using JobWay.Application.Services;
+using JobWay.Infrastructure.BackgroundJobs;
 using JobWay.Infrastructure.Persistence;
 using JobWay.Infrastructure.Persistence.Data;
 using JobWay.Infrastructure.Repositories;
@@ -25,6 +25,8 @@ public static class DependencyInjection
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        
+        services.AddHostedService<ReviewReminderBackgroundService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
@@ -65,6 +67,9 @@ public static class DependencyInjection
         
         services.AddScoped<IPushNotificationService, FcmPushNotificationService>();
         services.AddScoped<IDeviceTokenRepository, DeviceTokenRepository>();
+        
+        services.AddScoped<IReviewRepository, ReviewRepository>();
+        services.AddScoped<IReviewService, ReviewService>();
 
         return services;
     }

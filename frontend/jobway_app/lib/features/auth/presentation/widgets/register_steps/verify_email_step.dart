@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/widgets/otp_input.dart';
+import '../../../../../core/widgets/inputs/otp_input.dart';
 
 class VerifyEmailStep extends StatelessWidget {
   final String email;

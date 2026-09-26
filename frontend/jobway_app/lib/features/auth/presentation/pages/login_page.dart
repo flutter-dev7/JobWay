@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/network/api_exception.dart';
 import 'package:jobway_app/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:jobway_app/features/home/presentation/pages/home_page.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/inputs/app_text_field.dart';
 import '../providers/auth_provider.dart';
 import 'register_page.dart';
 
@@ -42,7 +42,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -99,7 +99,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: Colors.blue,
+                              foregroundColor: const Color(0xFF3157D5),
                             ),
                             onPressed: () {
                               Navigator.push(
@@ -133,7 +133,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                             TextButton(
                               style: TextButton.styleFrom(
-                                foregroundColor: Colors.blue,
+                                foregroundColor: const Color(0xFF3157D5),
                               ),
                               onPressed: () {
                                 Navigator.push(

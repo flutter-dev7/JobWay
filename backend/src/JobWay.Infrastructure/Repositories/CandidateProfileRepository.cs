@@ -22,6 +22,11 @@ public class CandidateProfileRepository : ICandidateProfileRepository
 
     public Task<List<CandidateProfile>> GetAllAsync(CancellationToken cancellationToken)
         => _context.CandidateProfiles.ToListAsync(cancellationToken);
+    
+    public Task<List<CandidateProfile>> GetAllWithSkillsAsync(CancellationToken cancellationToken)
+        => _context.CandidateProfiles
+            .Include(c => c.Skills)
+            .ToListAsync(cancellationToken);
 
     public void Update(CandidateProfile profile) => _context.CandidateProfiles.Update(profile);
 }

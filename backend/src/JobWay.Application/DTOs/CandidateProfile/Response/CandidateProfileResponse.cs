@@ -6,6 +6,7 @@ namespace JobWay.Application.DTOs.CandidateProfile.Response;
 public class CandidateProfileResponse
 {
     public Guid Id { get; set; }
+    public Guid UserId { get; set; }
     public string FullName { get; set; } = null!;
     public DateOnly? BirthDate { get; set; }
     public string? Location { get; set; }

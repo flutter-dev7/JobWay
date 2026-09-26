@@ -5,7 +5,11 @@ class NotificationCard extends StatelessWidget {
   final AppNotification notification;
   final VoidCallback onTap;
 
-  const NotificationCard({super.key, required this.notification, required this.onTap});
+  const NotificationCard({
+    super.key,
+    required this.notification,
+    required this.onTap,
+  });
 
   IconData _icon() {
     switch (notification.type) {
@@ -15,6 +19,10 @@ class NotificationCard extends StatelessWidget {
         return Icons.event_available_outlined;
       case 'NewMatchingVacancy':
         return Icons.notifications_active_outlined;
+      case 'NewReview':
+        return Icons.star_outline_rounded;
+      case 'ReviewReminder':
+        return Icons.rate_review_outlined;
       default:
         return Icons.info_outline;
     }
@@ -27,6 +35,8 @@ class NotificationCard extends StatelessWidget {
       case 'ApplicationStatusChanged':
         return const Color(0xFFDCFCE7);
       case 'NewMatchingVacancy':
+        return const Color(0xFFFEF3C7);
+      case 'NewReview':
         return const Color(0xFFFEF3C7);
       default:
         return const Color(0xFFF3F4F6);
@@ -41,6 +51,8 @@ class NotificationCard extends StatelessWidget {
         return const Color(0xFF059669);
       case 'NewMatchingVacancy':
         return const Color(0xFFD97706);
+      case 'NewReview':
+        return const Color(0xFFF59E0B);
       default:
         return const Color(0xFF6B7280);
     }
@@ -65,7 +77,13 @@ class NotificationCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: notification.isRead ? Colors.white : const Color(0xFFF3F5FF),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +91,10 @@ class NotificationCard extends StatelessWidget {
             Container(
               width: 42,
               height: 42,
-              decoration: BoxDecoration(color: _iconBackground(), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: _iconBackground(),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Icon(_icon(), size: 20, color: _iconColor()),
             ),
             const SizedBox(width: 12),
@@ -81,12 +102,30 @@ class NotificationCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(notification.title,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+                  Text(
+                    notification.title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF111827),
+                    ),
+                  ),
                   const SizedBox(height: 3),
-                  Text(notification.message, style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
+                  Text(
+                    notification.message,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Text(_timeAgo(), style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF))),
+                  Text(
+                    _timeAgo(),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -95,7 +134,10 @@ class NotificationCard extends StatelessWidget {
                 width: 8,
                 height: 8,
                 margin: const EdgeInsets.only(top: 4),
-                decoration: const BoxDecoration(color: Color(0xFF3157D5), shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF3157D5),
+                  shape: BoxShape.circle,
+                ),
               ),
           ],
         ),

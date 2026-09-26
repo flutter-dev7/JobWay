@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/floating_nav_bar.dart';
+import '../../../../core/widgets/navigation/floating_nav_bar.dart';
 import '../../../admin/presentation/pages/admin_companies_page.dart';
 import '../../../admin/presentation/pages/admin_profile_page.dart';
 import '../../../admin/presentation/pages/admin_users_page.dart';

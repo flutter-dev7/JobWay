@@ -1,5 +1,6 @@
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
+using JobWay.Domain.Enums;
 using JobWay.Infrastructure.Persistence;
 using JobWay.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,22 @@ public class JobApplicationRepository : IJobApplicationRepository
     
     public Task<bool> ExistsForCandidateAndCompanyAsync(Guid candidateProfileId, Guid companyProfileId, CancellationToken cancellationToken)
         => _context.JobApplications.AnyAsync(a => a.CandidateProfileId == candidateProfileId && a.Vacancy.CompanyProfileId == companyProfileId, cancellationToken);
+    
+    public Task<JobApplication?> GetWithParticipantsAsync(Guid id, CancellationToken cancellationToken)
+        => _context.JobApplications
+            .Include(a => a.CandidateProfile)
+            .Include(a => a.Vacancy)
+            .ThenInclude(v => v.CompanyProfile)
+            .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+    
+    public Task<List<JobApplication>> GetCompletedWithoutReminderCheckAsync(DateTime updatedBefore, CancellationToken cancellationToken)
+        => _context.JobApplications
+            .Include(a => a.CandidateProfile)
+            .Include(a => a.Vacancy)
+            .ThenInclude(v => v.CompanyProfile)
+            .Where(a => (a.Status == ApplicationStatus.Accepted || a.Status == ApplicationStatus.Rejected)
+                        && a.UpdatedAt <= updatedBefore)
+            .ToListAsync(cancellationToken);
 
     public void Add(JobApplication application) => _context.JobApplications.Add(application);
     public void Update(JobApplication application) => _context.JobApplications.Update(application);

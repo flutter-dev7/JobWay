@@ -4,6 +4,7 @@ import '../../domain/entities/candidate_profile.dart';
 
 class CandidateProfileModel {
   final String id;
+  final String userId;
   final String fullName;
   final DateTime? birthDate;
   final String? location;
@@ -16,6 +17,7 @@ class CandidateProfileModel {
 
   CandidateProfileModel({
     required this.id,
+    required this.userId,
     required this.fullName,
     this.birthDate,
     this.location,
@@ -31,6 +33,7 @@ class CandidateProfileModel {
     final data = ApiResponse.unwrap(json);
     return CandidateProfileModel(
       id: data['id'],
+      userId: data['userId'],
       fullName: data['fullName'],
       birthDate: data['birthDate'] != null ? DateTime.tryParse(data['birthDate']) : null,
       location: data['location'],
@@ -45,6 +48,7 @@ class CandidateProfileModel {
 
   CandidateProfile toEntity() => CandidateProfile(
         id: id,
+        userId: userId,
         fullName: fullName,
         birthDate: birthDate,
         location: location,

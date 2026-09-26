@@ -34,3 +34,8 @@ final myApplicationsProvider =
 final vacancyApplicationsProvider = FutureProvider.autoDispose.family<List<JobApplication>, String>(
   (ref, vacancyId) => ref.read(getVacancyApplicationsUseCaseProvider)(vacancyId),
 );
+
+final appliedVacancyIdsProvider = Provider.autoDispose<Set<String>>((ref) {
+  final applicationsAsync = ref.watch(myApplicationsProvider);
+  return applicationsAsync.valueOrNull?.map((a) => a.vacancyId).toSet() ?? {};
+});

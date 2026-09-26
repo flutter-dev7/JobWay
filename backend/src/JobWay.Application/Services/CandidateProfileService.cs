@@ -138,6 +138,7 @@ public class CandidateProfileService : ICandidateProfileService
     private static CandidateProfileResponse MapToResponse(CandidateProfile profile) => new()
     {
         Id = profile.Id,
+        UserId =  profile.UserId,
         FullName = profile.FullName,
         BirthDate = profile.BirthDate,
         Location = profile.Location,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme_extension.dart';
 
 class SectionCard extends StatelessWidget {
   final String title;
@@ -13,14 +14,16 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.025),
+            color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.15 : 0.025),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -35,19 +38,15 @@ class SectionCard extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F5FF),
+                  color: colors.surfaceMuted,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, size: 20, color: const Color(0xFF3157D5)),
+                child: Icon(icon, size: 20, color: context.accentColor),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF111827),
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: colors.textPrimary),
               ),
             ],
           ),

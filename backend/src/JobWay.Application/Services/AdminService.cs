@@ -10,10 +10,12 @@ namespace JobWay.Application.Services;
 public class AdminService : IAdminService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly INotificationService _notificationService;
 
-    public AdminService(IUnitOfWork unitOfWork)
+    public AdminService(IUnitOfWork unitOfWork, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<List<CompanyModerationResponse>>> GetCompaniesAsync(CancellationToken cancellationToken)
@@ -74,6 +76,18 @@ public class AdminService : IAdminService
         _unitOfWork.CompanyProfiles.Update(company);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        var (title, message) = status == VerificationStatus.Verified
+            ? ("Компания верифицирована", $"Поздравляем! «{company.CompanyName}» прошла верификацию и теперь может публиковать вакансии.")
+            : ("Заявка на верификацию отклонена", $"Заявка на верификацию «{company.CompanyName}» была отклонена администратором.");
+
+        await _notificationService.CreateAsync(
+            company.UserId,
+            NotificationType.System,
+            title,
+            message,
+            company.Id,
+            cancellationToken);
+
         return Result<string>.Ok($"Company {status.ToString().ToLower()}");
     }
 
@@ -91,6 +105,18 @@ public class AdminService : IAdminService
 
         _unitOfWork.Users.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var (title, message) = isActive
+            ? ("Аккаунт разблокирован", "Ваш аккаунт снова активен, вы можете пользоваться приложением.")
+            : ("Аккаунт заблокирован", "Ваш аккаунт заблокирован администратором. Обратитесь в поддержку для уточнения причины.");
+
+        await _notificationService.CreateAsync(
+            user.Id,
+            NotificationType.System,
+            title,
+            message,
+            user.Id,
+            cancellationToken);
 
         return Result<string>.Ok(isActive ? "User unblocked" : "User blocked");
     }

@@ -1,4 +1,3 @@
-// Application/Services/VacancyService.cs — заменить целиком
 using System.Text.Json;
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.Skill.Response;
@@ -14,14 +13,23 @@ namespace JobWay.Application.Services;
 public class VacancyService : IVacancyService
 {
     private const string TodayCountCacheKey = "vacancies:today-count";
+    private const int MatchNotificationThreshold = 70;
 
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cacheService;
+    private readonly IMatchingService _matchingService;
+    private readonly INotificationService _notificationService;
 
-    public VacancyService(IUnitOfWork unitOfWork, ICacheService cacheService)
+    public VacancyService(
+        IUnitOfWork unitOfWork,
+        ICacheService cacheService,
+        IMatchingService matchingService,
+        INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
         _cacheService = cacheService;
+        _matchingService = matchingService;
+        _notificationService = notificationService;
     }
 
     private static string VacancyCacheKey(Guid id) => $"vacancy:{id}";
@@ -98,7 +106,34 @@ public class VacancyService : IVacancyService
         if (companyProfile.VerificationStatus != VerificationStatus.Verified)
             return Result<VacancyResponse>.Fail("Company must be verified by an admin before publishing vacancies", ErrorType.Forbidden);
 
-        return await ChangeStatusAsync(employerUserId, vacancyId, VacancyStatus.Active, cancellationToken);
+        var result = await ChangeStatusAsync(employerUserId, vacancyId, VacancyStatus.Active, cancellationToken);
+
+        if (result.IsSuccess)
+            await NotifyMatchingCandidatesAsync(vacancyId, cancellationToken);
+
+        return result;
+    }
+
+    private async Task NotifyMatchingCandidatesAsync(Guid vacancyId, CancellationToken cancellationToken)
+    {
+        var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
+        if (vacancy is null) return;
+
+        var candidates = await _unitOfWork.CandidateProfiles.GetAllWithSkillsAsync(cancellationToken);
+
+        foreach (var candidate in candidates)
+        {
+            var match = _matchingService.Calculate(candidate.Skills, vacancy.RequiredSkills);
+            if (match.ScorePercent < MatchNotificationThreshold) continue;
+
+            await _notificationService.CreateAsync(
+                candidate.UserId,
+                NotificationType.NewMatchingVacancy,
+                "Подходящая вакансия",
+                $"«{vacancy.Title}» в {vacancy.CompanyProfile.CompanyName} — совпадение {match.ScorePercent}%",
+                vacancy.Id,
+                cancellationToken);
+        }
     }
 
     public async Task<Result<int>> GetTodayCountAsync(CancellationToken cancellationToken)
@@ -186,6 +221,7 @@ public class VacancyService : IVacancyService
     {
         Id = vacancy.Id,
         CompanyProfileId = vacancy.CompanyProfileId,
+        CompanyUserId = vacancy.CompanyProfile.UserId,
         CompanyName = vacancy.CompanyProfile.CompanyName,
         Title = vacancy.Title,
         Description = vacancy.Description,

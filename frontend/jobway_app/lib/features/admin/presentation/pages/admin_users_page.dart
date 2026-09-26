@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../providers/admin_provider.dart';
 import '../widgets/user_moderation_card.dart';
 

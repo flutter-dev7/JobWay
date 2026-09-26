@@ -17,7 +17,8 @@ public class UnitOfWork : IUnitOfWork
         IJobApplicationRepository jobApplications,
         INotificationRepository notifications,
         ISavedVacancyRepository savedVacancies,
-        IDeviceTokenRepository deviceTokens)
+        IDeviceTokenRepository deviceTokens,
+        IReviewRepository reviews)
     {
         _context = context;
         Users = users;
@@ -29,6 +30,7 @@ public class UnitOfWork : IUnitOfWork
         Notifications = notifications;
         SavedVacancies = savedVacancies;
         DeviceTokens = deviceTokens;
+        Reviews = reviews;
     }
 
     public IUserRepository Users { get; }
@@ -40,6 +42,7 @@ public class UnitOfWork : IUnitOfWork
     public INotificationRepository Notifications { get; }
     public ISavedVacancyRepository SavedVacancies { get; }
     public IDeviceTokenRepository DeviceTokens { get; }
+    public IReviewRepository Reviews { get; }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         => _context.SaveChangesAsync(cancellationToken);

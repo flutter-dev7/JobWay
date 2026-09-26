@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
+import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/section_card.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
+import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/inputs/app_text_field.dart';
+import '../../../../core/widgets/display/section_card.dart';
 import '../../../skills/presentation/widgets/skills_selector.dart';
 import '../providers/vacancies_provider.dart';
 
@@ -102,19 +103,7 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Новая вакансия',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
-          ),
-        ),
-      ),
+      appBar: appPageAppBar(context, 'Новая вакансия'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: [

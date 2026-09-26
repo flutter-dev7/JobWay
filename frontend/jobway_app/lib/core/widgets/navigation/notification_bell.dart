@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/notifications/presentation/pages/notifications_page.dart';
-import '../../features/notifications/presentation/providers/notifications_provider.dart';
+import '../../theme/app_theme_extension.dart';
+import '../../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../../features/notifications/presentation/providers/notifications_provider.dart';
 
 class NotificationBell extends ConsumerWidget {
   const NotificationBell({super.key});
@@ -10,6 +11,7 @@ class NotificationBell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final unreadCountAsync = ref.watch(unreadNotificationsCountProvider);
     final unreadCount = unreadCountAsync.valueOrNull ?? 0;
+    final colors = context.colors;
 
     return Padding(
       padding: const EdgeInsets.only(right: 12),
@@ -17,10 +19,10 @@ class NotificationBell extends ConsumerWidget {
         children: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: colors.surface,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
-            icon: const Icon(Icons.notifications_outlined, size: 21, color: Color(0xFF111827)),
+            icon: Icon(Icons.notifications_outlined, size: 21, color: colors.textPrimary),
             onPressed: () async {
               await Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
               ref.invalidate(myNotificationsProvider);

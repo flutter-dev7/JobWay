@@ -15,6 +15,7 @@ class JobApplication {
   final String? companyLogoUrl;
   final String? candidatePhotoUrl;
   final DateTime createdAt;
+  final bool hasReviewFromCurrentUser;
 
   const JobApplication({
     required this.id,
@@ -31,5 +32,6 @@ class JobApplication {
     this.companyLogoUrl,
     this.candidatePhotoUrl,
     required this.createdAt,
+    required this.hasReviewFromCurrentUser
   });
 }
