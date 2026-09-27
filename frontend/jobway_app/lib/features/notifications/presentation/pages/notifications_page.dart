@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/navigation/app_page_app_bar.dart';
 import '../../domain/entities/notification.dart';
@@ -20,13 +21,12 @@ const _categories = [
     label: 'Отклики',
     types: {'NewApplication', 'ApplicationStatusChanged'},
   ),
-  _NotificationCategory(label: 'Отзывы', types: {'NewReview'}),
-  _NotificationCategory(label: 'Вакансии', types: {'NewMatchingVacancy'}),
-  _NotificationCategory(label: 'Система', types: {'System'}),
   _NotificationCategory(
     label: 'Отзывы',
     types: {'NewReview', 'ReviewReminder'},
   ),
+  _NotificationCategory(label: 'Вакансии', types: {'NewMatchingVacancy'}),
+  _NotificationCategory(label: 'Система', types: {'System'}),
 ];
 
 class NotificationsPage extends ConsumerStatefulWidget {
@@ -55,9 +55,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final notificationsAsync = ref.watch(myNotificationsProvider);
     final hasUnread =
         notificationsAsync.valueOrNull?.any((n) => !n.isRead) ?? false;
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(
         context,
         'Уведомления',
@@ -74,9 +75,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                   AppSnackbar.showError(ApiException.extractMessage(error));
                 }
               },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF3157D5),
-              ),
+              style: TextButton.styleFrom(foregroundColor: context.accentColor),
               child: const Text(
                 'Прочитать все',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
@@ -122,8 +121,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF111827)
-                                : Colors.white,
+                                ? colors.textPrimary
+                                : colors.surface,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           alignment: Alignment.center,
@@ -136,8 +135,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
-                                      ? Colors.white
-                                      : const Color(0xFF374151),
+                                      ? colors.surface
+                                      : colors.textSecondary,
                                 ),
                               ),
                               if (count > 0) ...[
@@ -149,8 +148,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? Colors.white.withOpacity(0.2)
-                                        : const Color(0xFFF3F4F6),
+                                        ? colors.surface.withOpacity(0.2)
+                                        : colors.surfaceMuted,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -159,8 +158,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFF6B7280),
+                                          ? colors.surface
+                                          : colors.textSecondary,
                                     ),
                                   ),
                                 ),
@@ -175,12 +174,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: filtered.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Text(
                             'Уведомлений нет',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF9CA3AF),
+                              color: colors.textMuted,
                             ),
                           ),
                         )

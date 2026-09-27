@@ -1,6 +1,8 @@
 // features/vacancies/presentation/pages/vacancies_list_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/utils/today_badge_storage.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import 'package:jobway_app/features/vacancies/presentation/widgets/quick_filter_chips.dart';
 import '../../domain/entities/vacancy_filter.dart';
@@ -19,11 +21,14 @@ class VacanciesListPage extends ConsumerStatefulWidget {
 class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
+  bool _showTodayBadge = true;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _checkTodayBadge();
+    _searchController.addListener(() => setState(() {}));
   }
 
   @override
@@ -31,6 +36,11 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkTodayBadge() async {
+    final dismissed = await TodayBadgeStorage.wasDismissedToday();
+    if (mounted) setState(() => _showTodayBadge = !dismissed);
   }
 
   void _onScroll() {
@@ -41,10 +51,11 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
   }
 
   void _openFilters(VacancyFilter currentFilter) {
+    final colors = context.colors;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -61,13 +72,28 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
     ref
         .read(vacanciesControllerProvider.notifier)
         .applyFilter(
-          current.copyWith(search: value.trim().isEmpty ? null : value.trim()),
+          current.copyWith(
+            search: value.trim().isEmpty ? null : value.trim(),
+            clearSearch: value.trim().isEmpty,
+          ),
         );
+  }
+
+  void _onSearchChanged(String value) {
+    if (value.trim().isEmpty) {
+      final current = ref.read(vacanciesControllerProvider).filter;
+      if (current.search != null) {
+        ref
+            .read(vacanciesControllerProvider.notifier)
+            .applyFilter(current.copyWith(search: null, clearSearch: true));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(vacanciesControllerProvider);
+    final colors = context.colors;
 
     ref.listen(savedVacanciesProvider, (previous, next) {
       next.whenData((vacancies) {
@@ -78,17 +104,17 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Вакансии',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
+            color: colors.textPrimary,
           ),
         ),
         actions: const [NotificationBell()],
@@ -97,50 +123,64 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
         onRefresh: () => ref.read(vacanciesControllerProvider.notifier).load(),
         child: CustomScrollView(
           controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // features/vacancies/presentation/pages/vacancies_list_page.dart
-            // заменить блок целиком
             SliverToBoxAdapter(
               child: Consumer(
                 builder: (context, ref, _) {
                   final countAsync = ref.watch(todayVacanciesCountProvider);
                   final count = countAsync.valueOrNull;
 
-                  if (count == null || count == 0)
+                  if (!_showTodayBadge || count == null || count == 0)
                     return const SizedBox.shrink();
 
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFDCE5FF),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF3157D5),
-                              shape: BoxShape.circle,
-                            ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () async {
+                          await TodayBadgeStorage.dismissForToday();
+                          if (mounted) setState(() => _showTodayBadge = false);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '$count новых сегодня',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF3157D5),
-                            ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDCE5FF),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF3157D5),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '$count новых сегодня',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF3157D5),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.close_rounded,
+                                size: 14,
+                                color: Color(0xFF3157D5),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   );
@@ -155,20 +195,38 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colors.surface,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: TextField(
                           controller: _searchController,
                           onSubmitted: _onSearchSubmitted,
-                          decoration: const InputDecoration(
+                          onChanged: _onSearchChanged,
+                          style: TextStyle(color: colors.textPrimary),
+                          decoration: InputDecoration(
                             hintText: 'Поиск вакансий',
+                            hintStyle: TextStyle(color: colors.textMuted),
                             prefixIcon: Icon(
                               Icons.search,
-                              color: Color(0xFF9CA3AF),
+                              color: colors.textMuted,
                             ),
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(
+                                      Icons.close_rounded,
+                                      size: 18,
+                                      color: colors.textMuted,
+                                    ),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      _onSearchChanged('');
+                                    },
+                                  )
+                                : null,
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -180,12 +238,12 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colors.surface,
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.tune_rounded,
-                          color: Color(0xFF111827),
+                          color: colors.textPrimary,
                         ),
                       ),
                     ),
@@ -223,20 +281,20 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
                     child: Text(
                       state.error!,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF6B7280),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ),
                 ),
               )
             else if (state.items.isEmpty)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 child: Center(
                   child: Text(
                     'Вакансии не найдены',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                    style: TextStyle(fontSize: 14, color: colors.textMuted),
                   ),
                 ),
               )

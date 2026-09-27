@@ -1,5 +1,6 @@
 // features/vacancies/presentation/widgets/vacancy_filter_sheet.dart — заменить целиком
 import 'package:flutter/material.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/inputs/app_text_field.dart';
@@ -24,6 +25,11 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
   String? _experienceLevel;
   final _locationController = TextEditingController();
   final _salaryFromController = TextEditingController();
+  String? _paymentType;
+  String? _currency;
+
+  static const _paymentTypes = ['Monthly', 'Daily', 'PerShift'];
+  static const _currencies = ['TJS', 'USD', 'EUR', 'RUB'];
 
   static const _employmentTypes = [
     'FullTime',
@@ -47,6 +53,8 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
     _salaryFromController.text = widget.currentFilter.salaryFrom != null
         ? widget.currentFilter.salaryFrom!.toStringAsFixed(0)
         : '';
+    _paymentType = widget.currentFilter.paymentType;
+    _currency = widget.currentFilter.currency;
   }
 
   @override
@@ -57,11 +65,14 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
   }
 
   Widget _buildChips(
+    BuildContext context,
     List<String> options,
     String? selected,
     ValueChanged<String?> onSelect,
     String Function(String) labelBuilder,
   ) {
+    final colors = context.colors;
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -74,9 +85,7 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color(0xFF111827)
-                  : const Color(0xFFF3F4F6),
+              color: isSelected ? colors.textPrimary : colors.surfaceMuted,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -84,7 +93,7 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF374151),
+                color: isSelected ? colors.surface : colors.textSecondary,
               ),
             ),
           ),
@@ -97,6 +106,8 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
     setState(() {
       _employmentType = null;
       _experienceLevel = null;
+      _paymentType = null;
+      _currency = null;
       _locationController.clear();
       _salaryFromController.clear();
     });
@@ -104,6 +115,8 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -118,50 +131,74 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Фильтры',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF111827),
+                    color: colors.textPrimary,
                   ),
                 ),
                 TextButton(
                   onPressed: _clearAll,
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF6B7280),
+                    foregroundColor: colors.textSecondary,
                   ),
                   child: const Text('Сбросить'),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Тип занятости',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              style: TextStyle(fontSize: 13, color: colors.textSecondary),
             ),
             const SizedBox(height: 8),
             _buildChips(
+              context,
               _employmentTypes,
               _employmentType,
               (value) => setState(() => _employmentType = value),
               employmentTypeLabel,
             ),
-
             const SizedBox(height: 18),
-
-            const Text(
+            Text(
               'Уровень опыта',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              style: TextStyle(fontSize: 13, color: colors.textSecondary),
             ),
-
             const SizedBox(height: 8),
-
             _buildChips(
+              context,
               _experienceLevels,
               _experienceLevel,
               (value) => setState(() => _experienceLevel = value),
               experienceLevelLabel,
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Тип оплаты',
+              style: TextStyle(fontSize: 13, color: colors.textSecondary),
+            ),
+            const SizedBox(height: 8),
+            _buildChips(
+              context,
+              _paymentTypes,
+              _paymentType,
+              (value) => setState(() => _paymentType = value),
+              paymentTypeLabel,
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Валюта',
+              style: TextStyle(fontSize: 13, color: colors.textSecondary),
+            ),
+            const SizedBox(height: 8),
+            _buildChips(
+              context,
+              _currencies,
+              _currency,
+              (value) => setState(() => _currency = value),
+              (c) => c,
             ),
             const SizedBox(height: 18),
             AppTextField(
@@ -189,6 +226,10 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
                     clearEmploymentType: _employmentType == null,
                     experienceLevel: _experienceLevel,
                     clearExperienceLevel: _experienceLevel == null,
+                    paymentType: _paymentType,
+                    clearPaymentType: _paymentType == null,
+                    currency: _currency,
+                    clearCurrency: _currency == null,
                     location: location.isEmpty ? null : location,
                     clearLocation: location.isEmpty,
                     salaryFrom: salaryFrom.isEmpty

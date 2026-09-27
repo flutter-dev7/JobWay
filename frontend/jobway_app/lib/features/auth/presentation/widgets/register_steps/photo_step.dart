@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../../../core/theme/app_theme_extension.dart';
 import '../../../../../core/widgets/buttons/app_button.dart';
 
 class PhotoStep extends StatelessWidget {
@@ -20,13 +21,17 @@ class PhotoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(role == 'Candidate' ? 'Добавьте фото профиля' : 'Добавьте лого компании',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        Text(
+          role == 'Candidate' ? 'Добавьте фото профиля' : 'Добавьте лого компании',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colors.textPrimary),
+        ),
         const SizedBox(height: 6),
-        const Text('Необязательно — можно добавить позже в профиле', style: TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+        Text('Необязательно — можно добавить позже в профиле', style: TextStyle(fontSize: 14, color: colors.textSecondary)),
         const SizedBox(height: 32),
         Center(
           child: GestureDetector(
@@ -37,11 +42,11 @@ class PhotoStep extends StatelessWidget {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
+                      color: colors.surfaceMuted,
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF3157D5), width: 2),
+                      border: Border.all(color: context.accentColor, width: 2),
                     ),
-                    child: const Icon(Icons.add_a_photo_outlined, size: 32, color: Color(0xFF3157D5)),
+                    child: Icon(Icons.add_a_photo_outlined, size: 32, color: context.accentColor),
                   ),
           ),
         ),
@@ -51,7 +56,7 @@ class PhotoStep extends StatelessWidget {
             onTap: onPickPhoto,
             child: Text(
               pickedPhoto != null ? 'Изменить фото' : 'Нажмите, чтобы добавить фото',
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3157D5)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.accentColor),
             ),
           ),
         ),

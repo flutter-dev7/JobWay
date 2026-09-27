@@ -16,6 +16,8 @@ public class Vacancy : BaseEntity
     public decimal? SalaryFrom { get; set; }
     public decimal? SalaryTo { get; set; }
     public VacancyStatus Status { get; set; } = VacancyStatus.Draft;
+    public PaymentType PaymentType { get; set; } = PaymentType.Monthly;
+    public Currency Currency { get; set; } = Currency.TJS;
 
     public List<Skill> RequiredSkills { get; set; } = [];
     public List<JobApplication> Applications { get; set; } = [];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/widgets/display/skill_chip.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
@@ -32,6 +33,7 @@ class VacancyApplicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final hasPhoto =
         application.candidatePhotoUrl != null &&
         application.candidatePhotoUrl!.isNotEmpty;
@@ -40,11 +42,13 @@ class VacancyApplicationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
+            ),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -68,7 +72,7 @@ class VacancyApplicationCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F5FF),
+                    color: colors.surfaceMuted,
                     shape: BoxShape.circle,
                     image: hasPhoto
                         ? DecorationImage(
@@ -87,10 +91,10 @@ class VacancyApplicationCard extends StatelessWidget {
                                       .trim()[0]
                                       .toUpperCase()
                                 : '?',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF3157D5),
+                              color: context.accentColor,
                             ),
                           ),
                         )
@@ -104,18 +108,18 @@ class VacancyApplicationCard extends StatelessWidget {
                         child: Text(
                           application.candidateFullName,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF111827),
+                            color: colors.textPrimary,
                           ),
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(
+                      Icon(
                         Icons.chevron_right_rounded,
                         size: 18,
-                        color: Color(0xFF9CA3AF),
+                        color: colors.textMuted,
                       ),
                     ],
                   ),
@@ -123,17 +127,17 @@ class VacancyApplicationCard extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF3F5FF),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceMuted,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Text(
                       '${application.matchScore}%',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF3157D5),
+                        color: context.accentColor,
                       ),
                     ),
                   ),
@@ -147,12 +151,12 @@ class VacancyApplicationCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFF9FAFB),
+                color: colors.surfaceMuted,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 application.coverMessage!,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                style: TextStyle(fontSize: 13, color: colors.textSecondary),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -194,23 +198,23 @@ class VacancyApplicationCard extends StatelessWidget {
             decoration: InputDecoration(
               filled: true,
               fillColor: isLocked
-                  ? const Color(0xFFF3F4F6)
-                  : const Color(0xFFF9FAFB),
+                  ? colors.border.withOpacity(0.3)
+                  : colors.surfaceMuted,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 10,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                borderSide: BorderSide(color: colors.border),
               ),
             ),
           ),
           if (isLocked) ...[
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Вакансия закрыта — статус нельзя изменить',
-              style: TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
+              style: TextStyle(fontSize: 11, color: colors.textMuted),
             ),
           ],
           if ((application.status == 'Accepted' ||

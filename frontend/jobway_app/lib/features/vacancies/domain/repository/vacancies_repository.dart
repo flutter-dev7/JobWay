@@ -12,6 +12,8 @@ abstract class VacanciesRepository {
     required String description,
     required String employmentType,
     required String experienceLevel,
+    required String paymentType,
+    required String currency,
     String? location,
     double? salaryFrom,
     double? salaryTo,

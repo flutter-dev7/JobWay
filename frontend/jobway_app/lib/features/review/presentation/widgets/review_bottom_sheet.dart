@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../providers/reviews_provider.dart';
@@ -58,10 +59,14 @@ class _ReviewBottomSheetState extends ConsumerState<ReviewBottomSheet> {
 
     setState(() => _submitting = true);
     try {
-      await ref.read(createReviewUseCaseProvider).call(
+      await ref
+          .read(createReviewUseCaseProvider)
+          .call(
             widget.jobApplicationId,
             _rating,
-            comment: _commentController.text.trim().isEmpty ? null : _commentController.text.trim(),
+            comment: _commentController.text.trim().isEmpty
+                ? null
+                : _commentController.text.trim(),
           );
       if (mounted) {
         Navigator.pop(context);
@@ -77,13 +82,17 @@ class _ReviewBottomSheetState extends ConsumerState<ReviewBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -91,7 +100,11 @@ class _ReviewBottomSheetState extends ConsumerState<ReviewBottomSheet> {
           children: [
             Text(
               'Оценить: ${widget.targetName}',
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF111827)),
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: colors.textPrimary,
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -101,7 +114,9 @@ class _ReviewBottomSheetState extends ConsumerState<ReviewBottomSheet> {
                 return IconButton(
                   onPressed: () => setState(() => _rating = starIndex),
                   icon: Icon(
-                    starIndex <= _rating ? Icons.star_rounded : Icons.star_border_rounded,
+                    starIndex <= _rating
+                        ? Icons.star_rounded
+                        : Icons.star_border_rounded,
                     color: const Color(0xFFF59E0B),
                     size: 34,
                   ),
@@ -112,14 +127,16 @@ class _ReviewBottomSheetState extends ConsumerState<ReviewBottomSheet> {
             TextField(
               controller: _commentController,
               maxLines: 3,
+              style: TextStyle(color: colors.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Комментарий (необязательно)',
+                hintStyle: TextStyle(color: colors.textMuted),
                 filled: true,
-                fillColor: const Color(0xFFF9FAFB),
+                fillColor: colors.surfaceMuted,
                 contentPadding: const EdgeInsets.all(12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                  borderSide: BorderSide(color: colors.border),
                 ),
               ),
             ),

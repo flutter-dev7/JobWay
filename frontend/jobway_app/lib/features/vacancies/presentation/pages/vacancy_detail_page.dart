@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/applications/presentation/providers/applications_provider.dart';
@@ -29,12 +30,21 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
   bool _isApplying = false;
   bool _isSaving = false;
 
-  String _formatSalary(double? from, double? to) {
+  String _formatSalary(
+    double? from,
+    double? to,
+    String paymentType,
+    String currency,
+  ) {
     if (from == null && to == null) return 'Не указана';
-    if (from != null && to != null)
-      return '${from.toStringAsFixed(0)} – ${to.toStringAsFixed(0)} TJS';
-    if (from != null) return 'от ${from.toStringAsFixed(0)} TJS';
-    return 'до ${to!.toStringAsFixed(0)} TJS';
+    final currencyLabelText = currencyLabel(currency);
+    final suffix = paymentTypeLabel(paymentType);
+    if (from != null && to != null) {
+      return '${from.toStringAsFixed(0)} – ${to.toStringAsFixed(0)} $currencyLabelText $suffix';
+    }
+    if (from != null)
+      return 'от ${from.toStringAsFixed(0)} $currencyLabelText $suffix';
+    return 'до ${to!.toStringAsFixed(0)} $currencyLabelText $suffix';
   }
 
   Future<void> _apply(bool hasApplied) async {
@@ -76,7 +86,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
     SharePlus.instance.share(
       ShareParams(
         text:
-            '${vacancy.title} в ${vacancy.companyName}\n\nЗарплата: ${_formatSalary(vacancy.salaryFrom, vacancy.salaryTo)}\nЛокация: ${vacancy.location ?? "не указана"}\n\nНайдено в JobWay',
+            '${vacancy.title} в ${vacancy.companyName}\n\nЗарплата: ${_formatSalary(vacancy.salaryFrom, vacancy.salaryTo, vacancy.paymentType, vacancy.currency)}\nЛокация: ${vacancy.location ?? "не указана"}\n\nНайдено в JobWay',
       ),
     );
   }
@@ -88,15 +98,16 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
     final isSaved = savedIds.contains(widget.vacancyId);
     final appliedIds = ref.watch(appliedVacancyIdsProvider);
     final hasApplied = appliedIds.contains(widget.vacancyId);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(
         context,
         'Детали вакансии',
         actions: [
           IconButton(
-            icon: const Icon(Icons.share, size: 20, color: Color(0xFF111827)),
+            icon: Icon(Icons.share, size: 20, color: colors.textPrimary),
             onPressed: () {
               final vacancy = vacancyAsync.valueOrNull;
               if (vacancy != null) _share(vacancy);
@@ -106,9 +117,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
             icon: Icon(
               isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
               size: 22,
-              color: isSaved
-                  ? const Color(0xFF3157D5)
-                  : const Color(0xFF111827),
+              color: isSaved ? context.accentColor : colors.textPrimary,
             ),
             onPressed: _isSaving ? null : () => _toggleSave(isSaved),
           ),
@@ -174,25 +183,22 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                 const SizedBox(height: 16),
                 Text(
                   vacancy.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF111827),
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text.rich(
                   TextSpan(
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
                     children: [
                       TextSpan(
                         text: vacancy.companyName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF374151),
+                          color: colors.textPrimary,
                         ),
                       ),
                       if (vacancy.location != null)
@@ -224,27 +230,29 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                         label: 'Тип занятости',
                         value: employmentTypeLabel(vacancy.employmentType),
                       ),
-                      const Divider(height: 24, color: Color(0xFFF3F4F6)),
+                      Divider(height: 24, color: colors.border),
                       InfoOverviewRow(
                         icon: Icons.trending_up_rounded,
                         label: 'Уровень опыта',
                         value: experienceLevelLabel(vacancy.experienceLevel),
                       ),
-                      const Divider(height: 24, color: Color(0xFFF3F4F6)),
+                      Divider(height: 24, color: colors.border),
                       InfoOverviewRow(
                         icon: Icons.location_on_outlined,
                         label: 'Локация',
                         value: vacancy.location ?? 'Не указана',
                       ),
-                      const Divider(height: 24, color: Color(0xFFF3F4F6)),
+                      Divider(height: 24, color: colors.border),
                       InfoOverviewRow(
                         icon: Icons.payments_outlined,
                         label: 'Зарплата',
                         value: _formatSalary(
                           vacancy.salaryFrom,
                           vacancy.salaryTo,
+                          vacancy.paymentType,
+                          vacancy.currency,
                         ),
-                        valueColor: const Color(0xFF3157D5),
+                        valueColor: context.accentColor,
                       ),
                     ],
                   ),
@@ -255,10 +263,10 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                   icon: Icons.notes_rounded,
                   child: Text(
                     vacancy.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       height: 1.6,
-                      color: Color(0xFF4B5563),
+                      color: colors.textSecondary,
                     ),
                   ),
                 ),
@@ -267,11 +275,11 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                   title: 'Требуемые навыки',
                   icon: Icons.auto_awesome_outlined,
                   child: vacancy.skills.isEmpty
-                      ? const Text(
+                      ? Text(
                           'Не указаны',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF9CA3AF),
+                            color: colors.textMuted,
                           ),
                         )
                       : Wrap(
@@ -298,17 +306,17 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colors.surface,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                        border: Border.all(color: colors.border),
                       ),
                       child: Icon(
                         isSaved
                             ? Icons.bookmark_rounded
                             : Icons.bookmark_border_rounded,
                         color: isSaved
-                            ? const Color(0xFF3157D5)
-                            : const Color(0xFF111827),
+                            ? context.accentColor
+                            : colors.textPrimary,
                       ),
                     ),
                   ),
@@ -345,18 +353,20 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: colors.surfaceMuted,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF374151),
+          color: colors.textSecondary,
         ),
       ),
     );

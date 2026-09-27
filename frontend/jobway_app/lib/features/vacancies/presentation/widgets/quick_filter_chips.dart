@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 
 class QuickFilterChips extends StatelessWidget {
   final String? selectedEmploymentType;
   final ValueChanged<String?> onSelected;
 
-  const QuickFilterChips({super.key, required this.selectedEmploymentType, required this.onSelected});
+  const QuickFilterChips({
+    super.key,
+    required this.selectedEmploymentType,
+    required this.onSelected,
+  });
 
   static const _options = [
     (label: 'Все', value: null),
@@ -16,6 +21,8 @@ class QuickFilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return SizedBox(
       height: 38,
       child: ListView.separated(
@@ -33,7 +40,7 @@ class QuickFilterChips extends StatelessWidget {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF111827) : Colors.white,
+                color: isSelected ? colors.textPrimary : colors.surface,
                 borderRadius: BorderRadius.circular(20),
               ),
               alignment: Alignment.center,
@@ -42,7 +49,7 @@ class QuickFilterChips extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white : const Color(0xFF374151),
+                  color: isSelected ? colors.surface : colors.textSecondary,
                 ),
               ),
             ),

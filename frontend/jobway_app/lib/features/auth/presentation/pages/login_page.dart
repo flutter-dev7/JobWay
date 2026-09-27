@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/network/api_exception.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:jobway_app/features/home/presentation/pages/home_page.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
@@ -23,6 +24,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final colors = context.colors;
 
     ref.listen(authControllerProvider, (previous, next) {
       next.whenOrNull(
@@ -42,7 +44,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -58,27 +60,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       children: [
                         Center(
                           child: Image.asset(
-                            'assets/images/logo.png',
+                            Theme.of(context).brightness == Brightness.dark
+                                ? 'assets/images/logo_dark.png'
+                                : 'assets/images/logo.png',
                             height: 72,
                           ),
                         ),
                         const SizedBox(height: 12),
-                        const Text(
+                        Text(
                           'С возвращением',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF111827),
+                            color: colors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
+                        Text(
                           'Войдите, чтобы продолжить поиск работы',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF6B7280),
+                            color: colors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -99,7 +103,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF3157D5),
+                              foregroundColor: context.accentColor,
                             ),
                             onPressed: () {
                               Navigator.push(
@@ -127,13 +131,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
+                            Text(
                               'Нет аккаунта?',
-                              style: TextStyle(color: Color(0xFF6B7280)),
+                              style: TextStyle(color: colors.textSecondary),
                             ),
                             TextButton(
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF3157D5),
+                                foregroundColor: context.accentColor,
                               ),
                               onPressed: () {
                                 Navigator.push(

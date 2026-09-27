@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/display/section_card.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../pages/all_reviews_page.dart';
@@ -17,6 +18,7 @@ class ReviewsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final averageAsync = ref.watch(averageRatingProvider(userId));
     final reviewsAsync = ref.watch(reviewsForUserProvider(userId));
+    final colors = context.colors;
 
     return SectionCard(
       title: 'Отзывы',
@@ -30,7 +32,7 @@ class ReviewsSection extends ConsumerWidget {
         ),
         error: (error, _) => Text(
           ApiException.extractMessage(error),
-          style: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+          style: TextStyle(fontSize: 13, color: colors.textMuted),
         ),
         data: (reviews) {
           final average = averageAsync.valueOrNull ?? 0;
@@ -41,36 +43,22 @@ class ReviewsSection extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.star_rounded,
-                    color: Color(0xFFF59E0B),
-                    size: 22,
-                  ),
+                  const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 22),
                   const SizedBox(width: 6),
                   Text(
                     average.toStringAsFixed(1),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: colors.textPrimary),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     '(${reviews.length} ${reviews.length == 1 ? "отзыв" : "отзывов"})',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF9CA3AF),
-                    ),
+                    style: TextStyle(fontSize: 13, color: colors.textMuted),
                   ),
                 ],
               ),
               if (preview.isEmpty) ...[
                 const SizedBox(height: 10),
-                const Text(
-                  'Пока нет отзывов',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
-                ),
+                Text('Пока нет отзывов', style: TextStyle(fontSize: 13, color: colors.textMuted)),
               ] else ...[
                 const SizedBox(height: 14),
                 ...preview.map(
@@ -85,34 +73,22 @@ class ReviewsSection extends ConsumerWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF3F5FF),
+                                color: colors.surfaceMuted,
                                 shape: BoxShape.circle,
-                                image:
-                                    review.reviewerPhotoUrl != null &&
-                                        review.reviewerPhotoUrl!.isNotEmpty
+                                image: review.reviewerPhotoUrl != null && review.reviewerPhotoUrl!.isNotEmpty
                                     ? DecorationImage(
-                                        image: NetworkImage(
-                                          '${ApiConstants.fileBaseUrl}${review.reviewerPhotoUrl}',
-                                        ),
+                                        image: NetworkImage('${ApiConstants.fileBaseUrl}${review.reviewerPhotoUrl}'),
                                         fit: BoxFit.cover,
                                       )
                                     : null,
                               ),
-                              child:
-                                  review.reviewerPhotoUrl == null ||
-                                      review.reviewerPhotoUrl!.isEmpty
+                              child: review.reviewerPhotoUrl == null || review.reviewerPhotoUrl!.isEmpty
                                   ? Center(
                                       child: Text(
                                         review.reviewerName.trim().isNotEmpty
-                                            ? review.reviewerName
-                                                  .trim()[0]
-                                                  .toUpperCase()
+                                            ? review.reviewerName.trim()[0].toUpperCase()
                                             : '?',
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF3157D5),
-                                        ),
+                                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: context.accentColor),
                                       ),
                                     )
                                   : null,
@@ -123,11 +99,7 @@ class ReviewsSection extends ConsumerWidget {
                                 review.reviewerName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF111827),
-                                ),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colors.textPrimary),
                               ),
                             ),
                           ],
@@ -138,33 +110,20 @@ class ReviewsSection extends ConsumerWidget {
                             ...List.generate(
                               5,
                               (i) => Icon(
-                                i < review.rating
-                                    ? Icons.star_rounded
-                                    : Icons.star_border_rounded,
+                                i < review.rating ? Icons.star_rounded : Icons.star_border_rounded,
                                 size: 16,
                                 color: const Color(0xFFF59E0B),
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              TimeAgo.format(review.createdAt),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF9CA3AF),
-                              ),
-                            ),
+                            Text(TimeAgo.format(review.createdAt), style: TextStyle(fontSize: 11, color: colors.textMuted)),
                           ],
                         ),
-                        if (review.comment != null &&
-                            review.comment!.isNotEmpty) ...[
+                        if (review.comment != null && review.comment!.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(
                             review.comment!,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF4B5563),
-                              height: 1.5,
-                            ),
+                            style: TextStyle(fontSize: 13, color: colors.textSecondary, height: 1.5),
                           ),
                         ],
                       ],
@@ -177,26 +136,16 @@ class ReviewsSection extends ConsumerWidget {
                     child: GestureDetector(
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => AllReviewsPage(userId: userId),
-                        ),
+                        MaterialPageRoute(builder: (_) => AllReviewsPage(userId: userId)),
                       ),
                       child: Row(
                         children: [
                           Text(
                             'Все отзывы (${reviews.length})',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF3157D5),
-                            ),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.accentColor),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 14,
-                            color: Color(0xFF3157D5),
-                          ),
+                          Icon(Icons.arrow_forward_rounded, size: 14, color: context.accentColor),
                         ],
                       ),
                     ),

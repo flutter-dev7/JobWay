@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../../../../core/widgets/display/company_avatar.dart';
@@ -18,17 +19,20 @@ class ApplicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final statusColor = applicationStatusColor(application.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
+            ),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -54,10 +58,10 @@ class ApplicationCard extends StatelessWidget {
                       application.vacancyTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF111827),
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -65,9 +69,9 @@ class ApplicationCard extends StatelessWidget {
                       application.companyName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF6B7280),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -77,17 +81,17 @@ class ApplicationCard extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F5FF),
+                decoration: BoxDecoration(
+                  color: colors.surfaceMuted,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
                     '${application.matchScore}%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF3157D5),
+                      color: context.accentColor,
                     ),
                   ),
                 ),
@@ -140,7 +144,7 @@ class ApplicationCard extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Text(
               'Отправлено ${TimeAgo.format(application.createdAt)}',
-              style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
+              style: TextStyle(fontSize: 11, color: colors.textMuted),
             ),
           ),
           if ((application.status == 'Accepted' ||

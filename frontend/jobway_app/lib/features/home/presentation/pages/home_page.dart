@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/navigation/floating_nav_bar.dart';
 import '../../../admin/presentation/pages/admin_companies_page.dart';
 import '../../../admin/presentation/pages/admin_profile_page.dart';
@@ -43,10 +44,7 @@ class _HomePageState extends State<HomePage> {
       default:
         return [
           FloatingNavItem(icon: Icons.search, label: 'Вакансии'),
-          FloatingNavItem(
-            icon: Icons.bookmark_border_rounded,
-            label: 'Сохранённые',
-          ),
+          FloatingNavItem(icon: Icons.bookmark_border_rounded, label: 'Сохранённые'),
           FloatingNavItem(icon: Icons.assignment_outlined, label: 'Отклики'),
           FloatingNavItem(icon: Icons.person_outline, label: 'Профиль'),
         ];
@@ -56,24 +54,11 @@ class _HomePageState extends State<HomePage> {
   List<Widget> _buildPages() {
     switch (widget.role) {
       case 'Employer':
-        return const [
-          MyVacanciesPage(),
-          ApplicationsOverviewPage(),
-          CompanyProfilePage(),
-        ];
+        return const [MyVacanciesPage(), ApplicationsOverviewPage(), CompanyProfilePage()];
       case 'Admin':
-        return const [
-          AdminCompaniesPage(),
-          AdminUsersPage(),
-          AdminProfilePage(),
-        ];
+        return const [AdminCompaniesPage(), AdminUsersPage(), AdminProfilePage()];
       default:
-        return const [
-          VacanciesListPage(),
-          SavedVacanciesPage(),
-          MyApplicationsPage(),
-          CandidateProfilePage(),
-        ];
+        return const [VacanciesListPage(), SavedVacanciesPage(), MyApplicationsPage(), CandidateProfilePage()];
     }
   }
 
@@ -82,7 +67,7 @@ class _HomePageState extends State<HomePage> {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.background,
       body: Stack(
         children: [
           IndexedStack(index: _currentIndex, children: _pages),

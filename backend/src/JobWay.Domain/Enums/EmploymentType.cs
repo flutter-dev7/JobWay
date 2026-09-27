@@ -5,5 +5,6 @@ public enum EmploymentType
     FullTime,
     PartTime,
     Remote,
-    Internship
+    Internship,
+    Gig 
 }

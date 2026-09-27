@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import 'package:jobway_app/features/applications/presentation/pages/vacancy_applications_page.dart';
 import '../../../../core/network/api_exception.dart';
@@ -47,20 +48,17 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
   @override
   Widget build(BuildContext context) {
     final vacanciesAsync = ref.watch(myVacanciesProvider);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Мои вакансии',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colors.textPrimary),
         ),
         actions: [
           const NotificationBell(),
@@ -68,17 +66,12 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(
               style: IconButton.styleFrom(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                backgroundColor: colors.surface,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
-              icon: const Icon(Icons.add, color: Color(0xFF111827)),
+              icon: Icon(Icons.add, color: colors.textPrimary),
               onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CreateVacancyPage()),
-                );
+                await Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateVacancyPage()));
                 ref.invalidate(myVacanciesProvider);
               },
             ),
@@ -92,18 +85,12 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
           error: (error, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text(
-                ApiException.extractMessage(error),
-                textAlign: TextAlign.center,
-              ),
+              child: Text(ApiException.extractMessage(error), textAlign: TextAlign.center),
             ),
           ),
           data: (vacancies) => vacancies.isEmpty
-              ? const Center(
-                  child: Text(
-                    'У вас пока нет вакансий',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
-                  ),
+              ? Center(
+                  child: Text('У вас пока нет вакансий', style: TextStyle(fontSize: 14, color: colors.textMuted)),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
