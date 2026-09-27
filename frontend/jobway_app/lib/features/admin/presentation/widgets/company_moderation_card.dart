@@ -1,5 +1,6 @@
 // features/admin/presentation/widgets/company_moderation_card.dart — заменить целиком
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/display/company_avatar.dart';
 import '../../domain/entities/company_moderation.dart';
 
@@ -43,6 +44,7 @@ class CompanyModerationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final color = _statusColor();
     final isFinal = company.verificationStatus == 'Verified';
 
@@ -50,9 +52,15 @@ class CompanyModerationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 14, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,15 +74,17 @@ class CompanyModerationCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(company.companyName,
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+                    Text(
+                      company.companyName,
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: colors.textPrimary),
+                    ),
                     if (company.industry != null || company.location != null) ...[
                       const SizedBox(height: 3),
                       Text(
                         [company.industry, company.location].where((e) => e != null && e.isNotEmpty).join(' · '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                        style: TextStyle(fontSize: 12, color: colors.textSecondary),
                       ),
                     ],
                   ],
@@ -90,7 +100,7 @@ class CompanyModerationCard extends StatelessWidget {
           ),
           if (!isFinal) ...[
             const SizedBox(height: 14),
-            const Divider(height: 1, color: Color(0xFFF3F4F6)),
+            Divider(height: 1, color: colors.border),
             const SizedBox(height: 14),
             Row(
               children: [

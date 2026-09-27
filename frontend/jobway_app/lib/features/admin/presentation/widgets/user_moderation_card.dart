@@ -1,6 +1,7 @@
 // features/admin/presentation/widgets/user_moderation_card.dart — заменить целиком
 import 'package:flutter/material.dart';
 import 'package:jobway_app/core/constants/api_constants.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../domain/entities/user_moderation.dart';
 
 class UserModerationCard extends StatelessWidget {
@@ -50,6 +51,7 @@ class UserModerationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isAdmin = user.role == 'Admin';
     final roleColor = _roleColor();
 
@@ -57,11 +59,13 @@ class UserModerationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -96,10 +100,10 @@ class UserModerationCard extends StatelessWidget {
                   user.email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF111827),
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -128,16 +132,16 @@ class UserModerationCard extends StatelessWidget {
             Switch(
               value: user.isActive,
               onChanged: isUpdating ? null : (_) => onToggle(),
-              activeColor: const Color(0xFF3157D5),
-              activeTrackColor: const Color(0xFFDCE5FF),
+              activeColor: context.accentColor,
+              activeTrackColor: context.accentColor.withOpacity(0.2),
             )
           else
-            const Padding(
-              padding: EdgeInsets.only(right: 4),
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
               child: Icon(
                 Icons.shield_outlined,
                 size: 18,
-                color: Color(0xFF9CA3AF),
+                color: colors.textMuted,
               ),
             ),
         ],

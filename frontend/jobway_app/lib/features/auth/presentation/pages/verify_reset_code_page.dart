@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -63,8 +64,10 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(context, 'Введите код'),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -76,7 +79,7 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
               const SizedBox(height: 20),
               Text(
                 'Мы отправили 6-значный код на ${widget.email}',
-                style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+                style: TextStyle(fontSize: 14, color: colors.textSecondary),
               ),
               const SizedBox(height: 28),
               OtpInput(onCompleted: (value) => setState(() => _code = value)),
@@ -91,7 +94,7 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
                 child: TextButton(
                   onPressed: _isResending ? null : _resend,
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF6B7280),
+                    foregroundColor: colors.textSecondary,
                   ),
                   child: Text(
                     _isResending ? 'Отправка...' : 'Отправить код повторно',

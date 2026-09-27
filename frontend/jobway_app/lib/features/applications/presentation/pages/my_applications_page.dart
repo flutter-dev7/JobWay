@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
 import '../../../../core/network/api_exception.dart';
 import '../providers/applications_provider.dart';
@@ -11,19 +12,20 @@ class MyApplicationsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final applicationsAsync = ref.watch(myApplicationsProvider);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Мои отклики',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -41,10 +43,10 @@ class MyApplicationsPage extends ConsumerWidget {
             ),
           ),
           data: (applications) => applications.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'Вы ещё не откликались на вакансии',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                    style: TextStyle(fontSize: 14, color: colors.textMuted),
                   ),
                 )
               : ListView.builder(

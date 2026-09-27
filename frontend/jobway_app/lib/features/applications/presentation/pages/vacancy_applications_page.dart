@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
 import '../../../../core/network/api_exception.dart';
@@ -49,9 +50,10 @@ class _VacancyApplicationsPageState
       vacancyApplicationsProvider(widget.vacancyId),
     );
     final isLocked = widget.vacancyStatus != 'Active';
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(context, widget.vacancyTitle),
       body: RefreshIndicator(
         onRefresh: () async =>
@@ -68,10 +70,10 @@ class _VacancyApplicationsPageState
             ),
           ),
           data: (applications) => applications.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'Пока нет откликов',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
+                    style: TextStyle(fontSize: 14, color: colors.textMuted),
                   ),
                 )
               : ListView(
@@ -79,10 +81,10 @@ class _VacancyApplicationsPageState
                   children: [
                     Text(
                       '${applications.length} ${applications.length == 1 ? "отклик" : "откликов"}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF6B7280),
+                        color: colors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 12),

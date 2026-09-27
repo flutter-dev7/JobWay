@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/theme/app_theme_extension.dart';
 import '../../../../../core/widgets/buttons/app_button.dart';
 import '../../../../../core/widgets/inputs/app_text_field.dart';
 
@@ -18,12 +19,24 @@ class EmailStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Ваш email', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        Text(
+          'Ваш email',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: 6),
-        const Text('Мы отправим код подтверждения', style: TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+        Text(
+          'Мы отправим код подтверждения',
+          style: TextStyle(fontSize: 14, color: colors.textSecondary),
+        ),
         const SizedBox(height: 28),
         AppTextField(
           controller: emailController,
@@ -32,7 +45,11 @@ class EmailStep extends StatelessWidget {
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 28),
-        AppButton(label: 'Отправить код', isLoading: isLoading, onPressed: canContinue ? onContinue : null),
+        AppButton(
+          label: 'Отправить код',
+          isLoading: isLoading,
+          onPressed: canContinue ? onContinue : null,
+        ),
       ],
     );
   }

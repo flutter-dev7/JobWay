@@ -76,7 +76,7 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(candidateProfileProvider);
-    final colors = context.colors;
+    final colors = context.colors; 
 
     return Scaffold(
       backgroundColor: colors.background,

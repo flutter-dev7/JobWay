@@ -51,6 +51,8 @@ public class VacancyService : IVacancyService
             Description = request.Description,
             EmploymentType = request.EmploymentType,
             ExperienceLevel = request.ExperienceLevel,
+            PaymentType = request.PaymentType,
+            Currency = request.Currency,
             Location = request.Location,
             SalaryFrom = request.SalaryFrom,
             SalaryTo = request.SalaryTo,
@@ -82,6 +84,8 @@ public class VacancyService : IVacancyService
         vacancy.Description = request.Description;
         vacancy.EmploymentType = request.EmploymentType;
         vacancy.ExperienceLevel = request.ExperienceLevel;
+        vacancy.PaymentType = request.PaymentType;
+        vacancy.Currency = request.Currency; 
         vacancy.Location = request.Location;
         vacancy.SalaryFrom = request.SalaryFrom;
         vacancy.SalaryTo = request.SalaryTo;
@@ -227,6 +231,8 @@ public class VacancyService : IVacancyService
         Description = vacancy.Description,
         EmploymentType = vacancy.EmploymentType,
         ExperienceLevel = vacancy.ExperienceLevel,
+        PaymentType = vacancy.PaymentType,
+        Currency = vacancy.Currency, 
         Location = vacancy.Location,
         SalaryFrom = vacancy.SalaryFrom,
         SalaryTo = vacancy.SalaryTo,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
@@ -25,6 +26,8 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
   final _salaryToController = TextEditingController();
   String _employmentType = 'FullTime';
   String _experienceLevel = 'Junior';
+  String _paymentType = 'Monthly';
+  String _currency = 'TJS';
   List<String> _selectedSkillIds = [];
   bool _isLoading = false;
 
@@ -40,6 +43,8 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
     'Middle',
     'Senior',
   ];
+  static const _paymentTypes = ['Monthly', 'Daily', 'PerShift'];
+  static const _currencies = ['TJS', 'USD', 'EUR', 'RUB'];
 
   @override
   void dispose() {
@@ -67,6 +72,8 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
             description: _descriptionController.text.trim(),
             employmentType: _employmentType,
             experienceLevel: _experienceLevel,
+            paymentType: _paymentType,
+            currency: _currency,
             location: _locationController.text.trim().isEmpty
                 ? null
                 : _locationController.text.trim(),
@@ -89,20 +96,25 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
     }
   }
 
-  InputDecoration _dropdownDecoration() => InputDecoration(
-    filled: true,
-    fillColor: const Color(0xFFF9FAFB),
-    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-    ),
-  );
+  InputDecoration _dropdownDecoration(BuildContext context) {
+    final colors = context.colors;
+    return InputDecoration(
+      filled: true,
+      fillColor: colors.surfaceMuted,
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.border),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(context, 'Новая вакансия'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -144,11 +156,9 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
                       .toList(),
                   onChanged: (value) =>
                       setState(() => _employmentType = value!),
-                  decoration: _dropdownDecoration(),
+                  decoration: _dropdownDecoration(context),
                 ),
-
                 const SizedBox(height: 14),
-
                 DropdownButtonFormField<String>(
                   value: _experienceLevel,
                   items: _experienceLevels
@@ -161,13 +171,58 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
                       .toList(),
                   onChanged: (value) =>
                       setState(() => _experienceLevel = value!),
-                  decoration: _dropdownDecoration(),
+                  decoration: _dropdownDecoration(context),
                 ),
                 const SizedBox(height: 14),
                 AppTextField(
                   controller: _locationController,
                   label: 'Локация',
                   icon: Icons.location_on_outlined,
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        controller: _salaryFromController,
+                        label: 'Зарплата от',
+                        icon: Icons.payments_outlined,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppTextField(
+                        controller: _salaryToController,
+                        label: 'Зарплата до',
+                        icon: Icons.payments_outlined,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                DropdownButtonFormField<String>(
+                  value: _paymentType,
+                  items: _paymentTypes
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text('Оплата ${paymentTypeLabel(type)}'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) => setState(() => _paymentType = value!),
+                  decoration: _dropdownDecoration(context),
+                ),
+                const SizedBox(height: 14),
+                DropdownButtonFormField<String>(
+                  value: _currency,
+                  items: _currencies
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: (value) => setState(() => _currency = value!),
+                  decoration: _dropdownDecoration(context),
                 ),
                 const SizedBox(height: 14),
                 Row(

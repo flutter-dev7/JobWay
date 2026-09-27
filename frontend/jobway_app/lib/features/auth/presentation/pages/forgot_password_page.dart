@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -45,8 +46,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(context, 'Забыли пароль?'),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -56,9 +59,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             children: [
               const StepProgressBar(currentStep: 0, totalSteps: 3),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Введите email — мы отправим код подтверждения',
-                style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+                style: TextStyle(fontSize: 14, color: colors.textSecondary),
               ),
               const SizedBox(height: 24),
               AppTextField(

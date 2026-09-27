@@ -13,6 +13,8 @@ public class CreateVacancyRequest
 
     public EmploymentType EmploymentType { get; set; }
     public ExperienceLevel ExperienceLevel { get; set; }
+    public PaymentType PaymentType { get; set; } = PaymentType.Monthly;
+    public Currency Currency { get; set; } = Currency.TJS;
     public string? Location { get; set; }
     public decimal? SalaryFrom { get; set; }
     public decimal? SalaryTo { get; set; }

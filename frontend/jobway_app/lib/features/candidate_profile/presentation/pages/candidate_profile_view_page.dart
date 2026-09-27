@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
-import 'package:jobway_app/features/candidate_profile/presentation/widgets/info_row.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
@@ -16,39 +17,35 @@ class CandidateProfileViewPage extends ConsumerWidget {
   const CandidateProfileViewPage({super.key, required this.candidateProfileId});
 
   String _experienceLevelLabel(String level) => switch (level) {
-    'NoExperience' => 'Без опыта',
-    'Junior' => 'Junior',
-    'Middle' => 'Middle',
-    'Senior' => 'Senior',
-    _ => level,
-  };
+        'NoExperience' => 'Без опыта',
+        'Junior' => 'Junior',
+        'Middle' => 'Middle',
+        'Senior' => 'Senior',
+        _ => level,
+      };
 
   String _employmentTypeLabel(String type) => switch (type) {
-    'FullTime' => 'Полная занятость',
-    'PartTime' => 'Частичная занятость',
-    'Remote' => 'Удалённо',
-    'Internship' => 'Стажировка',
-    _ => type,
-  };
+        'FullTime' => 'Полная занятость',
+        'PartTime' => 'Частичная занятость',
+        'Remote' => 'Удалённо',
+        'Internship' => 'Стажировка',
+        _ => type,
+      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileAsync = ref.watch(
-      candidateProfileByIdProvider(candidateProfileId),
-    );
+    final profileAsync = ref.watch(candidateProfileByIdProvider(candidateProfileId));
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appMinimalAppBar(context),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text(
-              ApiException.extractMessage(error),
-              textAlign: TextAlign.center,
-            ),
+            child: Text(ApiException.extractMessage(error), textAlign: TextAlign.center),
           ),
         ),
         data: (profile) => ListView(
@@ -57,11 +54,11 @@ class CandidateProfileViewPage extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.035),
+                    color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.035),
                     blurRadius: 20,
                     offset: const Offset(0, 6),
                   ),
@@ -73,34 +70,18 @@ class CandidateProfileViewPage extends ConsumerWidget {
                     width: 88,
                     height: 88,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF3FF),
+                      color: colors.surfaceMuted,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFFDCE5FF),
-                        width: 3,
-                      ),
-                      image:
-                          profile.photoUrl != null &&
-                              profile.photoUrl!.isNotEmpty
-                          ? DecorationImage(
-                              image: NetworkImage(
-                                '${ApiConstants.fileBaseUrl}${profile.photoUrl}',
-                              ),
-                              fit: BoxFit.cover,
-                            )
+                      border: Border.all(color: colors.border, width: 3),
+                      image: profile.photoUrl != null && profile.photoUrl!.isNotEmpty
+                          ? DecorationImage(image: NetworkImage('${ApiConstants.fileBaseUrl}${profile.photoUrl}'), fit: BoxFit.cover)
                           : null,
                     ),
                     child: profile.photoUrl == null || profile.photoUrl!.isEmpty
                         ? Center(
                             child: Text(
-                              profile.fullName.trim().isNotEmpty
-                                  ? profile.fullName.trim()[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                fontSize: 34,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF3157D5),
-                              ),
+                              profile.fullName.trim().isNotEmpty ? profile.fullName.trim()[0].toUpperCase() : '?',
+                              style: TextStyle(fontSize: 34, fontWeight: FontWeight.w700, color: context.accentColor),
                             ),
                           )
                         : null,
@@ -109,21 +90,11 @@ class CandidateProfileViewPage extends ConsumerWidget {
                   Text(
                     profile.fullName,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: colors.textPrimary),
                   ),
                   if (profile.location != null) ...[
                     const SizedBox(height: 7),
-                    Text(
-                      profile.location!,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
+                    Text(profile.location!, style: TextStyle(fontSize: 14, color: colors.textSecondary)),
                   ],
                 ],
               ),
@@ -153,14 +124,7 @@ class CandidateProfileViewPage extends ConsumerWidget {
               SectionCard(
                 title: 'О себе',
                 icon: Icons.notes_rounded,
-                child: Text(
-                  profile.bio!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    height: 1.6,
-                    color: Color(0xFF4B5563),
-                  ),
-                ),
+                child: Text(profile.bio!, style: TextStyle(fontSize: 14, height: 1.6, color: colors.textSecondary)),
               ),
             ],
             const SizedBox(height: 16),
@@ -168,68 +132,38 @@ class CandidateProfileViewPage extends ConsumerWidget {
               title: 'Навыки',
               icon: Icons.auto_awesome_outlined,
               child: profile.skills.isEmpty
-                  ? const Text(
-                      'Не указаны',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
-                    )
-                  : Wrap(
-                      spacing: 8,
-                      runSpacing: 10,
-                      children: profile.skills
-                          .map((s) => SkillChip(label: s.nameRu))
-                          .toList(),
-                    ),
+                  ? Text('Не указаны', style: TextStyle(fontSize: 14, color: colors.textMuted))
+                  : Wrap(spacing: 8, runSpacing: 10, children: profile.skills.map((s) => SkillChip(label: s.nameRu)).toList()),
             ),
-            if (profile.resumeFileUrl != null &&
-                profile.resumeFileUrl!.isNotEmpty) ...[
+            if (profile.resumeFileUrl != null && profile.resumeFileUrl!.isNotEmpty) ...[
               const SizedBox(height: 16),
               SectionCard(
                 title: 'Резюме',
                 icon: Icons.attach_file_rounded,
                 child: GestureDetector(
                   onTap: () => launchUrl(
-                    Uri.parse(
-                      '${ApiConstants.fileBaseUrl}${profile.resumeFileUrl}',
-                    ),
+                    Uri.parse('${ApiConstants.fileBaseUrl}${profile.resumeFileUrl}'),
                     mode: LaunchMode.externalApplication,
                   ),
                   child: Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: BoxDecoration(color: colors.surfaceMuted, borderRadius: BorderRadius.circular(12)),
                     child: Row(
                       children: [
                         Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFEE2E2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.picture_as_pdf_outlined,
-                            size: 20,
-                            color: Color(0xFFDC2626),
-                          ),
+                          decoration: BoxDecoration(color: const Color(0xFFFEE2E2), borderRadius: BorderRadius.circular(10)),
+                          child: const Icon(Icons.picture_as_pdf_outlined, size: 20, color: Color(0xFFDC2626)),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'Открыть резюме',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF111827),
-                            ),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colors.textPrimary),
                           ),
                         ),
-                        const Icon(
-                          Icons.open_in_new_rounded,
-                          size: 18,
-                          color: Color(0xFF9CA3AF),
-                        ),
+                        Icon(Icons.open_in_new_rounded, size: 18, color: colors.textMuted),
                       ],
                     ),
                   ),

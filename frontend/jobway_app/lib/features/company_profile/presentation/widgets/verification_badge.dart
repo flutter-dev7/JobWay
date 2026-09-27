@@ -48,13 +48,23 @@ class VerificationBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Row(
         children: [
           Icon(_icon(), size: 18, color: color),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(_label(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
+            child: Text(
+              _label(),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
           ),
         ],
       ),

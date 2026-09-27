@@ -11,6 +11,8 @@ class VacancyModel {
   final String description;
   final String employmentType;
   final String experienceLevel;
+  final String paymentType;
+  final String currency;
   final String? location;
   final String? companyLogoUrl;
   final double? salaryFrom;
@@ -28,6 +30,8 @@ class VacancyModel {
     required this.description,
     required this.employmentType,
     required this.experienceLevel,
+    required this.paymentType,
+    required this.currency,
     this.location,
     this.companyLogoUrl,
     this.salaryFrom,
@@ -38,40 +42,42 @@ class VacancyModel {
   });
 
   factory VacancyModel.fromJson(Map<String, dynamic> json) => VacancyModel(
-    id: json['id'],
-    companyProfileId: json['companyProfileId'],
-    companyUserId: json['companyUserId'],
-    companyName: json['companyName'],
-    title: json['title'],
-    description: json['description'],
-    employmentType: json['employmentType'],
-    experienceLevel: json['experienceLevel'],
-    location: json['location'],
-    companyLogoUrl: json['companyLogoUrl'],
-    salaryFrom: (json['salaryFrom'] as num?)?.toDouble(),
-    salaryTo: (json['salaryTo'] as num?)?.toDouble(),
-    status: json['status'],
-    skills: (json['skills'] as List)
-        .map((s) => SkillModel.fromJson(s))
-        .toList(),
-    createdAt: DateTime.parse(json['createdAt']),
-  );
+        id: json['id'],
+        companyProfileId: json['companyProfileId'],
+        companyUserId: json['companyUserId'],
+        companyName: json['companyName'],
+        title: json['title'],
+        description: json['description'],
+        employmentType: json['employmentType'],
+        experienceLevel: json['experienceLevel'],
+        paymentType: json['paymentType'],
+        currency: json['currency'],
+        location: json['location'],
+        companyLogoUrl: json['companyLogoUrl'],
+        salaryFrom: (json['salaryFrom'] as num?)?.toDouble(),
+        salaryTo: (json['salaryTo'] as num?)?.toDouble(),
+        status: json['status'],
+        skills: (json['skills'] as List).map((s) => SkillModel.fromJson(s)).toList(),
+        createdAt: DateTime.parse(json['createdAt']),
+      );
 
   Vacancy toEntity() => Vacancy(
-    id: id,
-    companyProfileId: companyProfileId,
-    companyUserId: companyUserId,
-    companyName: companyName,
-    title: title,
-    description: description,
-    employmentType: employmentType,
-    experienceLevel: experienceLevel,
-    location: location,
-    companyLogoUrl: companyLogoUrl,
-    salaryFrom: salaryFrom,
-    salaryTo: salaryTo,
-    status: status,
-    skills: skills.map((s) => s.toEntity()).toList(),
-    createdAt: createdAt,
-  );
+        id: id,
+        companyProfileId: companyProfileId,
+        companyUserId: companyUserId,
+        companyName: companyName,
+        title: title,
+        description: description,
+        employmentType: employmentType,
+        experienceLevel: experienceLevel,
+        paymentType: paymentType,
+        currency: currency,
+        location: location,
+        companyLogoUrl: companyLogoUrl,
+        salaryFrom: salaryFrom,
+        salaryTo: salaryTo,
+        status: status,
+        skills: skills.map((s) => s.toEntity()).toList(),
+        createdAt: createdAt,
+      );
 }

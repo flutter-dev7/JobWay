@@ -31,7 +31,7 @@ public class VacancyRepository : IVacancyRepository
             .Where(v => v.Status == VacancyStatus.Active);
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
-            query = query.Where(v => v.Title.Contains(filter.Search));
+            query = query.Where(v => EF.Functions.ILike(v.Title, $"%{filter.Search}%"));
 
         if (filter.EmploymentType is not null)
             query = query.Where(v => v.EmploymentType == filter.EmploymentType);
@@ -40,10 +40,16 @@ public class VacancyRepository : IVacancyRepository
             query = query.Where(v => v.ExperienceLevel == filter.ExperienceLevel);
 
         if (!string.IsNullOrWhiteSpace(filter.Location))
-            query = query.Where(v => v.Location != null && v.Location.Contains(filter.Location));
+            query = query.Where(v => v.Location != null && EF.Functions.ILike(v.Location, $"%{filter.Location}%"));
 
         if (filter.SalaryFrom is not null)
             query = query.Where(v => v.SalaryFrom == null || v.SalaryFrom >= filter.SalaryFrom);
+        
+        if (filter.PaymentType is not null)
+            query = query.Where(v => v.PaymentType == filter.PaymentType);
+
+        if (filter.Currency is not null)
+            query = query.Where(v => v.Currency == filter.Currency);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
@@ -55,7 +61,7 @@ public class VacancyRepository : IVacancyRepository
 
         return (items, totalCount);
     }
-    
+
     public Task<int> CountCreatedTodayAsync(CancellationToken cancellationToken)
     {
         var todayStart = DateTime.UtcNow.Date;

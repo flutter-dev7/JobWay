@@ -1,5 +1,6 @@
 // features/vacancies/presentation/widgets/my_vacancy_card.dart
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../../../../core/widgets/display/company_avatar.dart';
@@ -51,16 +52,19 @@ class MyVacancyCard extends StatelessWidget {
 
   String _formatSalary() {
     if (vacancy.salaryFrom == null && vacancy.salaryTo == null) return '';
+    final currency = currencyLabel(vacancy.currency);
+    final suffix = paymentTypeLabel(vacancy.paymentType);
     if (vacancy.salaryFrom != null && vacancy.salaryTo != null) {
-      return '${vacancy.salaryFrom!.toStringAsFixed(0)} – ${vacancy.salaryTo!.toStringAsFixed(0)} TJS';
+      return '${vacancy.salaryFrom!.toStringAsFixed(0)} – ${vacancy.salaryTo!.toStringAsFixed(0)} $currency $suffix';
     }
     if (vacancy.salaryFrom != null)
-      return 'от ${vacancy.salaryFrom!.toStringAsFixed(0)} TJS';
-    return 'до ${vacancy.salaryTo!.toStringAsFixed(0)} TJS';
+      return 'от ${vacancy.salaryFrom!.toStringAsFixed(0)} $currency $suffix';
+    return 'до ${vacancy.salaryTo!.toStringAsFixed(0)} $currency $suffix';
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final color = _statusColor();
     final showActions = vacancy.status == 'Draft' || vacancy.status == 'Active';
 
@@ -70,11 +74,13 @@ class MyVacancyCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
+              ),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -97,10 +103,10 @@ class MyVacancyCard extends StatelessWidget {
                     vacancy.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),
@@ -154,20 +160,22 @@ class MyVacancyCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Зарплата в месяц',
+                        Text(
+                          vacancy.paymentType == 'Monthly'
+                              ? 'Зарплата в месяц'
+                              : 'Оплата',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF9CA3AF),
+                            color: colors.textMuted,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           _formatSalary(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF3157D5),
+                            color: context.accentColor,
                           ),
                         ),
                       ],
@@ -177,16 +185,13 @@ class MyVacancyCard extends StatelessWidget {
                   const Spacer(),
                 Text(
                   TimeAgo.format(vacancy.createdAt),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF9CA3AF),
-                  ),
+                  style: TextStyle(fontSize: 12, color: colors.textMuted),
                 ),
               ],
             ),
             if (showActions) ...[
               const SizedBox(height: 14),
-              const Divider(height: 1, color: Color(0xFFF3F4F6)),
+              Divider(height: 1, color: colors.border),
               const SizedBox(height: 14),
               Row(
                 children: [
@@ -200,8 +205,8 @@ class MyVacancyCard extends StatelessWidget {
                         ),
                         label: const Text('Опубликовать'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF111827),
-                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          foregroundColor: colors.textPrimary,
+                          side: BorderSide(color: colors.border),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -229,7 +234,7 @@ class MyVacancyCard extends StatelessWidget {
               ),
             ] else ...[
               const SizedBox(height: 10),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
@@ -237,14 +242,14 @@ class MyVacancyCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF3157D5),
+                      color: context.accentColor,
                     ),
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Icon(
                     Icons.arrow_forward_rounded,
                     size: 14,
-                    color: Color(0xFF3157D5),
+                    color: context.accentColor,
                   ),
                 ],
               ),
@@ -264,20 +269,22 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F6FA),
+        color: colors.surfaceMuted,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: const Color(0xFF6B7280)),
+          Icon(icon, size: 13, color: colors.textSecondary),
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+            style: TextStyle(fontSize: 11, color: colors.textSecondary),
           ),
         ],
       ),

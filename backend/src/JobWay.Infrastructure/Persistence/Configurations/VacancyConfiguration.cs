@@ -1,4 +1,5 @@
 using JobWay.Domain.Entities;
+using JobWay.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,6 +14,8 @@ public class VacancyConfiguration : IEntityTypeConfiguration<Vacancy>
         builder.Property(v => v.Location).HasMaxLength(200);
         builder.Property(v => v.SalaryFrom).HasPrecision(12, 2);
         builder.Property(v => v.SalaryTo).HasPrecision(12, 2);
+        builder.Property(v => v.PaymentType).HasDefaultValue(PaymentType.Monthly);
+        builder.Property(v => v.Currency).HasDefaultValue(Currency.TJS);
 
         builder.HasMany(v => v.RequiredSkills)
             .WithMany(s => s.Vacancies)

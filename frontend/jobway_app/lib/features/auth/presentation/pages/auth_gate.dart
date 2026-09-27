@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/providers/core_providers.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import 'login_page.dart';
 
@@ -38,7 +39,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   @override
   Widget build(BuildContext context) {
     if (_checking) {
-      return const Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator()));
+      return Scaffold(backgroundColor: context.colors.background, body: const Center(child: CircularProgressIndicator()));
     }
 
     if (_isLoggedIn && _role != null) {

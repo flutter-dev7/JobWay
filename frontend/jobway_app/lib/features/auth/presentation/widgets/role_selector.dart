@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 
 class RoleSelector extends StatelessWidget {
   final String selectedRole;
@@ -8,20 +9,23 @@ class RoleSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(color: colors.surfaceMuted, borderRadius: BorderRadius.circular(14)),
       child: Row(
         children: [
-          _buildOption(label: 'Кандидат', value: 'Candidate'),
-          _buildOption(label: 'Работодатель', value: 'Employer'),
+          _buildOption(context, label: 'Кандидат', value: 'Candidate'),
+          _buildOption(context, label: 'Работодатель', value: 'Employer'),
         ],
       ),
     );
   }
 
-  Widget _buildOption({required String label, required String value}) {
+  Widget _buildOption(BuildContext context, {required String label, required String value}) {
     final isSelected = selectedRole == value;
+    final colors = context.colors;
 
     return Expanded(
       child: GestureDetector(
@@ -30,7 +34,7 @@ class RoleSelector extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? colors.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             boxShadow: isSelected
                 ? [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))]
@@ -41,7 +45,7 @@ class RoleSelector extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFF6B7280),
+              color: isSelected ? context.accentColor : colors.textSecondary,
             ),
           ),
         ),

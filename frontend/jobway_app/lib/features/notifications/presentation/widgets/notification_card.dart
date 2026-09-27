@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../domain/entities/notification.dart';
 
 class NotificationCard extends StatelessWidget {
@@ -69,17 +70,21 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: notification.isRead ? Colors.white : const Color(0xFFF3F5FF),
+          color: notification.isRead ? colors.surface : colors.surfaceMuted,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
+              ),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -104,27 +109,21 @@ class NotificationCard extends StatelessWidget {
                 children: [
                   Text(
                     notification.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     notification.message,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     _timeAgo(),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF9CA3AF),
-                    ),
+                    style: TextStyle(fontSize: 11, color: colors.textMuted),
                   ),
                 ],
               ),
@@ -134,8 +133,8 @@ class NotificationCard extends StatelessWidget {
                 width: 8,
                 height: 8,
                 margin: const EdgeInsets.only(top: 4),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF3157D5),
+                decoration: BoxDecoration(
+                  color: context.accentColor,
                   shape: BoxShape.circle,
                 ),
               ),

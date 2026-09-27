@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/theme/app_theme_extension.dart';
 import '../../../../../core/widgets/buttons/app_button.dart';
 import '../../../../../core/widgets/inputs/app_text_field.dart';
 import '../role_selector.dart';
@@ -21,12 +22,14 @@ class RoleNameStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Кто вы?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        Text('Кто вы?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colors.textPrimary)),
         const SizedBox(height: 6),
-        const Text('Выберите роль и представьтесь', style: TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+        Text('Выберите роль и представьтесь', style: TextStyle(fontSize: 14, color: colors.textSecondary)),
         const SizedBox(height: 28),
         RoleSelector(selectedRole: role, onChanged: onRoleChanged),
         const SizedBox(height: 18),

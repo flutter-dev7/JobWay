@@ -2,8 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
-import 'package:jobway_app/features/candidate_profile/presentation/widgets/info_row.dart';
+import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
@@ -66,25 +67,26 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(companyProfileProvider);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Профиль компании',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
+            color: colors.textPrimary,
           ),
         ),
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: colors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -101,15 +103,15 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(
               style: IconButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: colors.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              icon: const Icon(
+              icon: Icon(
                 Icons.edit_outlined,
                 size: 21,
-                color: Color(0xFF111827),
+                color: colors.textPrimary,
               ),
               onPressed: () async {
                 final profile = profileAsync.valueOrNull;
@@ -146,11 +148,15 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.035),
+                    color: Colors.black.withOpacity(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 0.2
+                          : 0.035,
+                    ),
                     blurRadius: 20,
                     offset: const Offset(0, 6),
                   ),
@@ -173,19 +179,19 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                   Text(
                     profile.companyName,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+                      color: colors.textPrimary,
                     ),
                   ),
                   if (profile.location != null) ...[
                     const SizedBox(height: 7),
                     Text(
                       profile.location!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF6B7280),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -200,10 +206,10 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                 icon: Icons.notes_rounded,
                 child: Text(
                   profile.description!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     height: 1.6,
-                    color: Color(0xFF4B5563),
+                    color: colors.textSecondary,
                   ),
                 ),
               ),
@@ -241,32 +247,31 @@ class _WebsiteLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Сайт',
-          style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
-        ),
+        Text('Сайт', style: TextStyle(fontSize: 12, color: colors.textMuted)),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFFF3F5FF),
+            color: colors.surfaceMuted,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             children: [
-              const Icon(Icons.link, size: 16, color: Color(0xFF3157D5)),
+              Icon(Icons.link, size: 16, color: context.accentColor),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   url,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF3157D5),
+                    color: context.accentColor,
                   ),
                 ),
               ),

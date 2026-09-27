@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/theme/app_theme_extension.dart';
 import '../../../../../core/widgets/inputs/otp_input.dart';
 
 class VerifyEmailStep extends StatelessWidget {
@@ -19,12 +20,24 @@ class VerifyEmailStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Введите код', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        Text(
+          'Введите код',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: 6),
-        Text('Мы отправили 6-значный код на $email', style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+        Text(
+          'Мы отправили 6-значный код на $email',
+          style: TextStyle(fontSize: 14, color: colors.textSecondary),
+        ),
         const SizedBox(height: 32),
         OtpInput(onCompleted: onCodeCompleted),
         const SizedBox(height: 16),
@@ -34,8 +47,12 @@ class VerifyEmailStep extends StatelessWidget {
           Center(
             child: TextButton(
               onPressed: isResending ? null : onResend,
-              style: TextButton.styleFrom(foregroundColor: const Color(0xFF6B7280)),
-              child: Text(isResending ? 'Отправка...' : 'Отправить код повторно'),
+              style: TextButton.styleFrom(
+                foregroundColor: colors.textSecondary,
+              ),
+              child: Text(
+                isResending ? 'Отправка...' : 'Отправить код повторно',
+              ),
             ),
           ),
       ],

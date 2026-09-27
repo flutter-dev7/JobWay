@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
@@ -154,20 +155,25 @@ class _EditCandidateProfilePageState
     }
   }
 
-  InputDecoration _dropdownDecoration() => InputDecoration(
-    filled: true,
-    fillColor: const Color(0xFFF9FAFB),
-    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-    ),
-  );
+  InputDecoration _dropdownDecoration(BuildContext context) {
+    final colors = context.colors;
+    return InputDecoration(
+      filled: true,
+      fillColor: colors.surfaceMuted,
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.border),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(context, 'Редактировать профиль'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -223,23 +229,16 @@ class _EditCandidateProfilePageState
                   items: _experienceLevels
                       .map(
                         (level) => DropdownMenuItem(
-                          value: level, // отправляем в API: Junior, Senior...
-                          child: Text(
-                            experienceLevelLabel(
-                              level,
-                            ), // показываем: Junior, Senior...
-                          ),
+                          value: level,
+                          child: Text(experienceLevelLabel(level)),
                         ),
                       )
                       .toList(),
-                  onChanged: (value) {
-                    setState(() => _experienceLevel = value!);
-                  },
-                  decoration: _dropdownDecoration(),
+                  onChanged: (value) =>
+                      setState(() => _experienceLevel = value!),
+                  decoration: _dropdownDecoration(context),
                 ),
-
                 const SizedBox(height: 14),
-
                 DropdownButtonFormField<String>(
                   value: _employmentType,
                   items: _employmentTypes
@@ -250,10 +249,9 @@ class _EditCandidateProfilePageState
                         ),
                       )
                       .toList(),
-                  onChanged: (value) {
-                    setState(() => _employmentType = value!);
-                  },
-                  decoration: _dropdownDecoration(),
+                  onChanged: (value) =>
+                      setState(() => _employmentType = value!),
+                  decoration: _dropdownDecoration(context),
                 ),
               ],
             ),
@@ -283,7 +281,7 @@ class _EditCandidateProfilePageState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
+                          color: colors.surfaceMuted,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -307,10 +305,10 @@ class _EditCandidateProfilePageState
                                 _resumeFileUrl!.split('/').last,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF111827),
+                                  color: colors.textPrimary,
                                 ),
                               ),
                             ),
@@ -335,7 +333,7 @@ class _EditCandidateProfilePageState
                               : const Icon(Icons.refresh_rounded, size: 16),
                           label: const Text('Заменить файл'),
                           style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xFF3157D5),
+                            foregroundColor: context.accentColor,
                           ),
                         ),
                       ),

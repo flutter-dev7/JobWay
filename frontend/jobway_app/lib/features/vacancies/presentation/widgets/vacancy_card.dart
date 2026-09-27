@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/display/company_avatar.dart';
+import '../../../review/presentation/providers/reviews_provider.dart';
 import '../../domain/entities/vacancy.dart';
 import '../providers/vacancies_provider.dart';
 
@@ -16,18 +18,24 @@ class VacancyCard extends ConsumerWidget {
 
   String _formatSalary() {
     if (vacancy.salaryFrom == null && vacancy.salaryTo == null) return '';
+    final currency = currencyLabel(vacancy.currency);
+    final suffix = paymentTypeLabel(vacancy.paymentType);
     if (vacancy.salaryFrom != null && vacancy.salaryTo != null) {
-      return '${vacancy.salaryFrom!.toStringAsFixed(0)} – ${vacancy.salaryTo!.toStringAsFixed(0)} TJS';
+      return '${vacancy.salaryFrom!.toStringAsFixed(0)} – ${vacancy.salaryTo!.toStringAsFixed(0)} $currency $suffix';
     }
     if (vacancy.salaryFrom != null)
-      return 'от ${vacancy.salaryFrom!.toStringAsFixed(0)} TJS';
-    return 'до ${vacancy.salaryTo!.toStringAsFixed(0)} TJS';
+      return 'от ${vacancy.salaryFrom!.toStringAsFixed(0)} $currency $suffix';
+    return 'до ${vacancy.salaryTo!.toStringAsFixed(0)} $currency $suffix';
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final savedIds = ref.watch(savedVacancyIdsProvider);
     final isSaved = savedIds.contains(vacancy.id);
+    final averageAsync = ref.watch(
+      averageRatingProvider(vacancy.companyUserId),
+    );
+    final colors = context.colors;
 
     return GestureDetector(
       onTap: onTap,
@@ -35,11 +43,13 @@ class VacancyCard extends ConsumerWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
+              ),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -64,21 +74,45 @@ class VacancyCard extends ConsumerWidget {
                         vacancy.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF111827),
+                          color: colors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        vacancy.companyName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7280),
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              vacancy.companyName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          if (averageAsync.valueOrNull != null &&
+                              averageAsync.valueOrNull! > 0) ...[
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 14,
+                              color: Color(0xFFF59E0B),
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              averageAsync.valueOrNull!.toStringAsFixed(1),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),
@@ -100,9 +134,7 @@ class VacancyCard extends ConsumerWidget {
                             .call(vacancy.id);
                         notifier.update((state) => {...state, vacancy.id});
                       }
-                      ref.invalidate(
-                        savedVacanciesProvider,
-                      ); 
+                      ref.invalidate(savedVacanciesProvider);
                     } catch (error) {
                       AppSnackbar.showError(ApiException.extractMessage(error));
                     }
@@ -112,9 +144,7 @@ class VacancyCard extends ConsumerWidget {
                         ? Icons.bookmark_rounded
                         : Icons.bookmark_border_rounded,
                     size: 22,
-                    color: isSaved
-                        ? const Color(0xFF3157D5)
-                        : const Color(0xFF9CA3AF),
+                    color: isSaved ? context.accentColor : colors.textMuted,
                   ),
                 ),
               ],
@@ -148,20 +178,22 @@ class VacancyCard extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Зарплата в месяц',
+                        Text(
+                          vacancy.paymentType == 'Monthly'
+                              ? 'Зарплата в месяц'
+                              : 'Оплата',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF9CA3AF),
+                            color: colors.textMuted,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           _formatSalary(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF3157D5),
+                            color: context.accentColor,
                           ),
                         ),
                       ],
@@ -171,10 +203,7 @@ class VacancyCard extends ConsumerWidget {
                   const Spacer(),
                 Text(
                   TimeAgo.format(vacancy.createdAt),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF9CA3AF),
-                  ),
+                  style: TextStyle(fontSize: 12, color: colors.textMuted),
                 ),
               ],
             ),
@@ -193,20 +222,22 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F6FA),
+        color: colors.surfaceMuted,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: const Color(0xFF6B7280)),
+          Icon(icon, size: 13, color: colors.textSecondary),
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+            style: TextStyle(fontSize: 11, color: colors.textSecondary),
           ),
         ],
       ),

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../providers/admin_provider.dart';
 import '../widgets/user_moderation_card.dart';
@@ -13,20 +14,17 @@ class AdminUsersPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(adminUsersControllerProvider);
     final controller = ref.read(adminUsersControllerProvider.notifier);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Пользователи',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colors.textPrimary),
         ),
       ),
       body: RefreshIndicator(
@@ -35,10 +33,7 @@ class AdminUsersPage extends ConsumerWidget {
             ? const Center(child: CircularProgressIndicator())
             : state.error != null
             ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(state.error!, textAlign: TextAlign.center),
-                ),
+                child: Padding(padding: const EdgeInsets.all(24), child: Text(state.error!, textAlign: TextAlign.center)),
               )
             : ListView.builder(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
@@ -52,15 +47,9 @@ class AdminUsersPage extends ConsumerWidget {
                     onToggle: () async {
                       try {
                         await controller.toggle(user);
-                        AppSnackbar.showSuccess(
-                          user.isActive
-                              ? 'Пользователь заблокирован'
-                              : 'Пользователь разблокирован',
-                        );
+                        AppSnackbar.showSuccess(user.isActive ? 'Пользователь заблокирован' : 'Пользователь разблокирован');
                       } catch (error) {
-                        AppSnackbar.showError(
-                          ApiException.extractMessage(error),
-                        );
+                        AppSnackbar.showError(ApiException.extractMessage(error));
                       }
                     },
                   );

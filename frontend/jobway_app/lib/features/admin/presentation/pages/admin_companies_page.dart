@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../domain/entities/company_moderation.dart';
 import '../providers/admin_provider.dart';
@@ -56,15 +57,18 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
   @override
   Widget build(BuildContext context) {
     final companiesAsync = ref.watch(adminCompaniesProvider);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Компании',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+        title: Text(
+          'Компании',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colors.textPrimary),
+        ),
       ),
       body: companiesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -97,33 +101,37 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                           duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF111827) : Colors.white,
+                            color: isSelected ? colors.textPrimary : colors.surface,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           alignment: Alignment.center,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(_filters[index],
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: isSelected ? Colors.white : const Color(0xFF374151),
-                                  )),
+                              Text(
+                                _filters[index],
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected ? colors.surface : colors.textSecondary,
+                                ),
+                              ),
                               if (count > 0) ...[
                                 const SizedBox(width: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? Colors.white.withOpacity(0.2) : const Color(0xFFF3F4F6),
+                                    color: isSelected ? colors.surface.withOpacity(0.2) : colors.surfaceMuted,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Text('$count',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: isSelected ? Colors.white : const Color(0xFF6B7280),
-                                      )),
+                                  child: Text(
+                                    '$count',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: isSelected ? colors.surface : colors.textSecondary,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ],
@@ -136,7 +144,7 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: filtered.isEmpty
-                      ? const Center(child: Text('Компаний нет', style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF))))
+                      ? Center(child: Text('Компаний нет', style: TextStyle(fontSize: 14, color: colors.textMuted)))
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                           itemCount: filtered.length,

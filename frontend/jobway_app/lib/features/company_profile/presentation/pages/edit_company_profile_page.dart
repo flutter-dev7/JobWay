@@ -1,6 +1,7 @@
 // features/company_profile/presentation/pages/edit_company_profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
@@ -96,8 +97,10 @@ class _EditCompanyProfilePageState
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: colors.background,
       appBar: appPageAppBar(context, 'Редактировать компанию'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),

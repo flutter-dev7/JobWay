@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/feedback/app_dialogs.dart';
@@ -189,7 +190,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: context.colors.background,
       appBar: appMinimalAppBar(context, onBack: _back),
       body: SafeArea(
         child: Column(
