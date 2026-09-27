@@ -28,3 +28,4 @@ google-services.json
 ## Android signing
 android/key.properties
 *.jks
+frontend/jobway_app/macos/Flutter/GeneratedPluginRegistrant.swift
