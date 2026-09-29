@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jobway_app/features/settings/presentation/widgets/delete_account_dialog.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../../../core/providers/settings_providers.dart';
@@ -40,6 +41,21 @@ class SettingsPage extends ConsumerWidget {
     }
   }
 
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final password = await showDeleteAccountDialog(context);
+    if (password == null || password.isEmpty) return;
+
+    try {
+      await ref.read(authRepositoryProvider).deleteAccount(password);
+      await ref.read(authRepositoryProvider).logout();
+      if (!context.mounted) return;
+      context.go(AppRoutes.login);
+      AppSnackbar.showSuccess('Аккаунт удалён');
+    } catch (error) {
+      AppSnackbar.showError(ApiException.extractMessage(error));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
@@ -67,7 +83,8 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.palette_outlined,
             child: ThemeModeSelector(
               selected: themeMode,
-              onChanged: (mode) => ref.read(themeModeProvider.notifier).setThemeMode(mode),
+              onChanged: (mode) =>
+                  ref.read(themeModeProvider.notifier).setThemeMode(mode),
             ),
           ),
           const SizedBox(height: 16),
@@ -91,6 +108,13 @@ class SettingsPage extends ConsumerWidget {
             title: 'Выйти из аккаунта',
             iconColor: const Color(0xFFDC2626),
             onTap: () => _logout(context, ref),
+          ),
+          const SizedBox(height: 8),
+          SettingsTile(
+            icon: Icons.delete_outline_rounded,
+            title: 'Удалить аккаунт',
+            iconColor: const Color(0xFFDC2626),
+            onTap: () => _deleteAccount(context, ref),
           ),
         ],
       ),

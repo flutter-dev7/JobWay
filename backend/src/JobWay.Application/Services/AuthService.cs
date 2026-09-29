@@ -24,6 +24,7 @@ public class AuthService : IAuthService
     private readonly IEmailService _emailService;
     private readonly ICacheService _cacheService;
     private readonly JwtSettings _jwtSettings;
+    private readonly INotificationService _notificationService;
 
     public AuthService(
         IUnitOfWork unitOfWork,
@@ -31,7 +32,8 @@ public class AuthService : IAuthService
         IJwtService jwtService,
         IEmailService emailService,
         ICacheService cacheService,
-        IOptions<JwtSettings> jwtSettings)
+        IOptions<JwtSettings> jwtSettings,
+        INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
@@ -39,6 +41,7 @@ public class AuthService : IAuthService
         _emailService = emailService;
         _cacheService = cacheService;
         _jwtSettings = jwtSettings.Value;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<string>> SendRegistrationCodeAsync(SendRegistrationCodeRequest request, CancellationToken cancellationToken)
@@ -203,6 +206,40 @@ public class AuthService : IAuthService
 
         return Result<string>.Ok("Password changed successfully");
     }
+    
+    public async Task<Result<string>> DeleteAccountAsync(Guid userId, DeleteAccountRequest request, CancellationToken cancellationToken)
+    {
+        var user = await _unitOfWork.Users.GetByIdAsync(userId, cancellationToken);
+
+        if (user is null)
+            return Result<string>.Fail("User not found", ErrorType.NotFound);
+
+        if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
+            return Result<string>.Fail("Password is incorrect", ErrorType.Validation);
+
+        if (user.Role == UserRole.Employer)
+        {
+            var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(userId, cancellationToken);
+            if (companyProfile is not null)
+            {
+                var vacancies = await _unitOfWork.Vacancies.GetByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
+                foreach (var vacancy in vacancies.Where(v => v.Status is VacancyStatus.Active or VacancyStatus.Draft))
+                {
+                    vacancy.Status = VacancyStatus.Closed;
+                    _unitOfWork.Vacancies.Update(vacancy);
+                }
+            }
+        }
+
+        user.IsActive = false;
+        user.Email = $"deleted_{user.Id}@jobway.tj";
+        user.PasswordHash = _passwordHasher.Hash(Guid.NewGuid().ToString());
+
+        _unitOfWork.Users.Update(user);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<string>.Ok("Account deleted successfully");
+    }
 
     private async Task<AuthResponse> BuildAuthResponseAsync(User user, CancellationToken cancellationToken)
     {
@@ -222,5 +259,21 @@ public class AuthService : IAuthService
             AccessToken = accessToken,
             RefreshToken = refreshToken
         };
+    }
+    
+    private async Task NotifyAdminsAboutNewEmployerAsync(User user, CancellationToken cancellationToken)
+    {
+        var adminUserIds = await _unitOfWork.Users.GetAdminUserIdsAsync(cancellationToken);
+
+        foreach (var adminUserId in adminUserIds)
+        {
+            await _notificationService.CreateAsync(
+                adminUserId,
+                NotificationType.NewEmployerRegistered,
+                "Новый работодатель",
+                $"Зарегистрирован новый работодатель: {user.CompanyProfile!.CompanyName}",
+                user.Id,
+                cancellationToken);
+        }
     }
 }

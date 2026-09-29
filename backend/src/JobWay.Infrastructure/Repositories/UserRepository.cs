@@ -1,5 +1,6 @@
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
+using JobWay.Domain.Enums;
 using JobWay.Infrastructure.Persistence;
 using JobWay.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,12 @@ public class UserRepository : IUserRepository
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         => _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+    
+    public Task<List<Guid>> GetAdminUserIdsAsync(CancellationToken cancellationToken)
+        => _context.Users
+            .Where(u => u.Role == UserRole.Admin && u.IsActive)
+            .Select(u => u.Id)
+            .ToListAsync(cancellationToken);
 
     public Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
         => _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken);

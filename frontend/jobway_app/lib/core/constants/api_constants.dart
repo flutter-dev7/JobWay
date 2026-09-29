@@ -11,6 +11,7 @@ class ApiConstants {
   static const String refreshToken = '/auth/refresh-token';
   static const String sendRegistrationCode = '/auth/send-registration-code';
   static const String verifyRegistrationCode = '/auth/verify-registration-code';
+  static const String deleteAccount = '/auth/delete-account';
 
   // Skills
   static const String skills = '/skills';

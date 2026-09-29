@@ -20,6 +20,7 @@ public class AuthServiceTests
     private readonly Mock<IJwtService> _jwtServiceMock = new();
     private readonly Mock<IEmailService> _emailServiceMock = new();
     private readonly Mock<ICacheService> _cacheServiceMock = new();
+    private readonly Mock<INotificationService> _notificationServiceMock = new();
 
     private readonly JwtSettings _jwtSettings = new()
     {
@@ -42,7 +43,8 @@ public class AuthServiceTests
             _jwtServiceMock.Object,
             _emailServiceMock.Object,
             _cacheServiceMock.Object,
-            Options.Create(_jwtSettings));
+            Options.Create(_jwtSettings),
+            _notificationServiceMock.Object);
     }
 
     [Fact]

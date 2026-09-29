@@ -129,7 +129,7 @@ public class CandidateProfileService : ICandidateProfileService
             return Result<CandidateProfileResponse>.Fail("You can only view profiles of candidates who applied to your vacancies", ErrorType.Forbidden);
 
         var profile = await _unitOfWork.CandidateProfiles.GetByIdAsync(candidateProfileId, cancellationToken);
-        if (profile is null)
+        if (profile is null || !profile.User.IsActive)
             return Result<CandidateProfileResponse>.Fail("Candidate not found", ErrorType.NotFound);
 
         return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));

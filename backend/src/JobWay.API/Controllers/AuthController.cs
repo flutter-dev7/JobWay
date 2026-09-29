@@ -50,6 +50,10 @@ public class AuthController : BaseApiController
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken)
         => HandleError(await _authService.ChangePasswordAsync(CurrentUserId, request, cancellationToken));
     
+    [HttpPost("delete-account")]
+    public async Task<IActionResult> DeleteAccount(DeleteAccountRequest request, CancellationToken cancellationToken)
+        => HandleError(await _authService.DeleteAccountAsync(CurrentUserId, request, cancellationToken));
+    
     [AllowAnonymous]
     [HttpPost("send-registration-code")]
     public async Task<IActionResult> SendRegistrationCode(SendRegistrationCodeRequest request, CancellationToken cancellationToken)

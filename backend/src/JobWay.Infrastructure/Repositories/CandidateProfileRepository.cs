@@ -18,7 +18,10 @@ public class CandidateProfileRepository : ICandidateProfileRepository
         => _context.CandidateProfiles.Include(p => p.Skills).FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
 
     public Task<CandidateProfile?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
-        => _context.CandidateProfiles.Include(p => p.Skills).FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        => _context.CandidateProfiles
+            .Include(p => p.Skills)
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
 
     public Task<List<CandidateProfile>> GetAllAsync(CancellationToken cancellationToken)
         => _context.CandidateProfiles.ToListAsync(cancellationToken);

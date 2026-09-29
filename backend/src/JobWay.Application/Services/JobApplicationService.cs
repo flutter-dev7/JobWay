@@ -73,6 +73,9 @@ public class JobApplicationService : IJobApplicationService
         if (companyProfile is null || application.Vacancy.CompanyProfileId != companyProfile.Id)
             return Result<JobApplicationResponse>.Fail("You do not own this vacancy", ErrorType.Forbidden);
 
+        if (!application.CandidateProfile.User.IsActive)
+            return Result<JobApplicationResponse>.Fail("This candidate's account no longer exists", ErrorType.NotFound);
+
         application.Status = request.Status;
 
         _unitOfWork.JobApplications.Update(application);
@@ -135,6 +138,7 @@ public class JobApplicationService : IJobApplicationService
     private JobApplicationResponse MapToResponse(JobApplication application, bool hasReview)
     {
         var match = _matchingService.Calculate(application.CandidateProfile.Skills, application.Vacancy.RequiredSkills);
+        var isCandidateActive = application.CandidateProfile.User.IsActive;
 
         return new JobApplicationResponse
         {
@@ -143,16 +147,17 @@ public class JobApplicationService : IJobApplicationService
             VacancyTitle = application.Vacancy.Title,
             CompanyName = application.Vacancy.CompanyProfile.CompanyName,
             CandidateProfileId = application.CandidateProfileId,
-            CandidateFullName = application.CandidateProfile.FullName,
+            CandidateFullName = isCandidateActive ? application.CandidateProfile.FullName : "Пользователь удалён",
             Status = application.Status,
             MatchScore = application.MatchScore,
             MatchedSkills = match.MatchedSkills,
             MissingSkills = match.MissingSkills,
-            CandidatePhotoUrl = application.CandidateProfile.PhotoUrl,
+            CandidatePhotoUrl = isCandidateActive ? application.CandidateProfile.PhotoUrl : null,
             CoverMessage = application.CoverMessage,
             CompanyLogoUrl = application.Vacancy.CompanyProfile.LogoUrl,
             CreatedAt = application.CreatedAt,
-            HasReviewFromCurrentUser = hasReview
+            HasReviewFromCurrentUser = hasReview,
+            CandidateAccountDeleted = !isCandidateActive
         };
     }
     

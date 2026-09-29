@@ -7,5 +7,6 @@ public enum NotificationType
     NewMatchingVacancy,
     System,
     NewReview,
-    ReviewReminder 
+    ReviewReminder,
+    NewEmployerRegistered
 }

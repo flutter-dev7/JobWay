@@ -18,6 +18,7 @@ class JobApplicationModel {
   final String? candidatePhotoUrl;
   final DateTime createdAt;
   final bool hasReviewFromCurrentUser;
+  final bool candidateAccountDeleted;
 
   JobApplicationModel({
     required this.id,
@@ -34,7 +35,8 @@ class JobApplicationModel {
     this.companyLogoUrl,
     this.candidatePhotoUrl,
     required this.createdAt,
-    required this.hasReviewFromCurrentUser
+    required this.hasReviewFromCurrentUser,
+    this.candidateAccountDeleted = false,
   });
 
   factory JobApplicationModel.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,7 @@ class JobApplicationModel {
       candidatePhotoUrl: data['candidatePhotoUrl'],
       createdAt: DateTime.parse(data['createdAt']),
       hasReviewFromCurrentUser: data['hasReviewFromCurrentUser'] ?? false,
+      candidateAccountDeleted: data['candidateAccountDeleted'] ?? false,
     );
   }
 
@@ -78,5 +81,6 @@ class JobApplicationModel {
     candidatePhotoUrl: candidatePhotoUrl,
     createdAt: createdAt,
     hasReviewFromCurrentUser: hasReviewFromCurrentUser,
+    candidateAccountDeleted: candidateAccountDeleted,
   );
 }

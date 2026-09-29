@@ -15,4 +15,5 @@ public interface IAuthService
     Task<Result<string>> VerifyResetCodeAsync(VerifyResetCodeRequest request, CancellationToken cancellationToken);
     Task<Result<string>> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken);
     Task<Result<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken);
+    Task<Result<string>> DeleteAccountAsync(Guid userId, DeleteAccountRequest request, CancellationToken cancellationToken);
 }

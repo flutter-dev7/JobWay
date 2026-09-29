@@ -35,9 +35,12 @@ class VacancyApplicationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isDeleted = application.candidateAccountDeleted;
     final hasPhoto =
+        !isDeleted &&
         application.candidatePhotoUrl != null &&
         application.candidatePhotoUrl!.isNotEmpty;
+    final isStatusLocked = isLocked || isDeleted;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -59,86 +62,93 @@ class VacancyApplicationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () => context.push(
-              AppRoutes.candidate(application.candidateProfileId),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: colors.surfaceMuted,
-                    shape: BoxShape.circle,
-                    image: hasPhoto
-                        ? DecorationImage(
-                            image: NetworkImage(
-                              '${ApiConstants.fileBaseUrl}${application.candidatePhotoUrl}',
+            onTap: isDeleted
+                ? null
+                : () => context.push(
+                    AppRoutes.candidate(application.candidateProfileId),
+                  ),
+            child: Opacity(
+              opacity: isDeleted ? 0.5 : 1,
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceMuted,
+                      shape: BoxShape.circle,
+                      image: hasPhoto
+                          ? DecorationImage(
+                              image: NetworkImage(
+                                '${ApiConstants.fileBaseUrl}${application.candidatePhotoUrl}',
+                              ),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: !hasPhoto
+                        ? Center(
+                            child: Icon(
+                              isDeleted
+                                  ? Icons.person_off_outlined
+                                  : Icons.person_outline,
+                              size: 20,
+                              color: colors.textMuted,
                             ),
-                            fit: BoxFit.cover,
                           )
                         : null,
                   ),
-                  child: !hasPhoto
-                      ? Center(
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
                           child: Text(
-                            application.candidateFullName.trim().isNotEmpty
-                                ? application.candidateFullName
-                                      .trim()[0]
-                                      .toUpperCase()
-                                : '?',
+                            application.candidateFullName,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: context.accentColor,
+                              fontStyle: isDeleted
+                                  ? FontStyle.italic
+                                  : FontStyle.normal,
+                              color: isDeleted
+                                  ? colors.textMuted
+                                  : colors.textPrimary,
                             ),
                           ),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          application.candidateFullName,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: colors.textPrimary,
-                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 18,
-                        color: colors.textMuted,
-                      ),
-                    ],
+                        if (!isDeleted) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            size: 18,
+                            color: colors.textMuted,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colors.surfaceMuted,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${application.matchScore}%',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: context.accentColor,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceMuted,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${application.matchScore}%',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: context.accentColor,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           if (application.coverMessage != null &&
@@ -185,7 +195,7 @@ class VacancyApplicationCard extends StatelessWidget {
                   ),
                 )
                 .toList(),
-            onChanged: (isLocked || isUpdating)
+            onChanged: (isStatusLocked || isUpdating)
                 ? null
                 : (value) {
                     if (value == null || value == application.status) return;
@@ -193,7 +203,7 @@ class VacancyApplicationCard extends StatelessWidget {
                   },
             decoration: InputDecoration(
               filled: true,
-              fillColor: isLocked
+              fillColor: isStatusLocked
                   ? colors.border.withOpacity(0.3)
                   : colors.surfaceMuted,
               contentPadding: const EdgeInsets.symmetric(
@@ -206,14 +216,21 @@ class VacancyApplicationCard extends StatelessWidget {
               ),
             ),
           ),
-          if (isLocked) ...[
+          if (isDeleted) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Аккаунт кандидата удалён — статус нельзя изменить',
+              style: TextStyle(fontSize: 11, color: colors.textMuted),
+            ),
+          ] else if (isLocked) ...[
             const SizedBox(height: 6),
             Text(
               'Вакансия закрыта — статус нельзя изменить',
               style: TextStyle(fontSize: 11, color: colors.textMuted),
             ),
           ],
-          if ((application.status == 'Accepted' ||
+          if (!isDeleted &&
+              (application.status == 'Accepted' ||
                   application.status == 'Rejected') &&
               !application.hasReviewFromCurrentUser &&
               onLeaveReview != null) ...[

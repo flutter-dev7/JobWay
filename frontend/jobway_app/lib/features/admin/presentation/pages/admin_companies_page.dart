@@ -1,6 +1,7 @@
-// features/admin/presentation/pages/admin_companies_page.dart — заменить целиком
+// features/admin/presentation/pages/admin_companies_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -19,7 +20,12 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
   String? _updatingId;
   int _selectedFilter = 0;
 
-  static const _filters = ['Все', 'На рассмотрении', 'Верифицированы', 'Отклонены'];
+  static const _filters = [
+    'Все',
+    'На рассмотрении',
+    'Верифицированы',
+    'Отклонены',
+  ];
   static const _filterStatuses = [null, 'NotVerified', 'Verified', 'Rejected'];
 
   List<CompanyModeration> _filtered(List<CompanyModeration> all) {
@@ -67,13 +73,24 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
         elevation: 0,
         title: Text(
           'Компании',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colors.textPrimary),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+          ),
         ),
+        actions: const [NotificationBell()],
       ),
       body: companiesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
-          child: Padding(padding: const EdgeInsets.all(24), child: Text(ApiException.extractMessage(error), textAlign: TextAlign.center)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              ApiException.extractMessage(error),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
         data: (companies) {
           final filtered = _filtered(companies);
@@ -93,7 +110,13 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                       final isSelected = _selectedFilter == index;
                       final count = index == 0
                           ? companies.length
-                          : companies.where((c) => c.verificationStatus == _filterStatuses[index]).length;
+                          : companies
+                                .where(
+                                  (c) =>
+                                      c.verificationStatus ==
+                                      _filterStatuses[index],
+                                )
+                                .length;
 
                       return GestureDetector(
                         onTap: () => setState(() => _selectedFilter = index),
@@ -101,7 +124,9 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                           duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
-                            color: isSelected ? colors.textPrimary : colors.surface,
+                            color: isSelected
+                                ? colors.textPrimary
+                                : colors.surface,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           alignment: Alignment.center,
@@ -113,15 +138,22 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: isSelected ? colors.surface : colors.textSecondary,
+                                  color: isSelected
+                                      ? colors.surface
+                                      : colors.textSecondary,
                                 ),
                               ),
                               if (count > 0) ...[
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 1,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? colors.surface.withOpacity(0.2) : colors.surfaceMuted,
+                                    color: isSelected
+                                        ? colors.surface.withOpacity(0.2)
+                                        : colors.surfaceMuted,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -129,7 +161,9 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: isSelected ? colors.surface : colors.textSecondary,
+                                      color: isSelected
+                                          ? colors.surface
+                                          : colors.textSecondary,
                                     ),
                                   ),
                                 ),
@@ -144,7 +178,15 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: filtered.isEmpty
-                      ? Center(child: Text('Компаний нет', style: TextStyle(fontSize: 14, color: colors.textMuted)))
+                      ? Center(
+                          child: Text(
+                            'Компаний нет',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: colors.textMuted,
+                            ),
+                          ),
+                        )
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                           itemCount: filtered.length,

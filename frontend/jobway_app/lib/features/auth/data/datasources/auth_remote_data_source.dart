@@ -78,6 +78,10 @@ class AuthRemoteDataSource {
     );
   }
 
+  Future<void> deleteAccount(String password) async {
+    await _dio.post(ApiConstants.deleteAccount, data: {'password': password});
+  }
+
   Future<void> sendRegistrationCode(String email) async {
     await _dio.post(ApiConstants.sendRegistrationCode, data: {'email': email});
   }

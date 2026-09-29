@@ -16,6 +16,7 @@ class JobApplication {
   final String? candidatePhotoUrl;
   final DateTime createdAt;
   final bool hasReviewFromCurrentUser;
+  final bool candidateAccountDeleted;
 
   const JobApplication({
     required this.id,
@@ -32,6 +33,7 @@ class JobApplication {
     this.companyLogoUrl,
     this.candidatePhotoUrl,
     required this.createdAt,
-    required this.hasReviewFromCurrentUser
+    required this.hasReviewFromCurrentUser,
+    this.candidateAccountDeleted = false,
   });
 }
