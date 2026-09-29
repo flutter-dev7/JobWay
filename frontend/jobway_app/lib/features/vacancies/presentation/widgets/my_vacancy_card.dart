@@ -11,6 +11,7 @@ class MyVacancyCard extends StatelessWidget {
   final VoidCallback? onPublish;
   final VoidCallback? onClose;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
   final bool isUpdating;
 
   const MyVacancyCard({
@@ -19,6 +20,7 @@ class MyVacancyCard extends StatelessWidget {
     this.onPublish,
     this.onClose,
     this.onTap,
+    this.onEdit,
     this.isUpdating = false,
   });
 
@@ -189,12 +191,28 @@ class MyVacancyCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (showActions) ...[
-              const SizedBox(height: 14),
-              Divider(height: 1, color: colors.border),
-              const SizedBox(height: 14),
-              Row(
-                children: [
+            const SizedBox(height: 14),
+            Divider(height: 1, color: colors.border),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_outlined, size: 16),
+                    label: const Text('Изменить'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.textPrimary,
+                      side: BorderSide(color: colors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                if (showActions) ...[
+                  const SizedBox(width: 10),
                   if (vacancy.status == 'Draft')
                     Expanded(
                       child: OutlinedButton.icon(
@@ -231,8 +249,9 @@ class MyVacancyCard extends StatelessWidget {
                       ),
                     ),
                 ],
-              ),
-            ] else ...[
+              ],
+            ),
+            if (!showActions) ...[
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

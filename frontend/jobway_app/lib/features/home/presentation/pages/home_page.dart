@@ -4,6 +4,7 @@ import '../../../../core/widgets/navigation/floating_nav_bar.dart';
 import '../../../admin/presentation/pages/admin_companies_page.dart';
 import '../../../admin/presentation/pages/admin_profile_page.dart';
 import '../../../admin/presentation/pages/admin_users_page.dart';
+import '../../../analytics/presentation/pages/employer_analytics_page.dart';
 import '../../../applications/presentation/pages/applications_overview_page.dart';
 import '../../../applications/presentation/pages/my_applications_page.dart';
 import '../../../candidate_profile/presentation/pages/candidate_profile_page.dart';
@@ -33,6 +34,7 @@ class _HomePageState extends State<HomePage> {
         return [
           FloatingNavItem(icon: Icons.work_outline, label: 'Вакансии'),
           FloatingNavItem(icon: Icons.people_outline, label: 'Отклики'),
+          FloatingNavItem(icon: Icons.bar_chart_outlined, label: 'Аналитика'),
           FloatingNavItem(icon: Icons.business_outlined, label: 'Компания'),
         ];
       case 'Admin':
@@ -54,7 +56,12 @@ class _HomePageState extends State<HomePage> {
   List<Widget> _buildPages() {
     switch (widget.role) {
       case 'Employer':
-        return const [MyVacanciesPage(), ApplicationsOverviewPage(), CompanyProfilePage()];
+        return const [
+          MyVacanciesPage(),
+          ApplicationsOverviewPage(),
+          EmployerAnalyticsPage(),
+          CompanyProfilePage(),
+        ];
       case 'Admin':
         return const [AdminCompaniesPage(), AdminUsersPage(), AdminProfilePage()];
       default:

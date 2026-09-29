@@ -1,6 +1,7 @@
-// features/vacancies/presentation/pages/vacancies_list_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/today_badge_storage.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
@@ -9,7 +10,6 @@ import '../../domain/entities/vacancy_filter.dart';
 import '../providers/vacancies_provider.dart';
 import '../widgets/vacancy_card.dart';
 import '../widgets/vacancy_filter_sheet.dart';
-import 'vacancy_detail_page.dart';
 
 class VacanciesListPage extends ConsumerStatefulWidget {
   const VacanciesListPage({super.key});
@@ -315,13 +315,7 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
                     final vacancy = state.items[index];
                     return VacancyCard(
                       vacancy: vacancy,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              VacancyDetailPage(vacancyId: vacancy.id),
-                        ),
-                      ),
+                      onTap: () => context.push(AppRoutes.vacancy(vacancy.id)),
                     );
                   }, childCount: state.items.length + 1),
                 ),

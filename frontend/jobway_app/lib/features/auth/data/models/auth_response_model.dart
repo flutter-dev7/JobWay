@@ -1,4 +1,4 @@
-// features/auth/data/models/auth_response_model.dart — заменить factory
+// features/auth/data/models/auth_response_model.dart 
 import '../../../../core/network/api_response.dart';
 import '../../domain/entities/auth_result.dart';
 

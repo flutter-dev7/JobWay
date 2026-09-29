@@ -5,11 +5,13 @@ class SectionCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget child;
+  final Widget? trailing;
 
   const SectionCard({
     required this.title,
     required this.icon,
     required this.child,
+    this.trailing,
   });
 
   @override
@@ -23,7 +25,9 @@ class SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.15 : 0.025),
+            color: Colors.black.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.15 : 0.025,
+            ),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -44,10 +48,17 @@ class SectionCard extends StatelessWidget {
                 child: Icon(icon, size: 20, color: context.accentColor),
               ),
               const SizedBox(width: 12),
-              Text(
-                title,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: colors.textPrimary),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
+                ),
               ),
+              if (trailing != null) trailing!,
             ],
           ),
           const SizedBox(height: 18),

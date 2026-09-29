@@ -70,6 +70,8 @@ public static class DependencyInjection
         
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IReviewService, ReviewService>();
+        
+        services.AddScoped<IAnalyticsService, AnalyticsService>();
 
         return services;
     }

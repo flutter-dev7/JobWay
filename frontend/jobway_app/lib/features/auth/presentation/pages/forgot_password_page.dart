@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
@@ -9,7 +11,6 @@ import '../../../../core/widgets/inputs/app_text_field.dart';
 import '../../../../core/widgets/feedback/info_banner.dart';
 import '../../../../core/widgets/display/step_progress_bar.dart';
 import '../providers/auth_provider.dart';
-import 'verify_reset_code_page.dart';
 
 class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -33,10 +34,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     try {
       await ref.read(authRepositoryProvider).forgotPassword(email);
       if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => VerifyResetCodePage(email: email)),
-      );
+      context.push(AppRoutes.verifyResetCode, extra: email);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {

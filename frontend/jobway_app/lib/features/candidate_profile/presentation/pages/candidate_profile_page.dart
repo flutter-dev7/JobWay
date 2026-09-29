@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
@@ -16,10 +18,7 @@ import '../../../../core/widgets/display/info_row.dart';
 import '../../../../core/widgets/display/profile_photo.dart';
 import '../../../../core/widgets/display/section_card.dart';
 import '../../../../core/widgets/display/skill_chip.dart';
-import '../../../auth/presentation/pages/login_page.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/candidate_profile_provider.dart';
-import 'edit_candidate_profile_page.dart';
 
 class CandidateProfilePage extends ConsumerStatefulWidget {
   const CandidateProfilePage({super.key});
@@ -60,23 +59,10 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
     }
   }
 
-  Future<void> _logout() async {
-    final confirmed = await confirmLogoutDialog(context);
-    if (!confirmed) return;
-
-    await ref.read(authRepositoryProvider).logout();
-    if (!mounted) return;
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-      (route) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(candidateProfileProvider);
-    final colors = context.colors; 
+    final colors = context.colors;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -93,21 +79,23 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
           ),
         ),
         actions: [
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor: colors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
+              icon: Icon(
+                Icons.settings_outlined,
+                size: 21,
+                color: colors.textPrimary,
+              ),
+              onPressed: () => context.push(AppRoutes.settings),
             ),
-            icon: const Icon(
-              Icons.logout_rounded,
-              size: 20,
-              color: Color(0xFFDC2626),
-            ),
-            onPressed: _logout,
           ),
-          const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(
@@ -126,11 +114,9 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                 final profile = profileAsync.valueOrNull;
                 if (profile == null) return;
 
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditCandidateProfilePage(profile: profile),
-                  ),
+                await context.push(
+                  AppRoutes.editCandidateProfile,
+                  extra: profile,
                 );
                 ref.invalidate(candidateProfileProvider);
               },

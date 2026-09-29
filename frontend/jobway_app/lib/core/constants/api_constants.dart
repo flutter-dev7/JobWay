@@ -58,6 +58,9 @@ class ApiConstants {
   static String reviewAverageRating(String userId) =>
       '/review/user/$userId/average-rating';
 
+  // Analytics
+  static const String employerAnalytics = '/analytics/employer';
+
   static const String uploadResume = '/candidate-profile/me/resume';
 
   static const String registerDeviceToken = '/notifications/device-token';

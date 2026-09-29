@@ -8,6 +8,7 @@ public interface IJobApplicationRepository
     Task<bool> ExistsAsync(Guid candidateProfileId, Guid vacancyId, CancellationToken cancellationToken);
     Task<List<JobApplication>> GetByVacancyIdAsync(Guid vacancyId, CancellationToken cancellationToken);
     Task<List<JobApplication>> GetByCandidateProfileIdAsync(Guid candidateProfileId, CancellationToken cancellationToken);
+    Task<List<JobApplication>> GetByCompanyProfileIdAsync(Guid companyProfileId, CancellationToken cancellationToken);
     Task<bool> ExistsForCandidateAndCompanyAsync(Guid candidateProfileId, Guid companyProfileId, CancellationToken cancellationToken);
     Task<JobApplication?> GetWithParticipantsAsync(Guid id, CancellationToken cancellationToken);
     Task<List<JobApplication>> GetCompletedWithoutReminderCheckAsync(DateTime updatedBefore, CancellationToken cancellationToken);

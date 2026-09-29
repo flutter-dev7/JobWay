@@ -61,6 +61,17 @@ class AuthRepositoryImpl implements AuthRepository {
   ) => _remoteDataSource.resetPassword(email, newPassword, confirmPassword);
 
   @override
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) => _remoteDataSource.changePassword(
+    oldPassword: oldPassword,
+    newPassword: newPassword,
+    confirmPassword: confirmPassword,
+  );
+
+  @override
   Future<void> logout() => _tokenStorage.clear();
 
   @override

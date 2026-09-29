@@ -1,9 +1,10 @@
-// features/vacancies/presentation/providers/vacancies_provider.dart — заменить целиком
+// features/vacancies/presentation/providers/vacancies_provider.dart 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancies_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_today_vacancies_count_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/save_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/unsave_vacancy_usecase.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/update_vacancy_usecase.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../data/datasources/vacancies_remote_data_source.dart';
@@ -40,6 +41,10 @@ final getMyVacanciesUseCaseProvider = Provider(
 
 final createVacancyUseCaseProvider = Provider(
   (ref) => CreateVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+
+final updateVacancyUseCaseProvider = Provider(
+  (ref) => UpdateVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
 );
 
 final publishVacancyUseCaseProvider = Provider(

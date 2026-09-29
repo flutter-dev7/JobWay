@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/widgets/display/skill_chip.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
-import '../../../candidate_profile/presentation/pages/candidate_profile_view_page.dart';
 import '../../domain/entities/job_application.dart';
 
 class VacancyApplicationCard extends StatelessWidget {
@@ -58,13 +59,8 @@ class VacancyApplicationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => CandidateProfileViewPage(
-                  candidateProfileId: application.candidateProfileId,
-                ),
-              ),
+            onTap: () => context.push(
+              AppRoutes.candidate(application.candidateProfileId),
             ),
             child: Row(
               children: [

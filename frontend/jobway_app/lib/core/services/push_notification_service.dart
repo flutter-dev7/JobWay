@@ -30,4 +30,9 @@ class PushNotificationService {
       },
     );
   }
+
+  Future<void> unregisterToken() async {
+    if (kIsWeb) return;
+    await FirebaseMessaging.instance.deleteToken();
+  }
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/feedback/app_dialogs.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
-import '../../../auth/presentation/pages/login_page.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 class AdminProfilePage extends ConsumerWidget {
@@ -91,10 +92,7 @@ class AdminProfilePage extends ConsumerWidget {
                 await ref.read(authRepositoryProvider).logout();
                 if (!context.mounted) return;
 
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                  (route) => false,
-                );
+                context.go(AppRoutes.login);
               },
             ),
           ],

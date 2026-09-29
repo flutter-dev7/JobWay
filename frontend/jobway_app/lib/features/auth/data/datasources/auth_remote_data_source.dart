@@ -63,6 +63,21 @@ class AuthRemoteDataSource {
     );
   }
 
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await _dio.post(
+      ApiConstants.changePassword,
+      data: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      },
+    );
+  }
+
   Future<void> sendRegistrationCode(String email) async {
     await _dio.post(ApiConstants.sendRegistrationCode, data: {'email': email});
   }

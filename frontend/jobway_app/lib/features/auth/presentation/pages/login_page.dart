@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/network/api_exception.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
-import 'package:jobway_app/features/auth/presentation/pages/forgot_password_page.dart';
-import 'package:jobway_app/features/home/presentation/pages/home_page.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/inputs/app_text_field.dart';
 import '../providers/auth_provider.dart';
-import 'register_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -34,10 +33,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           if (result != null) {
             _emailController.clear();
             _passwordController.clear();
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => HomePage(role: result.role)),
-            );
+            context.go(AppRoutes.home(result.role));
           }
         },
       );
@@ -106,12 +102,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               foregroundColor: context.accentColor,
                             ),
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ForgotPasswordPage(),
-                                ),
-                              );
+                              context.push(AppRoutes.forgotPassword);
                             },
                             child: const Text('Забыли пароль?'),
                           ),
@@ -140,12 +131,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 foregroundColor: context.accentColor,
                               ),
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const RegisterPage(),
-                                  ),
-                                );
+                                context.push(AppRoutes.register);
                               },
                               child: const Text(
                                 'Зарегистрироваться',

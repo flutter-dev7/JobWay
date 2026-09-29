@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../vacancies/presentation/providers/vacancies_provider.dart';
-import 'vacancy_applications_page.dart';
 
 class ApplicationsOverviewPage extends ConsumerWidget {
   const ApplicationsOverviewPage({super.key});
@@ -54,14 +55,11 @@ class ApplicationsOverviewPage extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final vacancy = vacancies[index];
                     return GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => VacancyApplicationsPage(
-                            vacancyId: vacancy.id,
-                            vacancyTitle: vacancy.title,
-                            vacancyStatus: vacancy.status,
-                          ),
+                      onTap: () => context.push(
+                        AppRoutes.vacancyApplications(vacancy.id),
+                        extra: VacancyApplicationsArgs(
+                          title: vacancy.title,
+                          status: vacancy.status,
                         ),
                       ),
                       child: Container(

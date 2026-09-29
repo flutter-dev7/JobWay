@@ -1,6 +1,7 @@
 // features/company_profile/presentation/pages/edit_company_profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
@@ -86,7 +87,7 @@ class _EditCompanyProfilePageState
                 : _locationController.text.trim(),
           );
       if (!mounted) return;
-      Navigator.pop(context);
+      context.pop();
       AppSnackbar.showSuccess('Профиль компании обновлён');
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));

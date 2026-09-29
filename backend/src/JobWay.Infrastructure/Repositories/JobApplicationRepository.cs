@@ -40,6 +40,12 @@ public class JobApplicationRepository : IJobApplicationRepository
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync(cancellationToken);
     
+    public Task<List<JobApplication>> GetByCompanyProfileIdAsync(Guid companyProfileId, CancellationToken cancellationToken)
+        => WithIncludes()
+            .Where(a => a.Vacancy.CompanyProfileId == companyProfileId)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync(cancellationToken);
+    
     public Task<bool> ExistsForCandidateAndCompanyAsync(Guid candidateProfileId, Guid companyProfileId, CancellationToken cancellationToken)
         => _context.JobApplications.AnyAsync(a => a.CandidateProfileId == candidateProfileId && a.Vacancy.CompanyProfileId == companyProfileId, cancellationToken);
     
