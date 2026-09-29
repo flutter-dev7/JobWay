@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../theme/app_theme_extension.dart';
 
 class AppBackButton extends StatelessWidget {
@@ -14,7 +15,7 @@ class AppBackButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(left: 20),
         child: GestureDetector(
-          onTap: onPressed ?? () => Navigator.pop(context),
+          onTap: onPressed ?? () => context.pop(),
           child: Container(
             width: 36,
             height: 36,

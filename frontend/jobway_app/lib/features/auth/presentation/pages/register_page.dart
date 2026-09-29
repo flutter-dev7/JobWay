@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import '../../../../core/network/api_exception.dart';
@@ -11,7 +13,6 @@ import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/display/step_progress_bar.dart';
 import '../../../candidate_profile/presentation/providers/candidate_profile_provider.dart';
 import '../../../company_profile/presentation/providers/company_profile_provider.dart';
-import '../../../home/presentation/pages/home_page.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/register_steps/email_step.dart';
 import '../widgets/register_steps/password_step.dart';
@@ -76,7 +77,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (_step > 0) {
       setState(() => _step--);
     } else {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -176,10 +177,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       }
 
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => HomePage(role: result.role)),
-      );
+      context.go(AppRoutes.home(result.role));
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {

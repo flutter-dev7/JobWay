@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
@@ -86,7 +87,7 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
             skillIds: _selectedSkillIds,
           );
       if (!mounted) return;
-      Navigator.pop(context);
+      context.pop();
       ref.invalidate(myVacanciesProvider);
       AppSnackbar.showSuccess('Вакансия создана как черновик');
     } catch (error) {

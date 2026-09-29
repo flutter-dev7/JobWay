@@ -20,6 +20,20 @@ abstract class VacanciesRepository {
     required List<String> skillIds,
   });
 
+  Future<Vacancy> update(
+    String id, {
+    required String title,
+    required String description,
+    required String employmentType,
+    required String experienceLevel,
+    required String paymentType,
+    required String currency,
+    String? location,
+    double? salaryFrom,
+    double? salaryTo,
+    required List<String> skillIds,
+  });
+
   Future<int> getTodayCount();
 
   Future<Vacancy> publish(String id);

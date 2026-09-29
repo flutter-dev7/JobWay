@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
@@ -8,7 +10,6 @@ import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/inputs/otp_input.dart';
 import '../../../../core/widgets/display/step_progress_bar.dart';
 import '../providers/auth_provider.dart';
-import 'reset_password_page.dart';
 
 class VerifyResetCodePage extends ConsumerStatefulWidget {
   final String email;
@@ -37,12 +38,7 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
           .read(authRepositoryProvider)
           .verifyResetCode(widget.email, _code);
       if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ResetPasswordPage(email: widget.email),
-        ),
-      );
+      context.push(AppRoutes.resetPassword, extra: widget.email);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../providers/vacancies_provider.dart';
 import '../widgets/vacancy_card.dart';
-import 'vacancy_detail_page.dart';
 
 class SavedVacanciesPage extends ConsumerWidget {
   const SavedVacanciesPage({super.key});
@@ -64,13 +65,7 @@ class SavedVacanciesPage extends ConsumerWidget {
                     final vacancy = vacancies[index];
                     return VacancyCard(
                       vacancy: vacancy,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              VacancyDetailPage(vacancyId: vacancy.id),
-                        ),
-                      ),
+                      onTap: () => context.push(AppRoutes.vacancy(vacancy.id)),
                     );
                   },
                 ),

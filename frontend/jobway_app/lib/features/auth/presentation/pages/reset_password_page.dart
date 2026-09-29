@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/widgets/display/step_progress_bar.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
@@ -39,7 +41,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             _confirmPasswordController.text,
           );
       if (!mounted) return;
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      context.go(AppRoutes.login);
       AppSnackbar.showSuccess('Пароль успешно изменён');
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));

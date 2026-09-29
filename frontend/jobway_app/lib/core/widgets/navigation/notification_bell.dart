@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import '../../theme/app_theme_extension.dart';
-import '../../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../../features/notifications/presentation/providers/notifications_provider.dart';
 
 class NotificationBell extends ConsumerWidget {
@@ -20,11 +21,17 @@ class NotificationBell extends ConsumerWidget {
           IconButton(
             style: IconButton.styleFrom(
               backgroundColor: colors.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
-            icon: Icon(Icons.notifications_outlined, size: 21, color: colors.textPrimary),
+            icon: Icon(
+              Icons.notifications_outlined,
+              size: 21,
+              color: colors.textPrimary,
+            ),
             onPressed: () async {
-              await Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
+              await context.push(AppRoutes.notifications);
               ref.invalidate(myNotificationsProvider);
             },
           ),
@@ -34,12 +41,19 @@ class NotificationBell extends ConsumerWidget {
               top: 8,
               child: Container(
                 padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(color: Color(0xFFDC2626), shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFDC2626),
+                  shape: BoxShape.circle,
+                ),
                 constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: Text(
                   unreadCount > 9 ? '9+' : '$unreadCount',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    fontSize: 9,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

@@ -1,22 +1,22 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/feedback/app_dialogs.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/display/profile_photo.dart';
 import '../../../../core/widgets/display/section_card.dart';
-import '../../../auth/presentation/pages/login_page.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/company_profile_provider.dart';
 import '../widgets/verification_badge.dart';
-import 'edit_company_profile_page.dart';
 
 class CompanyProfilePage extends ConsumerStatefulWidget {
   const CompanyProfilePage({super.key});
@@ -51,19 +51,6 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
     }
   }
 
-  Future<void> _logout() async {
-    final confirmed = await confirmLogoutDialog(context);
-    if (!confirmed) return;
-
-    await ref.read(authRepositoryProvider).logout();
-    if (!mounted) return;
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-      (route) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(companyProfileProvider);
@@ -84,21 +71,23 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
           ),
         ),
         actions: [
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor: colors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
+              icon: Icon(
+                Icons.settings_outlined,
+                size: 21,
+                color: colors.textPrimary,
+              ),
+              onPressed: () => context.push(AppRoutes.settings),
             ),
-            icon: const Icon(
-              Icons.logout_rounded,
-              size: 20,
-              color: Color(0xFFDC2626),
-            ),
-            onPressed: _logout,
           ),
-          const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(
@@ -117,11 +106,9 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                 final profile = profileAsync.valueOrNull;
                 if (profile == null) return;
 
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditCompanyProfilePage(profile: profile),
-                  ),
+                await context.push(
+                  AppRoutes.editCompanyProfile,
+                  extra: profile,
                 );
                 ref.invalidate(companyProfileProvider);
               },
@@ -245,6 +232,23 @@ class _WebsiteLine extends StatelessWidget {
 
   const _WebsiteLine({required this.url});
 
+  Future<void> _openWebsite() async {
+    var normalizedUrl = url.trim();
+    if (!normalizedUrl.startsWith('http://') &&
+        !normalizedUrl.startsWith('https://')) {
+      normalizedUrl = 'https://$normalizedUrl';
+    }
+
+    final uri = Uri.tryParse(normalizedUrl);
+    if (uri == null) return;
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      AppSnackbar.showError('Не удалось открыть ссылку');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -254,28 +258,31 @@ class _WebsiteLine extends StatelessWidget {
       children: [
         Text('Сайт', style: TextStyle(fontSize: 12, color: colors.textMuted)),
         const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: colors.surfaceMuted,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.link, size: 16, color: context.accentColor),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  url,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: context.accentColor,
+        GestureDetector(
+          onTap: _openWebsite,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: colors.surfaceMuted,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.link, size: 16, color: context.accentColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    url,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.accentColor,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

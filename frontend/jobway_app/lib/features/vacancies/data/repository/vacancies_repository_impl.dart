@@ -61,6 +61,36 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
   }
 
   @override
+  Future<Vacancy> update(
+    String id, {
+    required String title,
+    required String description,
+    required String employmentType,
+    required String experienceLevel,
+    required String paymentType,
+    required String currency,
+    String? location,
+    double? salaryFrom,
+    double? salaryTo,
+    required List<String> skillIds,
+  }) async {
+    final model = await _remoteDataSource.update(
+      id,
+      title: title,
+      description: description,
+      employmentType: employmentType,
+      experienceLevel: experienceLevel,
+      paymentType: paymentType,
+      currency: currency,
+      location: location,
+      salaryFrom: salaryFrom,
+      salaryTo: salaryTo,
+      skillIds: skillIds,
+    );
+    return model.toEntity();
+  }
+
+  @override
   Future<Vacancy> publish(String id) async {
     final model = await _remoteDataSource.publish(id);
     return model.toEntity();
