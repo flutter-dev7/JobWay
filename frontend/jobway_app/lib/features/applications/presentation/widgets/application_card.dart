@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
+import 'package:jobway_app/features/chat/presentation/providers/chat_provider.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
@@ -7,7 +11,7 @@ import '../../../../core/widgets/display/skill_chip.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../domain/entities/job_application.dart';
 
-class ApplicationCard extends StatelessWidget {
+class ApplicationCard extends ConsumerWidget {
   final JobApplication application;
   final VoidCallback? onLeaveReview;
 
@@ -18,7 +22,7 @@ class ApplicationCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final statusColor = applicationStatusColor(application.status);
 
@@ -147,17 +151,50 @@ class ApplicationCard extends StatelessWidget {
               style: TextStyle(fontSize: 11, color: colors.textMuted),
             ),
           ),
-          if ((application.status == 'Accepted' ||
-                  application.status == 'Rejected') &&
-              !application.hasReviewFromCurrentUser &&
-              onLeaveReview != null) ...[
-            const SizedBox(height: 10),
-            AppButton(
-              label: 'Оценить компанию',
-              color: const Color(0xFF3157D5),
-              onPressed: onLeaveReview,
-            ),
-          ],
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await context.push(
+                      AppRoutes.chat(application.id),
+                      extra: ChatArgs(
+                        otherUserId: application.companyUserId,
+                        otherUserName: application.companyName,
+                        otherUserPhotoUrl: application.companyLogoUrl,
+                        vacancyTitle: application.vacancyTitle,
+                      ),
+                    );
+                    ref.invalidate(chatThreadsProvider);
+                  },
+                  icon: const Icon(Icons.send_rounded, size: 16),
+                  label: const Text('Написать'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.textPrimary,
+                    side: BorderSide(color: colors.border),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              if ((application.status == 'Accepted' ||
+                      application.status == 'Rejected') &&
+                  !application.hasReviewFromCurrentUser &&
+                  onLeaveReview != null) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: AppButton(
+                    label: 'Оценить компанию',
+                    color: const Color(0xFF3157D5),
+                    onPressed: onLeaveReview,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );

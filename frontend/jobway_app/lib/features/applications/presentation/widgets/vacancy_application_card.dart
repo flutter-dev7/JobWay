@@ -14,6 +14,7 @@ class VacancyApplicationCard extends StatelessWidget {
   final bool isUpdating;
   final bool isLocked;
   final VoidCallback? onLeaveReview;
+  final VoidCallback? onMessage;
 
   const VacancyApplicationCard({
     super.key,
@@ -22,6 +23,7 @@ class VacancyApplicationCard extends StatelessWidget {
     this.isUpdating = false,
     this.isLocked = false,
     this.onLeaveReview,
+    this.onMessage,
   });
 
   static const _statuses = [
@@ -229,16 +231,40 @@ class VacancyApplicationCard extends StatelessWidget {
               style: TextStyle(fontSize: 11, color: colors.textMuted),
             ),
           ],
-          if (!isDeleted &&
-              (application.status == 'Accepted' ||
-                  application.status == 'Rejected') &&
-              !application.hasReviewFromCurrentUser &&
-              onLeaveReview != null) ...[
+          if (!isDeleted) ...[
             const SizedBox(height: 10),
-            AppButton(
-              label: 'Оценить кандидата',
-              color: const Color(0xFF3157D5),
-              onPressed: onLeaveReview,
+            Row(
+              children: [
+                if (onMessage != null)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onMessage,
+                      icon: const Icon(Icons.send_rounded, size: 16),
+                      label: const Text('Написать'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colors.textPrimary,
+                        side: BorderSide(color: colors.border),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                if ((application.status == 'Accepted' ||
+                        application.status == 'Rejected') &&
+                    !application.hasReviewFromCurrentUser &&
+                    onLeaveReview != null) ...[
+                  if (onMessage != null) const SizedBox(width: 10),
+                  Expanded(
+                    child: AppButton(
+                      label: 'Оценить кандидата',
+                      color: const Color(0xFF3157D5),
+                      onPressed: onLeaveReview,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ],

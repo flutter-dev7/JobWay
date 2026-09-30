@@ -1,9 +1,9 @@
-// features/admin/presentation/pages/admin_users_page.dart — заменить целиком
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/feedback/empty_state.dart';
 import '../providers/admin_provider.dart';
 import '../widgets/user_moderation_card.dart';
 
@@ -34,6 +34,11 @@ class AdminUsersPage extends ConsumerWidget {
             : state.error != null
             ? Center(
                 child: Padding(padding: const EdgeInsets.all(24), child: Text(state.error!, textAlign: TextAlign.center)),
+              )
+            : state.users.isEmpty
+            ? const EmptyState(
+                icon: Icons.people_outline_rounded,
+                title: 'Пользователей нет',
               )
             : ListView.builder(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),

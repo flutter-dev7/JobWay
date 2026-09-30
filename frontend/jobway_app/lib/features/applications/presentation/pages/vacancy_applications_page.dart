@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
 import '../../../../core/network/api_exception.dart';
@@ -70,11 +73,9 @@ class _VacancyApplicationsPageState
             ),
           ),
           data: (applications) => applications.isEmpty
-              ? Center(
-                  child: Text(
-                    'Пока нет откликов',
-                    style: TextStyle(fontSize: 14, color: colors.textMuted),
-                  ),
+              ? const EmptyState(
+                  icon: Icons.people_outline_rounded,
+                  title: 'Пока нет откликов',
                 )
               : ListView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -95,6 +96,21 @@ class _VacancyApplicationsPageState
                         isLocked: isLocked,
                         onStatusChanged: (status) =>
                             _updateStatus(application.id, status),
+                        onMessage: application.candidateAccountDeleted
+                            ? null
+                            : () async {
+                                await context.push(
+                                  AppRoutes.chat(application.id),
+                                  extra: ChatArgs(
+                                    otherUserId: application.candidateProfileId,
+                                    otherUserName:
+                                        application.candidateFullName,
+                                    otherUserPhotoUrl:
+                                        application.candidatePhotoUrl,
+                                    vacancyTitle: application.vacancyTitle,
+                                  ),
+                                );
+                              },
                         onLeaveReview: () => ReviewBottomSheet.show(
                           context,
                           jobApplicationId: application.id,

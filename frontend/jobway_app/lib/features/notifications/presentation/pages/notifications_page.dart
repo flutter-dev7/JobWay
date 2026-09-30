@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -99,7 +100,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           final filtered = _filtered(notifications);
 
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(myNotificationsProvider),
+            onRefresh: () => ref.refresh(myNotificationsProvider.future),
             child: Column(
               children: [
                 SizedBox(
@@ -174,14 +175,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: filtered.isEmpty
-                      ? Center(
-                          child: Text(
-                            'Уведомлений нет',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: colors.textMuted,
-                            ),
-                          ),
+                      ? const EmptyState(
+                          icon: Icons.notifications_none_rounded,
+                          title: 'Уведомлений нет',
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),

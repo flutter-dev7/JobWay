@@ -9,6 +9,8 @@ public class JobApplicationResponse
     public Guid VacancyId { get; set; }
     public string VacancyTitle { get; set; } = null!;
     public string CompanyName { get; set; } = null!;
+    public Guid CandidateUserId { get; set; }
+    public Guid CompanyUserId { get; set; }
     public Guid CandidateProfileId { get; set; }
     public string? CandidatePhotoUrl { get; set; }
     public string CandidateFullName { get; set; } = null!;

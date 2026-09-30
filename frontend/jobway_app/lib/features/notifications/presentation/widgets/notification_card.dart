@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme_extension.dart';
+import '../../../../core/utils/time_ago.dart';
 import '../../domain/entities/notification.dart';
 
 class NotificationCard extends StatelessWidget {
@@ -24,6 +25,8 @@ class NotificationCard extends StatelessWidget {
         return Icons.star_outline_rounded;
       case 'ReviewReminder':
         return Icons.rate_review_outlined;
+      case 'NewMessage':
+        return Icons.send_rounded;
       default:
         return Icons.info_outline;
     }
@@ -39,6 +42,8 @@ class NotificationCard extends StatelessWidget {
         return const Color(0xFFFEF3C7);
       case 'NewReview':
         return const Color(0xFFFEF3C7);
+      case 'NewMessage':
+        return const Color(0xFFDCE5FF);
       default:
         return const Color(0xFFF3F4F6);
     }
@@ -54,18 +59,11 @@ class NotificationCard extends StatelessWidget {
         return const Color(0xFFD97706);
       case 'NewReview':
         return const Color(0xFFF59E0B);
+      case 'NewMessage':
+        return const Color(0xFF3157D5);
       default:
         return const Color(0xFF6B7280);
     }
-  }
-
-  String _timeAgo() {
-    final diff = DateTime.now().difference(notification.createdAt);
-    if (diff.inMinutes < 1) return 'только что';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} мин назад';
-    if (diff.inHours < 24) return '${diff.inHours} ч назад';
-    if (diff.inDays == 1) return 'вчера';
-    return '${diff.inDays} дн назад';
   }
 
   @override
@@ -122,7 +120,7 @@ class NotificationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    _timeAgo(),
+                    TimeAgo.format(notification.createdAt),
                     style: TextStyle(fontSize: 11, color: colors.textMuted),
                   ),
                 ],

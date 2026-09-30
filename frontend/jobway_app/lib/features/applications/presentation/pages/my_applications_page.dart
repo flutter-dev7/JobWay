@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/widgets/feedback/empty_state.dart';
 import '../providers/applications_provider.dart';
 import '../widgets/application_card.dart';
 
@@ -30,7 +31,7 @@ class MyApplicationsPage extends ConsumerWidget {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(myApplicationsProvider),
+        onRefresh: () => ref.refresh(myApplicationsProvider.future),
         child: applicationsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
@@ -43,11 +44,10 @@ class MyApplicationsPage extends ConsumerWidget {
             ),
           ),
           data: (applications) => applications.isEmpty
-              ? Center(
-                  child: Text(
-                    'Вы ещё не откликались на вакансии',
-                    style: TextStyle(fontSize: 14, color: colors.textMuted),
-                  ),
+              ? const EmptyState(
+                  icon: Icons.assignment_outlined,
+                  title: 'Вы ещё не откликались на вакансии',
+                  subtitle: 'Найдите подходящую вакансию и откликнитесь',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),

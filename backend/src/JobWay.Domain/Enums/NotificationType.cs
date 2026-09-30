@@ -8,5 +8,6 @@ public enum NotificationType
     System,
     NewReview,
     ReviewReminder,
-    NewEmployerRegistered
+    NewEmployerRegistered,
+    NewMessage
 }

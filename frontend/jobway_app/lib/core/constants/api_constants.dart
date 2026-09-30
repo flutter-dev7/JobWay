@@ -59,6 +59,11 @@ class ApiConstants {
   static String reviewAverageRating(String userId) =>
       '/review/user/$userId/average-rating';
 
+  // Chat
+  static const String chatThreads = '/chat/threads';
+  static String chatMessages(String jobApplicationId) =>
+      '/chat/$jobApplicationId/messages';
+
   // Analytics
   static const String employerAnalytics = '/analytics/employer';
 

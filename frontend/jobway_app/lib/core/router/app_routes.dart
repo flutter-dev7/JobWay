@@ -11,12 +11,14 @@ class AppRoutes {
   static const settings = '/settings';
   static const changePassword = '/change-password';
   static const editVacancy = '/edit-vacancy';
+  static const chats = '/chats';
 
   static String home(String role) => '/home/$role';
   static String vacancy(String id) => '/vacancy/$id';
   static String vacancyApplications(String id) => '/vacancy/$id/applications';
   static String candidate(String id) => '/candidate/$id';
   static String reviews(String userId) => '/reviews/$userId';
+  static String chat(String jobApplicationId) => '/chat/$jobApplicationId';
 }
 
 class VacancyApplicationsArgs {
@@ -24,4 +26,20 @@ class VacancyApplicationsArgs {
   final String status;
 
   const VacancyApplicationsArgs({required this.title, required this.status});
+}
+
+class ChatArgs {
+  final String otherUserId;
+  final String otherUserName;
+  final String? otherUserPhotoUrl;
+  final bool otherUserActive;
+  final String vacancyTitle;
+
+  const ChatArgs({
+    required this.otherUserId,
+    required this.otherUserName,
+    this.otherUserPhotoUrl,
+    this.otherUserActive = true,
+    required this.vacancyTitle,
+  });
 }

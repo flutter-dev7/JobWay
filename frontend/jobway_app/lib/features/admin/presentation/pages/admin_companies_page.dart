@@ -1,7 +1,9 @@
 // features/admin/presentation/pages/admin_companies_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
+import 'package:jobway_app/features/admin/presentation/pages/admin_company_detail_page.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -96,7 +98,7 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
           final filtered = _filtered(companies);
 
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(adminCompaniesProvider),
+            onRefresh: () => ref.refresh(adminCompaniesProvider.future),
             child: Column(
               children: [
                 SizedBox(
@@ -178,14 +180,9 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: filtered.isEmpty
-                      ? Center(
-                          child: Text(
-                            'Компаний нет',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: colors.textMuted,
-                            ),
-                          ),
+                      ? const EmptyState(
+                          icon: Icons.business_outlined,
+                          title: 'Компаний нет',
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
@@ -197,6 +194,12 @@ class _AdminCompaniesPageState extends ConsumerState<AdminCompaniesPage> {
                               isUpdating: _updatingId == company.id,
                               onVerify: () => _verify(company.id),
                               onReject: () => _reject(company.id),
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      AdminCompanyDetailPage(company: company),
+                                ),
+                              ),
                             );
                           },
                         ),

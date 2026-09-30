@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
+import '../../../../core/widgets/feedback/empty_state.dart';
 import '../../../vacancies/presentation/providers/vacancies_provider.dart';
 
 class ApplicationsOverviewPage extends ConsumerWidget {
@@ -30,7 +31,7 @@ class ApplicationsOverviewPage extends ConsumerWidget {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(myVacanciesProvider),
+        onRefresh: () => ref.refresh(myVacanciesProvider.future),
         child: vacanciesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
@@ -43,11 +44,10 @@ class ApplicationsOverviewPage extends ConsumerWidget {
             ),
           ),
           data: (vacancies) => vacancies.isEmpty
-              ? Center(
-                  child: Text(
-                    'У вас пока нет вакансий',
-                    style: TextStyle(fontSize: 14, color: colors.textMuted),
-                  ),
+              ? const EmptyState(
+                  icon: Icons.inbox_outlined,
+                  title: 'У вас пока нет вакансий',
+                  subtitle: 'Создайте вакансию, чтобы начать получать отклики',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),

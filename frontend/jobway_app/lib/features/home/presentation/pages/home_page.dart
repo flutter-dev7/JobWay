@@ -8,6 +8,7 @@ import '../../../analytics/presentation/pages/employer_analytics_page.dart';
 import '../../../applications/presentation/pages/applications_overview_page.dart';
 import '../../../applications/presentation/pages/my_applications_page.dart';
 import '../../../candidate_profile/presentation/pages/candidate_profile_page.dart';
+import '../../../chat/presentation/pages/chat_threads_page.dart';
 import '../../../company_profile/presentation/pages/company_profile_page.dart';
 import '../../../vacancies/presentation/pages/my_vacancies_page.dart';
 import '../../../vacancies/presentation/pages/saved_vacancies_page.dart';
@@ -34,6 +35,7 @@ class _HomePageState extends State<HomePage> {
         return [
           FloatingNavItem(icon: Icons.work_outline, label: 'Вакансии'),
           FloatingNavItem(icon: Icons.people_outline, label: 'Отклики'),
+          FloatingNavItem(icon: Icons.send_rounded, label: 'Чаты'),
           FloatingNavItem(icon: Icons.bar_chart_outlined, label: 'Аналитика'),
           FloatingNavItem(icon: Icons.business_outlined, label: 'Компания'),
         ];
@@ -46,7 +48,11 @@ class _HomePageState extends State<HomePage> {
       default:
         return [
           FloatingNavItem(icon: Icons.search, label: 'Вакансии'),
-          FloatingNavItem(icon: Icons.bookmark_border_rounded, label: 'Сохранённые'),
+          FloatingNavItem(
+            icon: Icons.bookmark_border_rounded,
+            label: 'Сохранённые',
+          ),
+          FloatingNavItem(icon: Icons.send_rounded, label: 'Чаты'),
           FloatingNavItem(icon: Icons.assignment_outlined, label: 'Отклики'),
           FloatingNavItem(icon: Icons.person_outline, label: 'Профиль'),
         ];
@@ -59,13 +65,24 @@ class _HomePageState extends State<HomePage> {
         return const [
           MyVacanciesPage(),
           ApplicationsOverviewPage(),
+          ChatThreadsPage(),
           EmployerAnalyticsPage(),
           CompanyProfilePage(),
         ];
       case 'Admin':
-        return const [AdminCompaniesPage(), AdminUsersPage(), AdminProfilePage()];
+        return const [
+          AdminCompaniesPage(),
+          AdminUsersPage(),
+          AdminProfilePage(),
+        ];
       default:
-        return const [VacanciesListPage(), SavedVacanciesPage(), MyApplicationsPage(), CandidateProfilePage()];
+        return const [
+          VacanciesListPage(),
+          SavedVacanciesPage(),
+          ChatThreadsPage(),
+          MyApplicationsPage(),
+          CandidateProfilePage(),
+        ];
     }
   }
 

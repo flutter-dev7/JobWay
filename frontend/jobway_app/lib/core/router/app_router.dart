@@ -11,6 +11,8 @@ import 'package:jobway_app/features/auth/presentation/pages/verify_reset_code_pa
 import 'package:jobway_app/features/candidate_profile/domain/entities/candidate_profile.dart';
 import 'package:jobway_app/features/candidate_profile/presentation/pages/candidate_profile_view_page.dart';
 import 'package:jobway_app/features/candidate_profile/presentation/pages/edit_candidate_profile_page.dart';
+import 'package:jobway_app/features/chat/presentation/pages/chat_page.dart';
+import 'package:jobway_app/features/chat/presentation/pages/chat_threads_page.dart';
 import 'package:jobway_app/features/company_profile/domain/entities/company_profile.dart';
 import 'package:jobway_app/features/company_profile/presentation/pages/edit_company_profile_page.dart';
 import 'package:jobway_app/features/home/presentation/pages/home_page.dart';
@@ -99,6 +101,21 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.editVacancy,
       builder: (_, state) => EditVacancyPage(vacancy: state.extra as Vacancy),
+    ),
+    GoRoute(path: AppRoutes.chats, builder: (_, __) => const ChatThreadsPage()),
+    GoRoute(
+      path: '/chat/:id',
+      builder: (_, state) {
+        final args = state.extra as ChatArgs;
+        return ChatPage(
+          jobApplicationId: state.pathParameters['id']!,
+          otherUserId: args.otherUserId,
+          otherUserName: args.otherUserName,
+          otherUserPhotoUrl: args.otherUserPhotoUrl,
+          otherUserActive: args.otherUserActive,
+          vacancyTitle: args.vacancyTitle,
+        );
+      },
     ),
   ],
 );

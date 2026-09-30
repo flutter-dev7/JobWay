@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/today_badge_storage.dart';
+import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import 'package:jobway_app/features/vacancies/presentation/widgets/quick_filter_chips.dart';
 import '../../domain/entities/vacancy_filter.dart';
@@ -291,11 +292,10 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
               )
             else if (state.items.isEmpty)
               SliverFillRemaining(
-                child: Center(
-                  child: Text(
-                    'Вакансии не найдены',
-                    style: TextStyle(fontSize: 14, color: colors.textMuted),
-                  ),
+                child: EmptyState(
+                  icon: Icons.search_off_rounded,
+                  title: 'Вакансии не найдены',
+                  subtitle: 'Попробуйте изменить фильтры или запрос',
                 ),
               )
             else

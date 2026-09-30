@@ -12,6 +12,7 @@ public interface IUnitOfWork
     ISavedVacancyRepository SavedVacancies { get; }
     IDeviceTokenRepository DeviceTokens { get; }
     public IReviewRepository Reviews { get; }
+    IChatMessageRepository ChatMessages { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

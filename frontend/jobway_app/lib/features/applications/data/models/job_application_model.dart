@@ -6,6 +6,8 @@ class JobApplicationModel {
   final String id;
   final String vacancyId;
   final String vacancyTitle;
+  final String candidateUserId;
+  final String companyUserId;
   final String companyName;
   final String candidateProfileId;
   final String candidateFullName;
@@ -24,6 +26,8 @@ class JobApplicationModel {
     required this.id,
     required this.vacancyId,
     required this.vacancyTitle,
+    required this.candidateUserId,
+    required this.companyUserId,
     required this.companyName,
     required this.candidateProfileId,
     required this.candidateFullName,
@@ -45,6 +49,8 @@ class JobApplicationModel {
       id: data['id'],
       vacancyId: data['vacancyId'],
       vacancyTitle: data['vacancyTitle'],
+      candidateUserId: data['candidateUserId'],
+      companyUserId: data['companyUserId'],
       companyName: data['companyName'],
       candidateProfileId: data['candidateProfileId'],
       candidateFullName: data['candidateFullName'],
@@ -69,6 +75,8 @@ class JobApplicationModel {
     id: id,
     vacancyId: vacancyId,
     vacancyTitle: vacancyTitle,
+    candidateUserId: candidateUserId,
+    companyUserId: companyUserId,
     companyName: companyName,
     candidateProfileId: candidateProfileId,
     candidateFullName: candidateFullName,

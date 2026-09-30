@@ -124,8 +124,11 @@ public class AdminService : IAdminService
     private static CompanyModerationResponse MapCompany(CompanyProfile company) => new()
     {
         Id = company.Id,
+        UserId = company.UserId,
         CompanyName = company.CompanyName,
+        Description = company.Description,
         Industry = company.Industry,
+        Website = company.Website,
         Location = company.Location,
         LogoUrl = company.LogoUrl,
         VerificationStatus = company.VerificationStatus

@@ -20,9 +20,9 @@ public class JobApplicationRepository : IJobApplicationRepository
         => _context.JobApplications
             .Include(a => a.CandidateProfile).ThenInclude(c => c.Skills)
             .Include(a => a.CandidateProfile).ThenInclude(c => c.User)
-            .Include(a => a.Vacancy).ThenInclude(v => v.CompanyProfile)
+            .Include(a => a.Vacancy).ThenInclude(v => v.CompanyProfile).ThenInclude(c => c.User)
             .Include(a => a.Vacancy).ThenInclude(v => v.RequiredSkills);
-
+    
     public Task<JobApplication?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         => WithIncludes().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 

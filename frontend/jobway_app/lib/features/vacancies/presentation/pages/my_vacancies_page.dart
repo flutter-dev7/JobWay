@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -98,11 +99,10 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
             ),
           ),
           data: (vacancies) => vacancies.isEmpty
-              ? Center(
-                  child: Text(
-                    'У вас пока нет вакансий',
-                    style: TextStyle(fontSize: 14, color: colors.textMuted),
-                  ),
+              ? const EmptyState(
+                  icon: Icons.work_outline_rounded,
+                  title: 'У вас пока нет вакансий',
+                  subtitle: 'Нажмите «+», чтобы создать первую',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
@@ -121,7 +121,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
                         );
                         ref.invalidate(myVacanciesProvider);
                       },
-                      onTap: () => context.push(   
+                      onTap: () => context.push(
                         AppRoutes.vacancyApplications(vacancy.id),
                         extra: VacancyApplicationsArgs(
                           title: vacancy.title,

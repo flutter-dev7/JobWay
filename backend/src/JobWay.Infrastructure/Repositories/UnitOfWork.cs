@@ -18,7 +18,8 @@ public class UnitOfWork : IUnitOfWork
         INotificationRepository notifications,
         ISavedVacancyRepository savedVacancies,
         IDeviceTokenRepository deviceTokens,
-        IReviewRepository reviews)
+        IReviewRepository reviews,
+        IChatMessageRepository chatMessages)
     {
         _context = context;
         Users = users;
@@ -31,6 +32,7 @@ public class UnitOfWork : IUnitOfWork
         SavedVacancies = savedVacancies;
         DeviceTokens = deviceTokens;
         Reviews = reviews;
+        ChatMessages = chatMessages;
     }
 
     public IUserRepository Users { get; }
@@ -43,6 +45,7 @@ public class UnitOfWork : IUnitOfWork
     public ISavedVacancyRepository SavedVacancies { get; }
     public IDeviceTokenRepository DeviceTokens { get; }
     public IReviewRepository Reviews { get; }
+    public IChatMessageRepository ChatMessages { get; }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         => _context.SaveChangesAsync(cancellationToken);

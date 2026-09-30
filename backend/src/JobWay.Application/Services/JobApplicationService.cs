@@ -147,6 +147,8 @@ public class JobApplicationService : IJobApplicationService
             VacancyTitle = application.Vacancy.Title,
             CompanyName = application.Vacancy.CompanyProfile.CompanyName,
             CandidateProfileId = application.CandidateProfileId,
+            CandidateUserId = application.CandidateProfile.UserId,
+            CompanyUserId = application.Vacancy.CompanyProfile.UserId,
             CandidateFullName = isCandidateActive ? application.CandidateProfile.FullName : "Пользователь удалён",
             Status = application.Status,
             MatchScore = application.MatchScore,

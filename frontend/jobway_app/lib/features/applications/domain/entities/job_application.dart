@@ -4,6 +4,8 @@ class JobApplication {
   final String id;
   final String vacancyId;
   final String vacancyTitle;
+  final String candidateUserId;
+  final String companyUserId;
   final String companyName;
   final String candidateProfileId;
   final String candidateFullName;
@@ -22,6 +24,8 @@ class JobApplication {
     required this.id,
     required this.vacancyId,
     required this.vacancyTitle,
+    required this.candidateUserId,
+    required this.companyUserId,
     required this.companyName,
     required this.candidateProfileId,
     required this.candidateFullName,

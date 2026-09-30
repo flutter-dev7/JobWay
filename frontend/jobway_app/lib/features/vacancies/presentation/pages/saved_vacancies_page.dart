@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
+import '../../../../core/widgets/feedback/empty_state.dart';
 import '../providers/vacancies_provider.dart';
 import '../widgets/vacancy_card.dart';
 
@@ -39,7 +40,7 @@ class SavedVacanciesPage extends ConsumerWidget {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(savedVacanciesProvider),
+        onRefresh: () => ref.refresh(savedVacanciesProvider.future),
         child: savedAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
@@ -52,11 +53,11 @@ class SavedVacanciesPage extends ConsumerWidget {
             ),
           ),
           data: (vacancies) => vacancies.isEmpty
-              ? Center(
-                  child: Text(
-                    'Нет сохранённых вакансий',
-                    style: TextStyle(fontSize: 14, color: colors.textMuted),
-                  ),
+              ? const EmptyState(
+                  icon: Icons.bookmark_border_rounded,
+                  title: 'Нет сохранённых вакансий',
+                  subtitle:
+                      'Нажмите на значок закладки на вакансии, чтобы сохранить её',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
