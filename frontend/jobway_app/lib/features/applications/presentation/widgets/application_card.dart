@@ -8,7 +8,6 @@ import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../../../../core/widgets/display/company_avatar.dart';
 import '../../../../core/widgets/display/skill_chip.dart';
-import '../../../../core/widgets/buttons/app_button.dart';
 import '../../domain/entities/job_application.dart';
 
 class ApplicationCard extends ConsumerWidget {
@@ -152,48 +151,92 @@ class ApplicationCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    await context.push(
-                      AppRoutes.chat(application.id),
-                      extra: ChatArgs(
-                        otherUserId: application.companyUserId,
-                        otherUserName: application.companyName,
-                        otherUserPhotoUrl: application.companyLogoUrl,
-                        vacancyTitle: application.vacancyTitle,
-                      ),
-                    );
-                    ref.invalidate(chatThreadsProvider);
-                  },
-                  icon: const Icon(Icons.send_rounded, size: 16),
-                  label: const Text('Написать'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colors.textPrimary,
-                    side: BorderSide(color: colors.border),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-              if ((application.status == 'Accepted' ||
+          Builder(
+            builder: (context) {
+              final showReviewButton =
+                  (application.status == 'Accepted' ||
                       application.status == 'Rejected') &&
                   !application.hasReviewFromCurrentUser &&
-                  onLeaveReview != null) ...[
-                const SizedBox(width: 10),
-                Expanded(
-                  child: AppButton(
-                    label: 'Оценить компанию',
-                    color: const Color(0xFF3157D5),
-                    onPressed: onLeaveReview,
+                  onLeaveReview != null;
+
+              void openChat() async {
+                await context.push(
+                  AppRoutes.chat(application.id),
+                  extra: ChatArgs(
+                    otherUserId: application.companyUserId,
+                    otherUserName: application.companyName,
+                    otherUserPhotoUrl: application.companyLogoUrl,
+                    vacancyTitle: application.vacancyTitle,
                   ),
-                ),
-              ],
-            ],
+                );
+                ref.invalidate(chatThreadsProvider);
+              }
+
+              if (!showReviewButton) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: OutlinedButton.icon(
+                    onPressed: openChat,
+                    icon: const Icon(Icons.send_rounded, size: 16),
+                    label: const Text('Написать'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.textPrimary,
+                      side: BorderSide(color: colors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return Row(
+                children: [
+                  GestureDetector(
+                    onTap: openChat,
+                    child: Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: colors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: colors.border),
+                      ),
+                      child: Icon(
+                        Icons.send_rounded,
+                        size: 18,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 46,
+                      child: ElevatedButton(
+                        onPressed: onLeaveReview,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3157D5),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Оценить компанию',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

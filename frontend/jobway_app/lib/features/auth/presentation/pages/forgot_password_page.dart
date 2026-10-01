@@ -71,7 +71,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               const SizedBox(height: 16),
               const InfoBanner(
                 text:
-                    'Код действителен в течение 10 минут. Проверьте папку «Спам», если письмо не пришло сразу.',
+                    'Код действителен в течение 15 минут. Проверьте папку «Спам», если письмо не пришло сразу.',
               ),
               const SizedBox(height: 24),
               AppButton(

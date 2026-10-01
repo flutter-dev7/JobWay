@@ -71,7 +71,7 @@ public class AuthService : IAuthService
         return Result<string>.Ok("Email verified");
     }
 
-    public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
+        public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
         var emailVerified = await _cacheService.ExistsAsync(RegistrationVerifiedKeyPrefix + request.Email, cancellationToken);
         if (!emailVerified)
@@ -107,6 +107,9 @@ public class AuthService : IAuthService
 
         await _cacheService.RemoveAsync(RegistrationVerifiedKeyPrefix + request.Email, cancellationToken);
         await _cacheService.RemoveAsync(RegistrationCodeKeyPrefix + request.Email, cancellationToken);
+
+        if (request.Role == UserRole.Employer)
+            await NotifyAdminsAboutNewEmployerAsync(user, cancellationToken);
 
         return Result<AuthResponse>.Ok(await BuildAuthResponseAsync(user, cancellationToken));
     }

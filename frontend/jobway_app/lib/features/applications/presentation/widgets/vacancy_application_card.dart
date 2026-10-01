@@ -5,7 +5,6 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/widgets/display/skill_chip.dart';
-import '../../../../core/widgets/buttons/app_button.dart';
 import '../../domain/entities/job_application.dart';
 
 class VacancyApplicationCard extends StatelessWidget {
@@ -233,10 +232,18 @@ class VacancyApplicationCard extends StatelessWidget {
           ],
           if (!isDeleted) ...[
             const SizedBox(height: 10),
-            Row(
-              children: [
-                if (onMessage != null)
-                  Expanded(
+            Builder(
+              builder: (context) {
+                final showReviewButton =
+                    (application.status == 'Accepted' ||
+                        application.status == 'Rejected') &&
+                    !application.hasReviewFromCurrentUser &&
+                    onLeaveReview != null;
+
+                if (!showReviewButton) {
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 46,
                     child: OutlinedButton.icon(
                       onPressed: onMessage,
                       icon: const Icon(Icons.send_rounded, size: 16),
@@ -244,27 +251,60 @@ class VacancyApplicationCard extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: colors.textPrimary,
                         side: BorderSide(color: colors.border),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
-                  ),
-                if ((application.status == 'Accepted' ||
-                        application.status == 'Rejected') &&
-                    !application.hasReviewFromCurrentUser &&
-                    onLeaveReview != null) ...[
-                  if (onMessage != null) const SizedBox(width: 10),
-                  Expanded(
-                    child: AppButton(
-                      label: 'Оценить кандидата',
-                      color: const Color(0xFF3157D5),
-                      onPressed: onLeaveReview,
+                  );
+                }
+
+                return Row(
+                  children: [
+                    GestureDetector(
+                      onTap: onMessage,
+                      child: Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: colors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: colors.border),
+                        ),
+                        child: Icon(
+                          Icons.send_rounded,
+                          size: 18,
+                          color: colors.textPrimary,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: ElevatedButton(
+                          onPressed: onLeaveReview,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF3157D5),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Оценить кандидата',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ],

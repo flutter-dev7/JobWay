@@ -20,11 +20,12 @@ class FloatingNavBar extends StatelessWidget {
     required this.items,
   });
 
-  static const double _itemWidth = 64;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final maxBarWidth = screenWidth - 48;
+    final itemSize = (maxBarWidth / items.length).clamp(40.0, 52.0);
 
     return Container(
       padding: const EdgeInsets.all(4),
@@ -33,7 +34,9 @@ class FloatingNavBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.08),
+            color: Colors.black.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.08,
+            ),
             blurRadius: 18,
             offset: const Offset(0, 4),
           ),
@@ -50,18 +53,22 @@ class FloatingNavBar extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
-              width: _itemWidth,
-              height: 48,
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              width: itemSize,
+              height: itemSize,
+              margin: const EdgeInsets.symmetric(horizontal: 1),
               decoration: BoxDecoration(
                 color: selected ? colors.surfaceMuted : Colors.transparent,
-                borderRadius: BorderRadius.circular(26),
+                shape: BoxShape.circle,
               ),
-              child: Icon(items[index].icon, size: 24, color: colors.textPrimary),
+              child: Icon(
+                items[index].icon,
+                size: 21,
+                color: colors.textPrimary,
+              ),
             ),
           );
         }),
       ),
-    );
+    ); 
   }
 }

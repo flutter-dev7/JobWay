@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/navigation/floating_nav_bar.dart';
 import '../../../admin/presentation/pages/admin_companies_page.dart';
@@ -33,28 +34,25 @@ class _HomePageState extends State<HomePage> {
     switch (widget.role) {
       case 'Employer':
         return [
-          FloatingNavItem(icon: Icons.work_outline, label: 'Вакансии'),
-          FloatingNavItem(icon: Icons.people_outline, label: 'Отклики'),
-          FloatingNavItem(icon: Icons.send_rounded, label: 'Чаты'),
-          FloatingNavItem(icon: Icons.bar_chart_outlined, label: 'Аналитика'),
-          FloatingNavItem(icon: Icons.business_outlined, label: 'Компания'),
+          FloatingNavItem(icon: LucideIcons.briefcase, label: 'Вакансии'),
+          FloatingNavItem(icon: LucideIcons.users, label: 'Отклики'),
+          FloatingNavItem(icon: LucideIcons.send, label: 'Чаты'),
+          FloatingNavItem(icon: LucideIcons.barChart3, label: 'Аналитика'),
+          FloatingNavItem(icon: LucideIcons.building2, label: 'Компания'),
         ];
       case 'Admin':
         return [
-          FloatingNavItem(icon: Icons.business_outlined, label: 'Компании'),
-          FloatingNavItem(icon: Icons.people_outline, label: 'Юзеры'),
-          FloatingNavItem(icon: Icons.person_outline, label: 'Профиль'),
+          FloatingNavItem(icon: LucideIcons.building2, label: 'Компании'),
+          FloatingNavItem(icon: LucideIcons.users, label: 'Юзеры'),
+          FloatingNavItem(icon: LucideIcons.user, label: 'Профиль'),
         ];
       default:
         return [
-          FloatingNavItem(icon: Icons.search, label: 'Вакансии'),
-          FloatingNavItem(
-            icon: Icons.bookmark_border_rounded,
-            label: 'Сохранённые',
-          ),
-          FloatingNavItem(icon: Icons.send_rounded, label: 'Чаты'),
-          FloatingNavItem(icon: Icons.assignment_outlined, label: 'Отклики'),
-          FloatingNavItem(icon: Icons.person_outline, label: 'Профиль'),
+          FloatingNavItem(icon: LucideIcons.search, label: 'Вакансии'),
+          FloatingNavItem(icon: LucideIcons.bookmark, label: 'Сохранённые'),
+          FloatingNavItem(icon: LucideIcons.send, label: 'Чаты'),
+          FloatingNavItem(icon: LucideIcons.clipboardList, label: 'Отклики'),
+          FloatingNavItem(icon: LucideIcons.user, label: 'Профиль'),
         ];
     }
   }
