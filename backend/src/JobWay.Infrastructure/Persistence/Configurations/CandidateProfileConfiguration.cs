@@ -10,8 +10,9 @@ public class CandidateProfileConfiguration : IEntityTypeConfiguration<CandidateP
     {
         builder.Property(c => c.FullName).IsRequired().HasMaxLength(200);
         builder.Property(c => c.Location).HasMaxLength(200);
-        builder.Property(c => c.ResumeFileUrl).HasMaxLength(500);
-
+        builder.Property(c => c.ResumeFileUrl).HasMaxLength(2000);
+        builder.Property(c => c.PhotoUrl).HasMaxLength(2000);
+        
         builder.HasMany(c => c.Skills)
             .WithMany(s => s.CandidateProfiles)
             .UsingEntity(j => j.ToTable("CandidateSkills"));

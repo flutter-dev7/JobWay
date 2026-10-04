@@ -11,6 +11,7 @@ public class CompanyProfileConfiguration : IEntityTypeConfiguration<CompanyProfi
         builder.Property(c => c.CompanyName).IsRequired().HasMaxLength(200);
         builder.Property(c => c.Website).HasMaxLength(300);
         builder.Property(c => c.Location).HasMaxLength(200);
+        builder.Property(c => c.LogoUrl).HasMaxLength(2000);
 
         builder.HasMany(c => c.Vacancies)
             .WithOne(v => v.CompanyProfile)
