@@ -33,7 +33,11 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
 
   Future<void> _openResume(String resumeFileUrl) async {
     final uri = Uri.parse(ApiConstants.resolveFileUrl(resumeFileUrl));
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      AppSnackbar.showError('Не удалось открыть резюме');
+    }
   }
 
   Future<void> _changePhoto() async {

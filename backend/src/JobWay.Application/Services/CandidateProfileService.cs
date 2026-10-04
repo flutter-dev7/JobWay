@@ -84,7 +84,7 @@ public class CandidateProfileService : ICandidateProfileService
             return Result<CandidateProfileResponse>.Fail("Only PDF and Word documents are allowed", ErrorType.Validation);
 
         if (!string.IsNullOrEmpty(profile.ResumeFileUrl))
-            _ = Task.Run(() => _fileStorageService.DeleteAsync("resumes", profile.ResumeFileUrl, CancellationToken.None), cancellationToken);
+            _ = Task.Run(() => _fileStorageService.DeleteAsync("resumes", profile.ResumeFileUrl, CancellationToken.None));
 
         var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
         var url = await _fileStorageService.SaveAsync("resumes", storedFileName, request.Content, cancellationToken);
@@ -109,7 +109,7 @@ public class CandidateProfileService : ICandidateProfileService
             return Result<CandidateProfileResponse>.Fail("Only JPG and PNG images are allowed", ErrorType.Validation);
 
         if (!string.IsNullOrEmpty(profile.PhotoUrl))
-            _ = Task.Run(() => _fileStorageService.DeleteAsync("photos", profile.PhotoUrl, CancellationToken.None), cancellationToken);
+            _ = Task.Run(() => _fileStorageService.DeleteAsync("photos", profile.PhotoUrl, CancellationToken.None));
 
         var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
         var url = await _fileStorageService.SaveAsync("photos", storedFileName, request.Content, cancellationToken);

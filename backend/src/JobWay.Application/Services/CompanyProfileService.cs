@@ -76,7 +76,7 @@ public class CompanyProfileService : ICompanyProfileService
             return Result<CompanyProfileResponse>.Fail("Only JPG and PNG images are allowed", ErrorType.Validation);
 
         if (!string.IsNullOrEmpty(profile.LogoUrl))
-            _ = Task.Run(() => _fileStorageService.DeleteAsync("photos", profile.LogoUrl, CancellationToken.None), cancellationToken);
+            _ = Task.Run(() => _fileStorageService.DeleteAsync("photos", profile.LogoUrl, CancellationToken.None));
 
         var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
         var url = await _fileStorageService.SaveAsync("photos", storedFileName, request.Content, cancellationToken);

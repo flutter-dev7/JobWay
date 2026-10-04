@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/display/info_row.dart';
+import 'package:jobway_app/core/widgets/feedback/app_snackbar.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -15,6 +16,15 @@ class CandidateProfileViewPage extends ConsumerWidget {
   final String candidateProfileId;
 
   const CandidateProfileViewPage({super.key, required this.candidateProfileId});
+
+  Future<void> _openResume(BuildContext context, String resumeFileUrl) async {
+    final uri = Uri.parse(ApiConstants.resolveFileUrl(resumeFileUrl));
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      AppSnackbar.showError('Не удалось открыть резюме');
+    }
+  }
 
   String _experienceLevelLabel(String level) => switch (level) {
     'NoExperience' => 'Без опыта',
@@ -190,12 +200,7 @@ class CandidateProfileViewPage extends ConsumerWidget {
                 title: 'Резюме',
                 icon: Icons.attach_file_rounded,
                 child: GestureDetector(
-                  onTap: () => launchUrl(
-                    Uri.parse(
-                      ApiConstants.resolveFileUrl(profile.resumeFileUrl!),
-                    ),
-                    mode: LaunchMode.externalApplication,
-                  ),
+                  onTap: () => _openResume(context, profile.resumeFileUrl!),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
