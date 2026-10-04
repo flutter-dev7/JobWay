@@ -163,7 +163,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 image: hasPhoto
                     ? DecorationImage(
                         image: NetworkImage(
-                          '${ApiConstants.fileBaseUrl}${widget.otherUserPhotoUrl}',
+                          ApiConstants.resolveFileUrl(
+                            widget.otherUserPhotoUrl!,
+                          ),
                         ),
                         fit: BoxFit.cover,
                       )

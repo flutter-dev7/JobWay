@@ -92,7 +92,9 @@ class ReviewsSection extends ConsumerWidget {
                                         review.reviewerPhotoUrl!.isNotEmpty
                                     ? DecorationImage(
                                         image: NetworkImage(
-                                          '${ApiConstants.fileBaseUrl}${review.reviewerPhotoUrl}',
+                                          ApiConstants.resolveFileUrl(
+                                            review.reviewerPhotoUrl!,
+                                          ),
                                         ),
                                         fit: BoxFit.cover,
                                       )

@@ -1,4 +1,3 @@
-// Application/Services/CompanyProfileService.cs — заменить целиком
 using System.Text.Json;
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.CompanyProfile.Request;
@@ -12,8 +11,8 @@ namespace JobWay.Application.Services;
 
 public class CompanyProfileService : ICompanyProfileService
 {
-    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
-
+    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif"];
+    
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFileStorageService _fileStorageService;
     private readonly ICacheService _cacheService;
@@ -75,6 +74,9 @@ public class CompanyProfileService : ICompanyProfileService
         var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
         if (!AllowedImageExtensions.Contains(extension))
             return Result<CompanyProfileResponse>.Fail("Only JPG and PNG images are allowed", ErrorType.Validation);
+
+        if (!string.IsNullOrEmpty(profile.LogoUrl))
+            await _fileStorageService.DeleteAsync("photos", profile.LogoUrl, cancellationToken);
 
         var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
         var url = await _fileStorageService.SaveAsync("photos", storedFileName, request.Content, cancellationToken);

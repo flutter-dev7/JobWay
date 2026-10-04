@@ -154,7 +154,7 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                   ProfilePhoto(
                     photoUrl:
                         profile.logoUrl != null && profile.logoUrl!.isNotEmpty
-                        ? '${ApiConstants.fileBaseUrl}${profile.logoUrl}'
+                        ? ApiConstants.resolveFileUrl(profile.logoUrl!)
                         : null,
                     fallbackText: profile.companyName.trim().isNotEmpty
                         ? profile.companyName.trim()[0].toUpperCase()

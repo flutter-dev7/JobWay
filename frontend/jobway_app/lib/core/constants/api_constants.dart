@@ -78,4 +78,11 @@ class ApiConstants {
     final uri = Uri.parse(baseUrl);
     return '${uri.scheme}://${uri.authority}';
   }
+
+  static String resolveFileUrl(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    return '$fileBaseUrl$path';
+  }
 }

@@ -14,8 +14,8 @@ namespace JobWay.Application.Services;
 public class CandidateProfileService : ICandidateProfileService
 {
     private static readonly string[] AllowedResumeExtensions = [".pdf", ".doc", ".docx"];
-    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
-
+    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif"];
+    
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFileStorageService _fileStorageService;
     private readonly ICacheService _cacheService;
@@ -83,6 +83,9 @@ public class CandidateProfileService : ICandidateProfileService
         if (!AllowedResumeExtensions.Contains(extension))
             return Result<CandidateProfileResponse>.Fail("Only PDF and Word documents are allowed", ErrorType.Validation);
 
+        if (!string.IsNullOrEmpty(profile.ResumeFileUrl))
+            await _fileStorageService.DeleteAsync("resumes", profile.ResumeFileUrl, cancellationToken);
+
         var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
         var url = await _fileStorageService.SaveAsync("resumes", storedFileName, request.Content, cancellationToken);
 
@@ -98,13 +101,15 @@ public class CandidateProfileService : ICandidateProfileService
     public async Task<Result<CandidateProfileResponse>> UploadPhotoAsync(Guid userId, UploadPhotoRequest request, CancellationToken cancellationToken)
     {
         var profile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(userId, cancellationToken);
-
         if (profile is null)
             return Result<CandidateProfileResponse>.Fail("Profile not found", ErrorType.NotFound);
 
         var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
         if (!AllowedImageExtensions.Contains(extension))
             return Result<CandidateProfileResponse>.Fail("Only JPG and PNG images are allowed", ErrorType.Validation);
+
+        if (!string.IsNullOrEmpty(profile.PhotoUrl))
+            await _fileStorageService.DeleteAsync("photos", profile.PhotoUrl, cancellationToken);
 
         var storedFileName = $"{userId}_{Guid.NewGuid()}{extension}";
         var url = await _fileStorageService.SaveAsync("photos", storedFileName, request.Content, cancellationToken);

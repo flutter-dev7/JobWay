@@ -59,4 +59,33 @@ public class SupabaseStorageService : IFileStorageService
             throw;
         }
     }
+    
+    public async Task DeleteAsync(string containerName, string existingFileUrl, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var fileName = ExtractFileNameFromUrl(existingFileUrl, containerName);
+            if (fileName is null) return;
+
+            var bucket = _client.Storage.From(containerName);
+            await bucket.Remove(new List<string> { fileName });
+
+            _logger.LogInformation("Deleted old file {FileName} from bucket {Bucket}", fileName, containerName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to delete old file from bucket {Bucket}, continuing anyway", containerName);
+        }
+    }
+
+    private static string? ExtractFileNameFromUrl(string url, string containerName)
+    {
+        var marker = $"/object/sign/{containerName}/";
+        var index = url.IndexOf(marker, StringComparison.Ordinal);
+        if (index < 0) return null;
+
+        var afterMarker = url[(index + marker.Length)..];
+        var queryIndex = afterMarker.IndexOf('?');
+        return queryIndex >= 0 ? afterMarker[..queryIndex] : afterMarker;
+    }
 }

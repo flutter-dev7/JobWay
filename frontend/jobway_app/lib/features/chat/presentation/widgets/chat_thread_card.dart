@@ -13,7 +13,9 @@ class ChatThreadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasPhoto = thread.otherUserPhotoUrl != null && thread.otherUserPhotoUrl!.isNotEmpty;
+    final hasPhoto =
+        thread.otherUserPhotoUrl != null &&
+        thread.otherUserPhotoUrl!.isNotEmpty;
     final hasUnread = thread.unreadCount > 0;
 
     return GestureDetector(
@@ -26,7 +28,9 @@ class ChatThreadCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03),
+              color: Colors.black.withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
+              ),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -42,7 +46,11 @@ class ChatThreadCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 image: hasPhoto
                     ? DecorationImage(
-                        image: NetworkImage('${ApiConstants.fileBaseUrl}${thread.otherUserPhotoUrl}'),
+                        image: NetworkImage(
+                          ApiConstants.resolveFileUrl(
+                            thread.otherUserPhotoUrl!,
+                          ),
+                        ),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -50,8 +58,14 @@ class ChatThreadCard extends StatelessWidget {
               child: !hasPhoto
                   ? Center(
                       child: Text(
-                        thread.otherUserName.trim().isNotEmpty ? thread.otherUserName.trim()[0].toUpperCase() : '?',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.accentColor),
+                        thread.otherUserName.trim().isNotEmpty
+                            ? thread.otherUserName.trim()[0].toUpperCase()
+                            : '?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: context.accentColor,
+                        ),
                       ),
                     )
                   : null,
@@ -68,7 +82,11 @@ class ChatThreadCard extends StatelessWidget {
                           thread.otherUserName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: colors.textPrimary),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -95,22 +113,33 @@ class ChatThreadCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 13,
-                            color: hasUnread ? colors.textPrimary : colors.textSecondary,
-                            fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+                            color: hasUnread
+                                ? colors.textPrimary
+                                : colors.textSecondary,
+                            fontWeight: hasUnread
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                           ),
                         ),
                       ),
                       if (hasUnread) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: context.accentColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             '${thread.unreadCount}',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],

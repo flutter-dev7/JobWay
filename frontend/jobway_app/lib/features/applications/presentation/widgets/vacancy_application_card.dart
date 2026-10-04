@@ -81,7 +81,9 @@ class VacancyApplicationCard extends StatelessWidget {
                       image: hasPhoto
                           ? DecorationImage(
                               image: NetworkImage(
-                                '${ApiConstants.fileBaseUrl}${application.candidatePhotoUrl}',
+                                ApiConstants.resolveFileUrl(
+                                  application.candidatePhotoUrl!,
+                                ),
                               ),
                               fit: BoxFit.cover,
                             )

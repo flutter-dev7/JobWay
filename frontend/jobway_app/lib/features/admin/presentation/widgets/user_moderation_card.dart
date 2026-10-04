@@ -1,4 +1,4 @@
-// features/admin/presentation/widgets/user_moderation_card.dart — заменить целиком
+// features/admin/presentation/widgets/user_moderation_card.dart
 import 'package:flutter/material.dart';
 import 'package:jobway_app/core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme_extension.dart';
@@ -83,7 +83,7 @@ class UserModerationCard extends StatelessWidget {
             child: user.photoUrl != null && user.photoUrl!.isNotEmpty
                 ? ClipOval(
                     child: Image.network(
-                      '${ApiConstants.fileBaseUrl}${user.photoUrl}',
+                      ApiConstants.resolveFileUrl(user.photoUrl!),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
                           Icon(_roleIcon(), size: 22, color: roleColor),

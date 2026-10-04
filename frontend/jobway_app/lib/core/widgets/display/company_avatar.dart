@@ -58,7 +58,7 @@ class CompanyAvatar extends StatelessWidget {
       return ClipRRect(
         borderRadius: BorderRadius.circular(size * 0.28),
         child: Image.network(
-          '${ApiConstants.fileBaseUrl}$logoUrl',
+          ApiConstants.resolveFileUrl(logoUrl!),
           width: size,
           height: size,
           fit: BoxFit.cover,
@@ -77,11 +77,18 @@ class CompanyAvatar extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(size * 0.28)),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(size * 0.28),
+      ),
       child: Center(
         child: Text(
           _initials(),
-          style: TextStyle(fontSize: size * 0.36, fontWeight: FontWeight.w700, color: _textPalette[index]),
+          style: TextStyle(
+            fontSize: size * 0.36,
+            fontWeight: FontWeight.w700,
+            color: _textPalette[index],
+          ),
         ),
       ),
     );

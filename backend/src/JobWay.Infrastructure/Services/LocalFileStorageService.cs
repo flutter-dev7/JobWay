@@ -1,4 +1,4 @@
-using JobWay.Application.Interfaces.Services;
+/*using JobWay.Application.Interfaces.Services;
 
 namespace JobWay.Infrastructure.Services;
 
@@ -15,4 +15,4 @@ public class LocalFileStorageService : IFileStorageService
 
         return $"/uploads/{containerName}/{fileName}";
     }
-}
+}*/
