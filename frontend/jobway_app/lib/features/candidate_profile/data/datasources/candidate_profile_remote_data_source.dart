@@ -10,6 +10,11 @@ class CandidateProfileRemoteDataSource {
 
   CandidateProfileRemoteDataSource(this._dio);
 
+  static final _uploadOptions = Options(
+    sendTimeout: const Duration(seconds: 60),
+    receiveTimeout: const Duration(seconds: 60),
+  );
+
   Future<CandidateProfileModel> getMyProfile() async {
     final response = await _dio.get(ApiConstants.candidateProfileMe);
     return CandidateProfileModel.fromJson(response.data);
@@ -46,7 +51,11 @@ class CandidateProfileRemoteDataSource {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(file.path, filename: fileName),
     });
-    final response = await _dio.post(ApiConstants.uploadResume, data: formData);
+    final response = await _dio.post(
+      ApiConstants.uploadResume,
+      data: formData,
+      options: _uploadOptions,
+    );
     return CandidateProfileModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
@@ -58,6 +67,7 @@ class CandidateProfileRemoteDataSource {
     final response = await _dio.post(
       ApiConstants.uploadCandidatePhoto,
       data: formData,
+      options: _uploadOptions,
     );
     return CandidateProfileModel.fromJson(ApiResponse.unwrap(response.data));
   }

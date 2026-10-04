@@ -10,6 +10,11 @@ class CompanyProfileRemoteDataSource {
 
   CompanyProfileRemoteDataSource(this._dio);
 
+  static final _uploadOptions = Options(
+    sendTimeout: const Duration(seconds: 60),
+    receiveTimeout: const Duration(seconds: 60),
+  );
+
   Future<CompanyProfileModel> getMyProfile() async {
     final response = await _dio.get(ApiConstants.companyProfileMe);
     return CompanyProfileModel.fromJson(ApiResponse.unwrap(response.data));
@@ -45,6 +50,7 @@ class CompanyProfileRemoteDataSource {
     final response = await _dio.post(
       ApiConstants.uploadCompanyLogo,
       data: formData,
+      options: _uploadOptions,
     );
     return CompanyProfileModel.fromJson(ApiResponse.unwrap(response.data));
   }
