@@ -12,6 +12,7 @@ class ApiConstants {
   static const String sendRegistrationCode = '/auth/send-registration-code';
   static const String verifyRegistrationCode = '/auth/verify-registration-code';
   static const String deleteAccount = '/auth/delete-account';
+  static const String health = '/health';
 
   // Skills
   static const String skills = '/skills';
