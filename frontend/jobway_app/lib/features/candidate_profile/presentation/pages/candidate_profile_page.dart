@@ -353,8 +353,7 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  profile.resumeFileUrl!.split('/').last,
-                                  maxLines: 1,
+                                  ApiConstants.extractFileName(profile.resumeFileUrl!),                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 13,

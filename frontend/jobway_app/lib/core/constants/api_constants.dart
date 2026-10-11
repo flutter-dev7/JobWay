@@ -86,4 +86,19 @@ class ApiConstants {
     }
     return '$fileBaseUrl$path';
   }
+
+  static String extractFileName(String url) {
+    final withoutQuery = url.split('?').first;
+    final fileName = withoutQuery.split('/').last;
+    final parts = fileName.split('_');
+    if (parts.length >= 3) {
+      return 'Резюме${_extensionOf(fileName)}';
+    }
+    return fileName;
+  }
+
+  static String _extensionOf(String fileName) {
+    final dotIndex = fileName.lastIndexOf('.');
+    return dotIndex >= 0 ? fileName.substring(dotIndex) : '';
+  }
 }

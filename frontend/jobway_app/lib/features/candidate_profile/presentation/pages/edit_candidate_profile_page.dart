@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/constants/api_constants.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
@@ -306,7 +307,7 @@ class _EditCandidateProfilePageState
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                _resumeFileUrl!.split('/').last,
+                                ApiConstants.extractFileName(_resumeFileUrl!),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
