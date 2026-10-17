@@ -94,28 +94,36 @@ public class JobApplicationService : IJobApplicationService
         return Result<JobApplicationResponse>.Ok(MapToResponse(application, hasReview));
     }
 
-    public async Task<Result<List<JobApplicationResponse>>> GetByVacancyAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<JobApplicationResponse>>> GetByVacancyAsync(Guid employerUserId, Guid vacancyId, ApplicationFilterRequest filter, CancellationToken cancellationToken)
     {
         var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);
         if (companyProfile is null)
-            return Result<List<JobApplicationResponse>>.Fail("Company profile not found", ErrorType.NotFound);
+            return Result<PagedResult<JobApplicationResponse>>.Fail("Company profile not found", ErrorType.NotFound);
 
         var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
         if (vacancy is null)
-            return Result<List<JobApplicationResponse>>.Fail("Vacancy not found", ErrorType.NotFound);
+            return Result<PagedResult<JobApplicationResponse>>.Fail("Vacancy not found", ErrorType.NotFound);
 
         if (vacancy.CompanyProfileId != companyProfile.Id)
-            return Result<List<JobApplicationResponse>>.Fail("You do not own this vacancy", ErrorType.Forbidden);
+            return Result<PagedResult<JobApplicationResponse>>.Fail("You do not own this vacancy", ErrorType.Forbidden);
 
-        var applications = await _unitOfWork.JobApplications.GetByVacancyIdAsync(vacancyId, cancellationToken);
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (applications, totalCount) = await _unitOfWork.JobApplications.GetPagedByVacancyIdAsync(vacancyId, filter, cancellationToken);
 
         var reviewedIds = await _unitOfWork.Reviews.GetReviewedApplicationIdsAsync(
             applications.Select(a => a.Id).ToList(),
             ReviewType.CompanyToCandidate,
             cancellationToken);
 
-        return Result<List<JobApplicationResponse>>.Ok(
-            applications.Select(a => MapToResponse(a, reviewedIds.Contains(a.Id))).ToList());
+        return Result<PagedResult<JobApplicationResponse>>.Ok(new PagedResult<JobApplicationResponse>
+        {
+            Items = applications.Select(a => MapToResponse(a, reviewedIds.Contains(a.Id))).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
     }
 
     public async Task<Result<List<JobApplicationResponse>>> GetMyApplicationsAsync(Guid candidateUserId, CancellationToken cancellationToken)
@@ -133,6 +141,41 @@ public class JobApplicationService : IJobApplicationService
 
         return Result<List<JobApplicationResponse>>.Ok(
             applications.Select(a => MapToResponse(a, reviewedIds.Contains(a.Id))).ToList());
+    }
+    
+    public async Task<Result<PagedResult<JobApplicationResponse>>> GetMyApplicationsAsync(Guid candidateUserId, ApplicationFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var candidateProfile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(candidateUserId, cancellationToken);
+        if (candidateProfile is null)
+            return Result<PagedResult<JobApplicationResponse>>.Fail("Candidate profile not found", ErrorType.NotFound);
+
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (applications, totalCount) = await _unitOfWork.JobApplications.GetPagedByCandidateProfileIdAsync(candidateProfile.Id, filter, cancellationToken);
+
+        var reviewedIds = await _unitOfWork.Reviews.GetReviewedApplicationIdsAsync(
+            applications.Select(a => a.Id).ToList(),
+            ReviewType.CandidateToCompany,
+            cancellationToken);
+
+        return Result<PagedResult<JobApplicationResponse>>.Ok(new PagedResult<JobApplicationResponse>
+        {
+            Items = applications.Select(a => MapToResponse(a, reviewedIds.Contains(a.Id))).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
+    }
+
+    public async Task<Result<List<Guid>>> GetMyAppliedVacancyIdsAsync(Guid candidateUserId, CancellationToken cancellationToken)
+    {
+        var candidateProfile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(candidateUserId, cancellationToken);
+        if (candidateProfile is null)
+            return Result<List<Guid>>.Fail("Candidate profile not found", ErrorType.NotFound);
+
+        var ids = await _unitOfWork.JobApplications.GetVacancyIdsByCandidateProfileIdAsync(candidateProfile.Id, cancellationToken);
+        return Result<List<Guid>>.Ok(ids);
     }
 
     private JobApplicationResponse MapToResponse(JobApplication application, bool hasReview)

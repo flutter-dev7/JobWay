@@ -63,8 +63,15 @@ public static class DependencyInjection
         
         services.AddScoped<IAdminService, AdminService>();
         
-        services.Configure<SupabaseSettings>(configuration.GetSection("Supabase"));
-        services.AddScoped<IFileStorageService, SupabaseStorageService>();
+        if (string.Equals(configuration["Storage:Provider"], "Local", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        }
+        else
+        {
+            services.Configure<SupabaseSettings>(configuration.GetSection("Supabase"));
+            services.AddScoped<IFileStorageService, SupabaseStorageService>();
+        }
         
         services.AddScoped<IPushNotificationService, FcmPushNotificationService>();
         services.AddScoped<IDeviceTokenRepository, DeviceTokenRepository>();

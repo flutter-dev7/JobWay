@@ -1,4 +1,5 @@
-import '../entities/job_application.dart';
+import '../entities/application_filter.dart';
+import '../entities/paged_job_applications.dart';
 import '../repository/applications_repository.dart';
 
 class GetMyApplicationsUseCase {
@@ -6,5 +7,6 @@ class GetMyApplicationsUseCase {
 
   GetMyApplicationsUseCase(this._repository);
 
-  Future<List<JobApplication>> call() => _repository.getMyApplications();
+  Future<PagedJobApplications> call(ApplicationFilter filter) =>
+      _repository.getMyApplications(filter);
 }

@@ -12,7 +12,7 @@ public class JobApplicationController : BaseApiController
     private readonly IJobApplicationService _jobApplicationService;
     private readonly ICandidateProfileService _candidateProfileService;
 
-    public JobApplicationController(IJobApplicationService jobApplicationService,  ICandidateProfileService candidateProfileService)
+    public JobApplicationController(IJobApplicationService jobApplicationService, ICandidateProfileService candidateProfileService)
     {
         _jobApplicationService = jobApplicationService;
         _candidateProfileService = candidateProfileService;
@@ -25,19 +25,24 @@ public class JobApplicationController : BaseApiController
 
     [Authorize(Roles = Roles.Employer)]
     [HttpGet("vacancies/{vacancyId:guid}/applications")]
-    public async Task<IActionResult> GetByVacancy(Guid vacancyId, CancellationToken cancellationToken)
-        => HandleError(await _jobApplicationService.GetByVacancyAsync(CurrentUserId, vacancyId, cancellationToken));
+    public async Task<IActionResult> GetByVacancy(Guid vacancyId, [FromQuery] ApplicationFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _jobApplicationService.GetByVacancyAsync(CurrentUserId, vacancyId, filter, cancellationToken));
 
     [Authorize(Roles = Roles.Candidate)]
     [HttpGet("applications/my")]
-    public async Task<IActionResult> GetMyApplications(CancellationToken cancellationToken)
-        => HandleError(await _jobApplicationService.GetMyApplicationsAsync(CurrentUserId, cancellationToken));
+    public async Task<IActionResult> GetMyApplications([FromQuery] ApplicationFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _jobApplicationService.GetMyApplicationsAsync(CurrentUserId, filter, cancellationToken));
+
+    [Authorize(Roles = Roles.Candidate)]
+    [HttpGet("applications/my/vacancy-ids")]
+    public async Task<IActionResult> GetMyAppliedVacancyIds(CancellationToken cancellationToken)
+        => HandleError(await _jobApplicationService.GetMyAppliedVacancyIdsAsync(CurrentUserId, cancellationToken));
 
     [Authorize(Roles = Roles.Employer)]
     [HttpPut("applications/{applicationId:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid applicationId, UpdateJobApplicationStatusRequest request, CancellationToken cancellationToken)
         => HandleError(await _jobApplicationService.UpdateStatusAsync(CurrentUserId, applicationId, request, cancellationToken));
-    
+
     [Authorize(Roles = Roles.Employer)]
     [HttpGet("candidate-profile/{candidateProfileId:guid}")]
     public async Task<IActionResult> GetCandidateProfile(Guid candidateProfileId, CancellationToken cancellationToken)

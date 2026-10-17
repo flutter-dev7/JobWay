@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_response.dart';
+import '../../domain/entities/application_filter.dart';
 import '../models/job_application_model.dart';
+import '../models/paged_job_applications_model.dart';
 
 class ApplicationsRemoteDataSource {
   final Dio _dio;
@@ -16,16 +18,26 @@ class ApplicationsRemoteDataSource {
     return JobApplicationModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
-  Future<List<JobApplicationModel>> getMyApplications() async {
-    final response = await _dio.get(ApiConstants.myApplications);
-    final list = ApiResponse.unwrap(response.data) as List;
-    return list.map((json) => JobApplicationModel.fromJson(json)).toList();
+  Future<PagedJobApplicationsModel> getMyApplications(ApplicationFilter filter) async {
+    final response = await _dio.get(
+      ApiConstants.myApplications,
+      queryParameters: filter.toQueryParams(),
+    );
+    return PagedJobApplicationsModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
-  Future<List<JobApplicationModel>> getByVacancy(String vacancyId) async {
-    final response = await _dio.get(ApiConstants.vacancyApplications(vacancyId));
+  Future<List<String>> getMyAppliedVacancyIds() async {
+    final response = await _dio.get(ApiConstants.myAppliedVacancyIds);
     final list = ApiResponse.unwrap(response.data) as List;
-    return list.map((json) => JobApplicationModel.fromJson(json)).toList();
+    return list.map((e) => e.toString()).toList();
+  }
+
+  Future<PagedJobApplicationsModel> getByVacancy(String vacancyId, ApplicationFilter filter) async {
+    final response = await _dio.get(
+      ApiConstants.vacancyApplications(vacancyId),
+      queryParameters: filter.toQueryParams(),
+    );
+    return PagedJobApplicationsModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
   Future<JobApplicationModel> updateStatus(String applicationId, String status) async {

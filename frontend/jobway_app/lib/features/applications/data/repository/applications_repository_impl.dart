@@ -1,4 +1,6 @@
+import '../../domain/entities/application_filter.dart';
 import '../../domain/entities/job_application.dart';
+import '../../domain/entities/paged_job_applications.dart';
 import '../../domain/repository/applications_repository.dart';
 import '../datasources/applications_remote_data_source.dart';
 
@@ -14,15 +16,18 @@ class ApplicationsRepositoryImpl implements ApplicationsRepository {
   }
 
   @override
-  Future<List<JobApplication>> getMyApplications() async {
-    final models = await _remoteDataSource.getMyApplications();
-    return models.map((m) => m.toEntity()).toList();
+  Future<PagedJobApplications> getMyApplications(ApplicationFilter filter) async {
+    final model = await _remoteDataSource.getMyApplications(filter);
+    return model.toEntity();
   }
 
   @override
-  Future<List<JobApplication>> getByVacancy(String vacancyId) async {
-    final models = await _remoteDataSource.getByVacancy(vacancyId);
-    return models.map((m) => m.toEntity()).toList();
+  Future<List<String>> getMyAppliedVacancyIds() => _remoteDataSource.getMyAppliedVacancyIds();
+
+  @override
+  Future<PagedJobApplications> getByVacancy(String vacancyId, ApplicationFilter filter) async {
+    final model = await _remoteDataSource.getByVacancy(vacancyId, filter);
+    return model.toEntity();
   }
 
   @override

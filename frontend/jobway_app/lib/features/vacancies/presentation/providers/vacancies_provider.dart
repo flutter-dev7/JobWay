@@ -1,4 +1,4 @@
-// features/vacancies/presentation/providers/vacancies_provider.dart 
+// features/vacancies/presentation/providers/vacancies_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancies_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_today_vacancies_count_usecase.dart';

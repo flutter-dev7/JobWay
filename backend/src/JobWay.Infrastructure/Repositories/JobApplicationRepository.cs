@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.JobApplication.Request;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
@@ -64,6 +65,57 @@ public class JobApplicationRepository : IJobApplicationRepository
             .ThenInclude(v => v.CompanyProfile)
             .Where(a => (a.Status == ApplicationStatus.Accepted || a.Status == ApplicationStatus.Rejected)
                         && a.UpdatedAt <= updatedBefore)
+            .ToListAsync(cancellationToken);
+    
+    public async Task<(List<JobApplication> Items, int TotalCount)> GetPagedByCandidateProfileIdAsync(
+        Guid candidateProfileId, ApplicationFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = WithIncludes().Where(a => a.CandidateProfileId == candidateProfileId);
+
+        if (filter.Status is not null)
+            query = query.Where(a => a.Status == filter.Status);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(a => a.CreatedAt)
+            .ThenBy(a => a.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+    
+    public async Task<(List<JobApplication> Items, int TotalCount)> GetPagedByVacancyIdAsync(
+        Guid vacancyId, ApplicationFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = WithIncludes().Where(a => a.VacancyId == vacancyId);
+
+        if (filter.Status is not null)
+            query = query.Where(a => a.Status == filter.Status);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var ordered = string.Equals(filter.SortBy, "matchScore", StringComparison.OrdinalIgnoreCase)
+            ? query.OrderByDescending(a => a.MatchScore).ThenByDescending(a => a.CreatedAt)
+            : query.OrderByDescending(a => a.CreatedAt);
+
+        var items = await ordered
+            .ThenBy(a => a.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public Task<List<Guid>> GetVacancyIdsByCandidateProfileIdAsync(Guid candidateProfileId, CancellationToken cancellationToken)
+        => _context.JobApplications
+            .Where(a => a.CandidateProfileId == candidateProfileId)
+            .Select(a => a.VacancyId)
             .ToListAsync(cancellationToken);
 
     public void Add(JobApplication application) => _context.JobApplications.Add(application);

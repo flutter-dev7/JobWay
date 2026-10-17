@@ -55,7 +55,8 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
       await ref.read(applyToVacancyUseCaseProvider).call(widget.vacancyId);
       if (!mounted) return;
       AppSnackbar.showSuccess('Отклик отправлен');
-      ref.invalidate(myApplicationsProvider);
+      ref.invalidate(myAppliedVacancyIdsProvider);
+      ref.invalidate(myApplicationsControllerProvider);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
