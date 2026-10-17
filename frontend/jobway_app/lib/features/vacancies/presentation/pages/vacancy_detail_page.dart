@@ -5,6 +5,8 @@ import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/applications/presentation/providers/applications_provider.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
+import 'package:jobway_app/features/vacancies/presentation/providers/saved_vacancies_controller.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/time_ago.dart';
@@ -75,7 +77,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
         await ref.read(saveVacancyUseCaseProvider).call(widget.vacancyId);
         notifier.update((state) => {...state, widget.vacancyId});
       }
-      ref.invalidate(savedVacanciesProvider);
+      ref.invalidate(savedVacanciesControllerProvider);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
@@ -227,7 +229,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                   child: Column(
                     children: [
                       InfoOverviewRow(
-                        icon: Icons.work_outline_rounded,
+                        icon: LucideIcons.briefcase,
                         label: 'Тип занятости',
                         value: employmentTypeLabel(vacancy.employmentType),
                       ),

@@ -187,15 +187,25 @@ public class VacancyService : IVacancyService
         return Result<PagedResult<VacancyResponse>>.Ok(result);
     }
 
-    public async Task<Result<List<VacancyResponse>>> GetMyVacanciesAsync(Guid employerUserId, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<VacancyResponse>>> GetMyVacanciesAsync(Guid employerUserId, MyVacanciesFilterRequest filter, CancellationToken cancellationToken)
     {
         var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);
 
         if (companyProfile is null)
-            return Result<List<VacancyResponse>>.Fail("Company profile not found", ErrorType.NotFound);
+            return Result<PagedResult<VacancyResponse>>.Fail("Company profile not found", ErrorType.NotFound);
 
-        var vacancies = await _unitOfWork.Vacancies.GetByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
-        return Result<List<VacancyResponse>>.Ok(vacancies.Select(MapToResponse).ToList());
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (vacancies, totalCount) = await _unitOfWork.Vacancies.GetPagedByCompanyProfileIdAsync(companyProfile.Id, filter, cancellationToken);
+
+        return Result<PagedResult<VacancyResponse>>.Ok(new PagedResult<VacancyResponse>
+        {
+            Items = vacancies.Select(MapToResponse).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
     }
 
     private async Task<Result<VacancyResponse>> ChangeStatusAsync(Guid employerUserId, Guid vacancyId, VacancyStatus status, CancellationToken cancellationToken)

@@ -7,6 +7,7 @@ import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -277,7 +278,7 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                     ),
                     const SizedBox(height: 16),
                     InfoRow(
-                      icon: Icons.work_outline_rounded,
+                      icon: LucideIcons.briefcase,
                       label: 'Тип занятости',
                       value: employmentTypeLabel(profile.desiredEmploymentType),
                     ),
@@ -353,7 +354,10 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  ApiConstants.extractFileName(profile.resumeFileUrl!),                                  maxLines: 1,
+                                  ApiConstants.extractFileName(
+                                    profile.resumeFileUrl!,
+                                  ),
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 13,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
@@ -35,8 +36,19 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
   late List<String> _selectedSkillIds;
   bool _isLoading = false;
 
-  static const _employmentTypes = ['FullTime', 'PartTime', 'Remote', 'Internship', 'Gig'];
-  static const _experienceLevels = ['NoExperience', 'Junior', 'Middle', 'Senior'];
+  static const _employmentTypes = [
+    'FullTime',
+    'PartTime',
+    'Remote',
+    'Internship',
+    'Gig',
+  ];
+  static const _experienceLevels = [
+    'NoExperience',
+    'Junior',
+    'Middle',
+    'Senior',
+  ];
   static const _paymentTypes = ['Monthly', 'Daily', 'PerShift'];
   static const _currencies = ['TJS', 'USD', 'EUR', 'RUB'];
 
@@ -48,10 +60,14 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
     _descriptionController = TextEditingController(text: vacancy.description);
     _locationController = TextEditingController(text: vacancy.location ?? '');
     _salaryFromController = TextEditingController(
-      text: vacancy.salaryFrom != null ? vacancy.salaryFrom!.toStringAsFixed(0) : '',
+      text: vacancy.salaryFrom != null
+          ? vacancy.salaryFrom!.toStringAsFixed(0)
+          : '',
     );
     _salaryToController = TextEditingController(
-      text: vacancy.salaryTo != null ? vacancy.salaryTo!.toStringAsFixed(0) : '',
+      text: vacancy.salaryTo != null
+          ? vacancy.salaryTo!.toStringAsFixed(0)
+          : '',
     );
     _employmentType = vacancy.employmentType;
     _experienceLevel = vacancy.experienceLevel;
@@ -95,7 +111,9 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(updateVacancyUseCaseProvider).call(
+      await ref
+          .read(updateVacancyUseCaseProvider)
+          .call(
             widget.vacancy.id,
             title: _titleController.text.trim(),
             description: _descriptionController.text.trim(),
@@ -103,7 +121,9 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
             experienceLevel: _experienceLevel,
             paymentType: _paymentType,
             currency: _currency,
-            location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+            location: _locationController.text.trim().isEmpty
+                ? null
+                : _locationController.text.trim(),
             salaryFrom: _salaryFromController.text.trim().isEmpty
                 ? null
                 : double.tryParse(_salaryFromController.text.trim()),
@@ -112,7 +132,6 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
                 : double.tryParse(_salaryToController.text.trim()),
             skillIds: _selectedSkillIds,
           );
-      ref.invalidate(myVacanciesProvider);
       if (!mounted) return;
       context.pop();
       AppSnackbar.showSuccess('Вакансия обновлена');
@@ -135,7 +154,7 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
         children: [
           SectionCard(
             title: 'Основное',
-            icon: Icons.work_outline_rounded,
+            icon: LucideIcons.briefcase,
             child: Column(
               children: [
                 AppTextField(
@@ -167,18 +186,30 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
                 DropdownButtonFormField<String>(
                   value: _employmentType,
                   items: _employmentTypes
-                      .map((type) => DropdownMenuItem(value: type, child: Text(employmentTypeLabel(type))))
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text(employmentTypeLabel(type)),
+                        ),
+                      )
                       .toList(),
-                  onChanged: (value) => setState(() => _employmentType = value!),
+                  onChanged: (value) =>
+                      setState(() => _employmentType = value!),
                   decoration: _dropdownDecoration(context),
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
                   value: _experienceLevel,
                   items: _experienceLevels
-                      .map((level) => DropdownMenuItem(value: level, child: Text(experienceLevelLabel(level))))
+                      .map(
+                        (level) => DropdownMenuItem(
+                          value: level,
+                          child: Text(experienceLevelLabel(level)),
+                        ),
+                      )
                       .toList(),
-                  onChanged: (value) => setState(() => _experienceLevel = value!),
+                  onChanged: (value) =>
+                      setState(() => _experienceLevel = value!),
                   decoration: _dropdownDecoration(context),
                 ),
                 const SizedBox(height: 14),
@@ -188,9 +219,15 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
                       child: DropdownButtonFormField<String>(
                         value: _paymentType,
                         items: _paymentTypes
-                            .map((type) => DropdownMenuItem(value: type, child: Text(paymentTypeLabel(type))))
+                            .map(
+                              (type) => DropdownMenuItem(
+                                value: type,
+                                child: Text(paymentTypeLabel(type)),
+                              ),
+                            )
                             .toList(),
-                        onChanged: (value) => setState(() => _paymentType = value!),
+                        onChanged: (value) =>
+                            setState(() => _paymentType = value!),
                         decoration: _dropdownDecoration(context),
                       ),
                     ),
@@ -199,9 +236,15 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
                       child: DropdownButtonFormField<String>(
                         value: _currency,
                         items: _currencies
-                            .map((c) => DropdownMenuItem(value: c, child: Text(currencyLabel(c))))
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c,
+                                child: Text(currencyLabel(c)),
+                              ),
+                            )
                             .toList(),
-                        onChanged: (value) => setState(() => _currency = value!),
+                        onChanged: (value) =>
+                            setState(() => _currency = value!),
                         decoration: _dropdownDecoration(context),
                       ),
                     ),

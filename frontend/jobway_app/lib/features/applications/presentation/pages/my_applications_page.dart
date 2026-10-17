@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/widgets/feedback/empty_state.dart';
 import '../providers/applications_provider.dart';
 import '../widgets/application_card.dart';
@@ -58,12 +59,12 @@ class _MyApplicationsPageState extends ConsumerState<MyApplicationsPage> {
     if (state.items.isEmpty) {
       return state.filter.status == null
           ? const EmptyState(
-              icon: Icons.assignment_outlined,
+              icon: LucideIcons.clipboardList,
               title: 'Вы ещё не откликались на вакансии',
               subtitle: 'Найдите подходящую вакансию и откликнитесь',
             )
           : const EmptyState(
-              icon: Icons.filter_list_off_rounded,
+              icon: LucideIcons.filterX,
               title: 'Нет откликов с таким статусом',
             );
     }

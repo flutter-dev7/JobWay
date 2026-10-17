@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.Vacancy.Request;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
 using JobWay.Infrastructure.Persistence.Data;
@@ -27,6 +28,32 @@ public class SavedVacancyRepository : ISavedVacancyRepository
             .Include(s => s.Vacancy).ThenInclude(v => v.RequiredSkills)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => s.Vacancy)
+            .ToListAsync(cancellationToken);
+    
+    public async Task<(List<Vacancy> Items, int TotalCount)> GetPagedSavedVacanciesAsync(
+        Guid userId, SavedVacanciesFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = _context.SavedVacancies.Where(s => s.UserId == userId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var saved = await query
+            .OrderByDescending(s => s.CreatedAt)
+            .ThenBy(s => s.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .Include(s => s.Vacancy).ThenInclude(v => v.CompanyProfile)
+            .Include(s => s.Vacancy).ThenInclude(v => v.RequiredSkills)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+        return (saved.Select(s => s.Vacancy).ToList(), totalCount);
+    }
+
+    public Task<List<Guid>> GetSavedVacancyIdsAsync(Guid userId, CancellationToken cancellationToken)
+        => _context.SavedVacancies
+            .Where(s => s.UserId == userId)
+            .Select(s => s.VacancyId)
             .ToListAsync(cancellationToken);
 
     public void Add(SavedVacancy savedVacancy) => _context.SavedVacancies.Add(savedVacancy);

@@ -1,5 +1,6 @@
 // features/vacancies/presentation/widgets/my_vacancy_card.dart
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
@@ -139,18 +140,15 @@ class MyVacancyCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _Tag(
-                  icon: Icons.work_outline_rounded,
+                  icon: LucideIcons.briefcase,
                   label: employmentTypeLabel(vacancy.employmentType),
                 ),
                 _Tag(
-                  icon: Icons.trending_up_rounded,
+                  icon: LucideIcons.trendingUp,
                   label: experienceLevelLabel(vacancy.experienceLevel),
                 ),
                 if (vacancy.location != null)
-                  _Tag(
-                    icon: Icons.location_on_outlined,
-                    label: vacancy.location!,
-                  ),
+                  _Tag(icon: LucideIcons.mapPin, label: vacancy.location!),
               ],
             ),
             const SizedBox(height: 14),
@@ -199,7 +197,7 @@ class MyVacancyCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onEdit,
-                    icon: const Icon(Icons.edit_outlined, size: 16),
+                    icon: const Icon(LucideIcons.pencil, size: 16),
                     label: const Text('Изменить'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colors.textPrimary,
@@ -217,10 +215,7 @@ class MyVacancyCard extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: isUpdating ? null : onPublish,
-                        icon: const Icon(
-                          Icons.rocket_launch_outlined,
-                          size: 16,
-                        ),
+                        icon: const Icon(LucideIcons.rocket, size: 16),
                         label: const Text('Опубликовать'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: colors.textPrimary,
@@ -236,7 +231,7 @@ class MyVacancyCard extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: isUpdating ? null : onClose,
-                        icon: const Icon(Icons.lock_outline_rounded, size: 16),
+                        icon: const Icon(LucideIcons.lock, size: 16),
                         label: const Text('Закрыть'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFFDC2626),
@@ -266,7 +261,7 @@ class MyVacancyCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    Icons.arrow_forward_rounded,
+                    LucideIcons.arrowRight,
                     size: 14,
                     color: context.accentColor,
                   ),

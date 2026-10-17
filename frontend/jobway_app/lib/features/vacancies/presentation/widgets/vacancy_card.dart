@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
+import 'package:jobway_app/features/vacancies/presentation/providers/saved_vacancies_controller.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -98,7 +100,7 @@ class VacancyCard extends ConsumerWidget {
                               averageAsync.valueOrNull! > 0) ...[
                             const SizedBox(width: 6),
                             const Icon(
-                              Icons.star_rounded,
+                              LucideIcons.star,
                               size: 14,
                               color: Color(0xFFF59E0B),
                             ),
@@ -134,15 +136,13 @@ class VacancyCard extends ConsumerWidget {
                             .call(vacancy.id);
                         notifier.update((state) => {...state, vacancy.id});
                       }
-                      ref.invalidate(savedVacanciesProvider);
+                      ref.invalidate(savedVacanciesControllerProvider);
                     } catch (error) {
                       AppSnackbar.showError(ApiException.extractMessage(error));
                     }
                   },
                   child: Icon(
-                    isSaved
-                        ? Icons.bookmark_rounded
-                        : Icons.bookmark_border_rounded,
+                    isSaved ? LucideIcons.bookmarkCheck : LucideIcons.bookmark,
                     size: 22,
                     color: isSaved ? context.accentColor : colors.textMuted,
                   ),
@@ -155,18 +155,15 @@ class VacancyCard extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 _Tag(
-                  icon: Icons.work_outline_rounded,
+                  icon: LucideIcons.briefcase,
                   label: employmentTypeLabel(vacancy.employmentType),
                 ),
                 _Tag(
-                  icon: Icons.trending_up_rounded,
+                  icon: LucideIcons.trendingUp,
                   label: experienceLevelLabel(vacancy.experienceLevel),
                 ),
                 if (vacancy.location != null)
-                  _Tag(
-                    icon: Icons.location_on_outlined,
-                    label: vacancy.location!,
-                  ),
+                  _Tag(icon: LucideIcons.mapPin, label: vacancy.location!),
               ],
             ),
             const SizedBox(height: 14),

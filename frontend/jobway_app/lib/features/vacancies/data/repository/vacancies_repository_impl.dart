@@ -1,3 +1,5 @@
+import 'package:jobway_app/features/vacancies/domain/entities/my_vacancies_filter.dart';
+
 import '../../domain/entities/vacancies_page.dart';
 import '../../domain/entities/vacancy.dart';
 import '../../domain/entities/vacancy_filter.dart';
@@ -26,10 +28,15 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
     return model.toEntity();
   }
 
-  @override
-  Future<List<Vacancy>> getMyVacancies() async {
-    final models = await _remoteDataSource.getMyVacancies();
-    return models.map((m) => m.toEntity()).toList();
+    @override
+  Future<VacanciesPage> getMyVacancies(MyVacanciesFilter filter) async {
+    final response = await _remoteDataSource.getMyVacancies(filter.toQueryParams());
+    return VacanciesPage(
+      items: response.items.map((m) => m.toEntity()).toList(),
+      pageNumber: response.pageNumber,
+      pageSize: response.pageSize,
+      totalCount: response.totalCount,
+    );
   }
 
   @override
@@ -111,9 +118,17 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
   @override
   Future<void> unsave(String vacancyId) => _remoteDataSource.unsave(vacancyId);
 
-  @override
-  Future<List<Vacancy>> getSaved() async {
-    final models = await _remoteDataSource.getSaved();
-    return models.map((m) => m.toEntity()).toList();
+    @override
+  Future<VacanciesPage> getSaved(VacancyFilter filter) async {
+    final response = await _remoteDataSource.getSaved(filter.toQueryParams());
+    return VacanciesPage(
+      items: response.items.map((m) => m.toEntity()).toList(),
+      pageNumber: response.pageNumber,
+      pageSize: response.pageSize,
+      totalCount: response.totalCount,
+    );
   }
+
+  @override
+  Future<List<String>> getSavedIds() => _remoteDataSource.getSavedIds();
 }

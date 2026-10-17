@@ -5,9 +5,11 @@ import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
-import '../providers/vacancies_provider.dart';
+import '../providers/my_vacancies_controller.dart';
+import '../widgets/my_vacancies_status_filter_bar.dart';
 import '../widgets/my_vacancy_card.dart';
 
 class MyVacanciesPage extends ConsumerStatefulWidget {
@@ -18,14 +20,41 @@ class MyVacanciesPage extends ConsumerStatefulWidget {
 }
 
 class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
+  final _scrollController = ScrollController();
   String? _updatingVacancyId;
 
-  Future<void> _publish(String id) async {
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  MyVacanciesController get _controller =>
+      ref.read(myVacanciesControllerProvider.notifier);
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 300) {
+      _controller.loadMore();
+    }
+  }
+
+  Future<void> _runAction(
+    String id,
+    Future<void> Function(String id) action,
+    String successMessage,
+  ) async {
     setState(() => _updatingVacancyId = id);
     try {
-      await ref.read(publishVacancyUseCaseProvider).call(id);
-      ref.invalidate(myVacanciesProvider);
-      AppSnackbar.showSuccess('Вакансия опубликована');
+      await action(id);
+      AppSnackbar.showSuccess(successMessage);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
@@ -33,22 +62,78 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
     }
   }
 
-  Future<void> _close(String id) async {
-    setState(() => _updatingVacancyId = id);
-    try {
-      await ref.read(closeVacancyUseCaseProvider).call(id);
-      ref.invalidate(myVacanciesProvider);
-      AppSnackbar.showSuccess('Вакансия закрыта');
-    } catch (error) {
-      AppSnackbar.showError(ApiException.extractMessage(error));
-    } finally {
-      if (mounted) setState(() => _updatingVacancyId = null);
+  Widget _buildBody(MyVacanciesState state) {
+    if (state.isLoading && state.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
     }
+
+    if (state.error != null && state.items.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        children: [
+          const SizedBox(height: 120),
+          Text(state.error!, textAlign: TextAlign.center),
+        ],
+      );
+    }
+
+    if (state.items.isEmpty) {
+      return state.filter.status == null
+          ? const EmptyState(
+              icon: LucideIcons.briefcase,
+              title: 'У вас пока нет вакансий',
+              subtitle: 'Нажмите «+», чтобы создать первую',
+            )
+          : const EmptyState(
+              icon: LucideIcons.filterX,
+              title: 'Нет вакансий с таким статусом',
+            );
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+      itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index >= state.items.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final vacancy = state.items[index];
+        return MyVacancyCard(
+          vacancy: vacancy,
+          isUpdating: _updatingVacancyId == vacancy.id,
+          onPublish: () => _runAction(
+            vacancy.id,
+            _controller.publish,
+            'Вакансия опубликована',
+          ),
+          onClose: () =>
+              _runAction(vacancy.id, _controller.close, 'Вакансия закрыта'),
+          onEdit: () async {
+            await context.push(AppRoutes.editVacancy, extra: vacancy);
+            _controller.load();
+          },
+          onTap: () => context.push(
+            AppRoutes.vacancyApplications(vacancy.id),
+            extra: VacancyApplicationsArgs(
+              title: vacancy.title,
+              status: vacancy.status,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final vacanciesAsync = ref.watch(myVacanciesProvider);
+    final state = ref.watch(myVacanciesControllerProvider);
     final colors = context.colors;
 
     return Scaffold(
@@ -76,62 +161,29 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              icon: Icon(Icons.add, color: colors.textPrimary),
+              icon: Icon(LucideIcons.plus, color: colors.textPrimary),
               onPressed: () async {
                 await context.push(AppRoutes.createVacancy);
-                ref.invalidate(myVacanciesProvider);
+                _controller.load();
               },
             ),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(myVacanciesProvider),
-        child: vacanciesAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                ApiException.extractMessage(error),
-                textAlign: TextAlign.center,
-              ),
+      body: Column(
+        children: [
+          MyVacanciesStatusFilterBar(
+            selected: state.filter.status,
+            onSelected: _controller.applyStatus,
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _controller.load,
+              child: _buildBody(state),
             ),
           ),
-          data: (vacancies) => vacancies.isEmpty
-              ? const EmptyState(
-                  icon: Icons.work_outline_rounded,
-                  title: 'У вас пока нет вакансий',
-                  subtitle: 'Нажмите «+», чтобы создать первую',
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
-                  itemCount: vacancies.length,
-                  itemBuilder: (context, index) {
-                    final vacancy = vacancies[index];
-                    return MyVacancyCard(
-                      vacancy: vacancy,
-                      isUpdating: _updatingVacancyId == vacancy.id,
-                      onPublish: () => _publish(vacancy.id),
-                      onClose: () => _close(vacancy.id),
-                      onEdit: () async {
-                        await context.push(
-                          AppRoutes.editVacancy,
-                          extra: vacancy,
-                        );
-                        ref.invalidate(myVacanciesProvider);
-                      },
-                      onTap: () => context.push(
-                        AppRoutes.vacancyApplications(vacancy.id),
-                        extra: VacancyApplicationsArgs(
-                          title: vacancy.title,
-                          status: vacancy.status,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
+        ],
       ),
     );
   }

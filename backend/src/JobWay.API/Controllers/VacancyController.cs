@@ -28,8 +28,8 @@ public class VacancyController : BaseApiController
 
     [Authorize(Roles = Roles.Employer)]
     [HttpGet("my")]
-    public async Task<IActionResult> GetMyVacancies(CancellationToken cancellationToken)
-        => HandleError(await _vacancyService.GetMyVacanciesAsync(CurrentUserId, cancellationToken));
+    public async Task<IActionResult> GetMyVacancies([FromQuery] MyVacanciesFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _vacancyService.GetMyVacanciesAsync(CurrentUserId, filter, cancellationToken));
 
     [Authorize(Roles = Roles.Employer)]
     [HttpPost]
@@ -67,6 +67,11 @@ public class VacancyController : BaseApiController
 
     [Authorize(Roles = Roles.Candidate)]
     [HttpGet("saved")]
-    public async Task<IActionResult> GetSaved(CancellationToken cancellationToken)
-        => HandleError(await _savedVacancyService.GetSavedAsync(CurrentUserId, cancellationToken));
+    public async Task<IActionResult> GetSaved([FromQuery] SavedVacanciesFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _savedVacancyService.GetSavedAsync(CurrentUserId, filter, cancellationToken));
+
+    [Authorize(Roles = Roles.Candidate)]
+    [HttpGet("saved/ids")]
+    public async Task<IActionResult> GetSavedIds(CancellationToken cancellationToken)
+        => HandleError(await _savedVacancyService.GetSavedIdsAsync(CurrentUserId, cancellationToken));
 }

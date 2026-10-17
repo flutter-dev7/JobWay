@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.123.36:5025/api';
+  static const String baseUrl = 'http://192.168.123.33:5025/api';
 
   // Auth
   static const String register = '/auth/register';
@@ -29,6 +29,7 @@ class ApiConstants {
   static String closeVacancy(String id) => '/vacancies/$id/close';
   static const String myVacancies = '/vacancies/my';
   static String saveVacancy(String id) => '/vacancies/$id/save';
+  static const String savedVacancyIds = '$savedVacancies/ids';
   static const String savedVacancies = '/vacancies/saved';
   static const String vacanciesTodayCount = '/vacancies/today-count';
 

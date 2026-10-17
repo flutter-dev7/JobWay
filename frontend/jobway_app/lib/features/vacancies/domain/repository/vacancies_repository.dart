@@ -1,3 +1,5 @@
+import 'package:jobway_app/features/vacancies/domain/entities/my_vacancies_filter.dart';
+
 import '../entities/vacancies_page.dart';
 import '../entities/vacancy.dart';
 import '../entities/vacancy_filter.dart';
@@ -5,7 +7,7 @@ import '../entities/vacancy_filter.dart';
 abstract class VacanciesRepository {
   Future<VacanciesPage> getActive(VacancyFilter filter);
   Future<Vacancy> getById(String id);
-  Future<List<Vacancy>> getMyVacancies();
+  Future<VacanciesPage> getMyVacancies(MyVacanciesFilter filter);
 
   Future<Vacancy> create({
     required String title,
@@ -41,5 +43,5 @@ abstract class VacanciesRepository {
 
   Future<void> save(String vacancyId);
   Future<void> unsave(String vacancyId);
-  Future<List<Vacancy>> getSaved();
-}
+  Future<VacanciesPage> getSaved(VacancyFilter filter);
+  Future<List<String>> getSavedIds();}

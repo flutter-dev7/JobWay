@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme_extension.dart';
@@ -78,7 +79,7 @@ class _EmployerAnalyticsBody extends StatelessWidget {
               child: AnalyticsStatCard(
                 label: 'Вакансий',
                 value: '${analytics.totalVacancies}',
-                icon: Icons.work_outline_rounded,
+                icon: LucideIcons.briefcase,
                 accentColor: context.accentColor,
               ),
             ),

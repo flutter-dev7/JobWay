@@ -1,5 +1,6 @@
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.Skill.Response;
+using JobWay.Application.DTOs.Vacancy.Request;
 using JobWay.Application.DTOs.Vacancy.Response;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Application.Interfaces.Services;
@@ -44,21 +45,40 @@ public class SavedVacancyService : ISavedVacancyService
         return Result<string>.Ok("Vacancy removed from saved");
     }
 
-    public async Task<Result<List<VacancyResponse>>> GetSavedAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<VacancyResponse>>> GetSavedAsync(Guid userId, SavedVacanciesFilterRequest filter, CancellationToken cancellationToken)
     {
-        var vacancies = await _unitOfWork.SavedVacancies.GetSavedVacanciesAsync(userId, cancellationToken);
-        return Result<List<VacancyResponse>>.Ok(vacancies.Select(MapToResponse).ToList());
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (vacancies, totalCount) = await _unitOfWork.SavedVacancies.GetPagedSavedVacanciesAsync(userId, filter, cancellationToken);
+
+        return Result<PagedResult<VacancyResponse>>.Ok(new PagedResult<VacancyResponse>
+        {
+            Items = vacancies.Select(MapToResponse).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
+    }
+
+    public async Task<Result<List<Guid>>> GetSavedIdsAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var ids = await _unitOfWork.SavedVacancies.GetSavedVacancyIdsAsync(userId, cancellationToken);
+        return Result<List<Guid>>.Ok(ids);
     }
 
     private static VacancyResponse MapToResponse(Vacancy vacancy) => new()
     {
         Id = vacancy.Id,
         CompanyProfileId = vacancy.CompanyProfileId,
+        CompanyUserId = vacancy.CompanyProfile.UserId,
         CompanyName = vacancy.CompanyProfile.CompanyName,
         Title = vacancy.Title,
         Description = vacancy.Description,
         EmploymentType = vacancy.EmploymentType,
         ExperienceLevel = vacancy.ExperienceLevel,
+        PaymentType = vacancy.PaymentType,
+        Currency = vacancy.Currency,
         Location = vacancy.Location,
         CompanyLogoUrl = vacancy.CompanyProfile.LogoUrl,
         SalaryFrom = vacancy.SalaryFrom,

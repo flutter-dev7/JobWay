@@ -6,6 +6,7 @@ import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../providers/vacancy_applications_controller.dart';
@@ -111,7 +112,11 @@ class _VacancyApplicationsPageState
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.sort_rounded, size: 18, color: colors.textSecondary),
+                Icon(
+                  LucideIcons.arrowUpDown,
+                  size: 18,
+                  color: colors.textSecondary,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   isByMatch ? 'Лучшие совпадения' : 'Сначала новые',
@@ -152,7 +157,7 @@ class _VacancyApplicationsPageState
               title: 'Пока нет откликов',
             )
           : const EmptyState(
-              icon: Icons.filter_list_off_rounded,
+              icon: LucideIcons.filterX,
               title: 'Нет откликов с таким статусом',
             );
     }

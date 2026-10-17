@@ -7,6 +7,7 @@ import 'package:jobway_app/core/constants/api_constants.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -226,7 +227,7 @@ class _EditCandidateProfilePageState
           const SizedBox(height: 16),
           SectionCard(
             title: 'Опыт и занятость',
-            icon: Icons.work_outline_rounded,
+            icon: LucideIcons.briefcase,
             child: Column(
               children: [
                 DropdownButtonFormField<String>(

@@ -79,6 +79,30 @@ public class VacancyRepository : IVacancyRepository
             .Where(v => v.CompanyProfileId == companyProfileId)
             .OrderByDescending(v => v.CreatedAt)
             .ToListAsync(cancellationToken);
+    
+    public async Task<(List<Vacancy> Items, int TotalCount)> GetPagedByCompanyProfileIdAsync(
+        Guid companyProfileId, MyVacanciesFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = _context.Vacancies
+            .Include(v => v.CompanyProfile)
+            .Include(v => v.RequiredSkills)
+            .Where(v => v.CompanyProfileId == companyProfileId);
+
+        if (filter.Status is not null)
+            query = query.Where(v => v.Status == filter.Status);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(v => v.CreatedAt)
+            .ThenBy(v => v.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 
     public void Add(Vacancy vacancy) => _context.Vacancies.Add(vacancy);
     public void Update(Vacancy vacancy) => _context.Vacancies.Update(vacancy);

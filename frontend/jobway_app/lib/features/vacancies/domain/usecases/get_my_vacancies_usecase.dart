@@ -1,4 +1,5 @@
-import '../entities/vacancy.dart';
+import '../entities/my_vacancies_filter.dart';
+import '../entities/vacancies_page.dart';
 import '../repository/vacancies_repository.dart';
 
 class GetMyVacanciesUseCase {
@@ -6,5 +7,5 @@ class GetMyVacanciesUseCase {
 
   GetMyVacanciesUseCase(this._repository);
 
-  Future<List<Vacancy>> call() => _repository.getMyVacancies();
+  Future<VacanciesPage> call(MyVacanciesFilter filter) => _repository.getMyVacancies(filter);
 }

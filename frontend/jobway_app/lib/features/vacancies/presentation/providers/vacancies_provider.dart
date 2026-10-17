@@ -1,6 +1,7 @@
 // features/vacancies/presentation/providers/vacancies_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancies_usecase.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancy_ids_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_today_vacancies_count_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/save_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/unsave_vacancy_usecase.dart';
@@ -55,10 +56,6 @@ final closeVacancyUseCaseProvider = Provider(
   (ref) => CloseVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
 );
 
-final myVacanciesProvider = FutureProvider.autoDispose<List<Vacancy>>(
-  (ref) => ref.read(getMyVacanciesUseCaseProvider)(),
-);
-
 // features/vacancies/presentation/providers/vacancies_provider.dart — добавить
 final saveVacancyUseCaseProvider = Provider(
   (ref) => SaveVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
@@ -70,8 +67,13 @@ final getSavedVacanciesUseCaseProvider = Provider(
   (ref) => GetSavedVacanciesUseCase(ref.read(vacanciesRepositoryProvider)),
 );
 
-final savedVacanciesProvider = FutureProvider.autoDispose<List<Vacancy>>(
-  (ref) => ref.read(getSavedVacanciesUseCaseProvider)(),
+final getSavedVacancyIdsUseCaseProvider = Provider(
+  (ref) => GetSavedVacancyIdsUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+
+// Все Id сохранённых вакансий (лёгкий запрос, не зависит от пагинации списка)
+final savedVacancyIdsLoaderProvider = FutureProvider.autoDispose<Set<String>>(
+  (ref) => ref.read(getSavedVacancyIdsUseCaseProvider)(),
 );
 
 final getTodayVacanciesCountUseCaseProvider = Provider(

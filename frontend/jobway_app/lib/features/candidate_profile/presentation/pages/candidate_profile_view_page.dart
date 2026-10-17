@@ -5,6 +5,7 @@ import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/core/widgets/feedback/app_snackbar.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/display/section_card.dart';
@@ -154,7 +155,7 @@ class CandidateProfileViewPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   InfoRow(
-                    icon: Icons.work_outline_rounded,
+                    icon: LucideIcons.briefcase,
                     label: 'Тип занятости',
                     value: _employmentTypeLabel(profile.desiredEmploymentType),
                   ),

@@ -47,10 +47,24 @@ class VacanciesRemoteDataSource {
     return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
-  Future<List<VacancyModel>> getMyVacancies() async {
-    final response = await _dio.get(ApiConstants.myVacancies);
-    final list = ApiResponse.unwrap(response.data) as List;
-    return list.map((v) => VacancyModel.fromJson(v)).toList();
+  Future<VacanciesPageResponse> getMyVacancies(
+    Map<String, dynamic> queryParams,
+  ) async {
+    final response = await _dio.get(
+      ApiConstants.myVacancies,
+      queryParameters: queryParams,
+    );
+    final data = ApiResponse.unwrap(response.data);
+    final items = (data['items'] as List)
+        .map((v) => VacancyModel.fromJson(v))
+        .toList();
+
+    return VacanciesPageResponse(
+      items: items,
+      pageNumber: data['pageNumber'],
+      pageSize: data['pageSize'],
+      totalCount: data['totalCount'],
+    );
   }
 
   Future<VacancyModel> create({
@@ -137,9 +151,29 @@ class VacanciesRemoteDataSource {
     await _dio.delete(ApiConstants.saveVacancy(vacancyId));
   }
 
-  Future<List<VacancyModel>> getSaved() async {
-    final response = await _dio.get(ApiConstants.savedVacancies);
+  Future<VacanciesPageResponse> getSaved(
+    Map<String, dynamic> queryParams,
+  ) async {
+    final response = await _dio.get(
+      ApiConstants.savedVacancies,
+      queryParameters: queryParams,
+    );
+    final data = ApiResponse.unwrap(response.data);
+    final items = (data['items'] as List)
+        .map((v) => VacancyModel.fromJson(v))
+        .toList();
+
+    return VacanciesPageResponse(
+      items: items,
+      pageNumber: data['pageNumber'],
+      pageSize: data['pageSize'],
+      totalCount: data['totalCount'],
+    );
+  }
+
+  Future<List<String>> getSavedIds() async {
+    final response = await _dio.get(ApiConstants.savedVacancyIds);
     final list = ApiResponse.unwrap(response.data) as List;
-    return list.map((v) => VacancyModel.fromJson(v)).toList();
+    return list.map((e) => e.toString()).toList();
   }
 }

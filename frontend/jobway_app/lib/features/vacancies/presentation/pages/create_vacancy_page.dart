@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -88,7 +89,6 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
           );
       if (!mounted) return;
       context.pop();
-      ref.invalidate(myVacanciesProvider);
       AppSnackbar.showSuccess('Вакансия создана как черновик');
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
@@ -122,7 +122,7 @@ class _CreateVacancyPageState extends ConsumerState<CreateVacancyPage> {
         children: [
           SectionCard(
             title: 'Основное',
-            icon: Icons.work_outline_rounded,
+            icon: LucideIcons.briefcase,
             child: Column(
               children: [
                 AppTextField(

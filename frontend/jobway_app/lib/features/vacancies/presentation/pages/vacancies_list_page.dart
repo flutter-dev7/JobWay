@@ -96,11 +96,9 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
     final state = ref.watch(vacanciesControllerProvider);
     final colors = context.colors;
 
-    ref.listen(savedVacanciesProvider, (previous, next) {
-      next.whenData((vacancies) {
-        ref.read(savedVacancyIdsProvider.notifier).state = vacancies
-            .map((v) => v.id)
-            .toSet();
+    ref.listen(savedVacancyIdsLoaderProvider, (previous, next) {
+      next.whenData((ids) {
+        ref.read(savedVacancyIdsProvider.notifier).state = ids;
       });
     });
 
