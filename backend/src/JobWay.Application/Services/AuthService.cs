@@ -25,6 +25,7 @@ public class AuthService : IAuthService
     private readonly ICacheService _cacheService;
     private readonly JwtSettings _jwtSettings;
     private readonly INotificationService _notificationService;
+    private readonly IFileStorageService _fileStorageService;
 
     public AuthService(
         IUnitOfWork unitOfWork,
@@ -33,7 +34,8 @@ public class AuthService : IAuthService
         IEmailService emailService,
         ICacheService cacheService,
         IOptions<JwtSettings> jwtSettings,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IFileStorageService fileStorageService)
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
@@ -42,6 +44,7 @@ public class AuthService : IAuthService
         _cacheService = cacheService;
         _jwtSettings = jwtSettings.Value;
         _notificationService = notificationService;
+        _fileStorageService = fileStorageService;
     }
 
     public async Task<Result<string>> SendRegistrationCodeAsync(SendRegistrationCodeRequest request, CancellationToken cancellationToken)
@@ -217,31 +220,47 @@ public class AuthService : IAuthService
         if (user is null)
             return Result<string>.Fail("User not found", ErrorType.NotFound);
 
+        if (user.Role == UserRole.Admin)
+            return Result<string>.Fail("Admin account cannot be deleted", ErrorType.Forbidden);
+
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
             return Result<string>.Fail("Password is incorrect", ErrorType.Validation);
 
-        if (user.Role == UserRole.Employer)
+        var fileUrls = await _unitOfWork.Users.DeleteWithAllDataAsync(userId, cancellationToken);
+
+        // Файлы удаляем после успешной транзакции: ошибка здесь не должна отменять удаление аккаунта
+        foreach (var url in fileUrls)
         {
-            var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(userId, cancellationToken);
-            if (companyProfile is not null)
+            var container = ExtractContainerName(url);
+            if (container is null) continue;
+
+            try
             {
-                var vacancies = await _unitOfWork.Vacancies.GetByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
-                foreach (var vacancy in vacancies.Where(v => v.Status is VacancyStatus.Active or VacancyStatus.Draft))
-                {
-                    vacancy.Status = VacancyStatus.Closed;
-                    _unitOfWork.Vacancies.Update(vacancy);
-                }
+                await _fileStorageService.DeleteAsync(container, url, cancellationToken);
+            }
+            catch
+            {
+                // осиротевший файл безвреднее, чем откат удаления
             }
         }
 
-        user.IsActive = false;
-        user.Email = $"deleted_{user.Id}@jobway.tj";
-        user.PasswordHash = _passwordHasher.Hash(Guid.NewGuid().ToString());
-
-        _unitOfWork.Users.Update(user);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
         return Result<string>.Ok("Account deleted successfully");
+    }
+
+    // Имя контейнера берём из самой ссылки: поддерживает и локальное хранилище, и Supabase
+    private static string? ExtractContainerName(string url)
+    {
+        foreach (var marker in new[] { "/uploads/", "/object/sign/" })
+        {
+            var index = url.IndexOf(marker, StringComparison.Ordinal);
+            if (index < 0) continue;
+
+            var rest = url[(index + marker.Length)..];
+            var slash = rest.IndexOf('/');
+            if (slash > 0) return rest[..slash];
+        }
+
+        return null;
     }
 
     private async Task<AuthResponse> BuildAuthResponseAsync(User user, CancellationToken cancellationToken)

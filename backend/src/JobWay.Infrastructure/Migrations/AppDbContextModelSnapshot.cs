@@ -296,7 +296,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("JobApplicationId")
+                    b.Property<Guid?>("JobApplicationId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Rating")
@@ -613,8 +613,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasOne("JobWay.Domain.Entities.JobApplication", "JobApplication")
                         .WithMany()
                         .HasForeignKey("JobApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("JobApplication");
                 });

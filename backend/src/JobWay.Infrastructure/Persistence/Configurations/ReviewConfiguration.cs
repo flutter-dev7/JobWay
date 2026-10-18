@@ -12,14 +12,15 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
 
         builder.Property(r => r.Rating).IsRequired();
         builder.Property(r => r.Comment).HasMaxLength(2000);
-        
+
         builder.Property(r => r.ReviewerName).IsRequired().HasMaxLength(200);
         builder.Property(r => r.ReviewerPhotoUrl).HasMaxLength(500);
 
         builder.HasOne(r => r.JobApplication)
             .WithMany()
             .HasForeignKey(r => r.JobApplicationId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(r => new { r.JobApplicationId, r.Type }).IsUnique();
         builder.HasIndex(r => r.RevieweeUserId);

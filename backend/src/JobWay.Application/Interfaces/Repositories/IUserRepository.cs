@@ -12,6 +12,7 @@ public interface IUserRepository
     Task<bool> ExistsAsync(string email, CancellationToken cancellationToken);
     Task<List<User>> GetAllAsync(CancellationToken cancellationToken);
     Task<List<Guid>> GetAdminUserIdsAsync(CancellationToken cancellationToken);
+    Task<List<string>> DeleteWithAllDataAsync(Guid userId, CancellationToken cancellationToken);
     Task<(List<AdminUserRow> Items, int TotalCount)> GetPagedForAdminAsync(AdminUsersFilterRequest filter, CancellationToken cancellationToken);
     Task AddAsync(User user, CancellationToken cancellationToken);
     void Update(User user);

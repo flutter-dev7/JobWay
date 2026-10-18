@@ -27,8 +27,8 @@ public class ReviewRepository : IReviewRepository
     public async Task<HashSet<Guid>> GetReviewedApplicationIdsAsync(List<Guid> jobApplicationIds, ReviewType type, CancellationToken cancellationToken)
     {
         var ids = await _context.Reviews
-            .Where(r => jobApplicationIds.Contains(r.JobApplicationId) && r.Type == type)
-            .Select(r => r.JobApplicationId)
+            .Where(r => r.JobApplicationId != null && jobApplicationIds.Contains(r.JobApplicationId.Value) && r.Type == type)
+            .Select(r => r.JobApplicationId!.Value)
             .ToListAsync(cancellationToken);
 
         return ids.ToHashSet();

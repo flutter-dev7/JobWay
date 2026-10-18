@@ -5,8 +5,9 @@ namespace JobWay.Domain.Entities;
 
 public class Review : BaseEntity
 {
-    public Guid JobApplicationId { get; set; }
-    public JobApplication JobApplication { get; set; } = null!;
+    // Null, если отклик удалён вместе с аккаунтом одного из участников
+    public Guid? JobApplicationId { get; set; }
+    public JobApplication? JobApplication { get; set; }
     public string ReviewerName { get; set; } = null!;
     public string? ReviewerPhotoUrl { get; set; }
     public ReviewType Type { get; set; }
