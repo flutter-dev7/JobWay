@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
-import 'package:jobway_app/features/chat/presentation/providers/chat_provider.dart';
+import 'package:jobway_app/features/chat/presentation/providers/chat_threads_controller.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
@@ -169,7 +169,7 @@ class ApplicationCard extends ConsumerWidget {
                     vacancyTitle: application.vacancyTitle,
                   ),
                 );
-                ref.invalidate(chatThreadsProvider);
+                ref.invalidate(chatThreadsControllerProvider);
               }
 
               if (!showReviewButton) {

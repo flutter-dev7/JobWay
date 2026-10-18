@@ -1,5 +1,6 @@
 import '../../domain/entities/chat_message.dart';
-import '../../domain/entities/chat_thread.dart';
+import '../../domain/entities/paged_chat_messages.dart';
+import '../../domain/entities/paged_chat_threads.dart';
 import '../../domain/repository/chat_repository.dart';
 import '../datasources/chat_remote_data_source.dart';
 
@@ -9,15 +10,31 @@ class ChatRepositoryImpl implements ChatRepository {
   ChatRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<List<ChatThread>> getMyThreads() async {
-    final models = await _remoteDataSource.getMyThreads();
-    return models.map((m) => m.toEntity()).toList();
+  Future<PagedChatThreads> getMyThreads({
+    bool unreadOnly = false,
+    int pageNumber = 1,
+    int pageSize = 20,
+  }) async {
+    final model = await _remoteDataSource.getMyThreads(
+      unreadOnly: unreadOnly,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+    return model.toEntity();
   }
 
   @override
-  Future<List<ChatMessage>> getMessages(String jobApplicationId, {DateTime? since}) async {
-    final models = await _remoteDataSource.getMessages(jobApplicationId, since: since);
-    return models.map((m) => m.toEntity()).toList();
+  Future<PagedChatMessages> getMessages(
+    String jobApplicationId, {
+    DateTime? since,
+    DateTime? before,
+  }) async {
+    final model = await _remoteDataSource.getMessages(
+      jobApplicationId,
+      since: since,
+      before: before,
+    );
+    return model.toEntity();
   }
 
   @override

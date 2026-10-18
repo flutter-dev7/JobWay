@@ -1,4 +1,5 @@
-import '../../domain/entities/notification.dart';
+import '../../domain/entities/notification_filter.dart';
+import '../../domain/entities/paged_notifications.dart';
 import '../../domain/repository/notifications_repository.dart';
 import '../datasources/notifications_remote_data_source.dart';
 
@@ -8,10 +9,13 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   NotificationsRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<List<AppNotification>> getMyNotifications() async {
-    final models = await _remoteDataSource.getMyNotifications();
-    return models.map((m) => m.toEntity()).toList();
+  Future<PagedNotifications> getMyNotifications(NotificationFilter filter) async {
+    final model = await _remoteDataSource.getMyNotifications(filter);
+    return model.toEntity();
   }
+
+  @override
+  Future<int> getUnreadCount() => _remoteDataSource.getUnreadCount();
 
   @override
   Future<void> markAsRead(String id) => _remoteDataSource.markAsRead(id);

@@ -6,7 +6,7 @@ namespace JobWay.Application.Interfaces.Services;
 
 public interface IChatService
 {
-    Task<Result<List<ChatThreadResponse>>> GetMyThreadsAsync(Guid currentUserId, CancellationToken cancellationToken);
-    Task<Result<List<ChatMessageResponse>>> GetMessagesAsync(Guid currentUserId, Guid jobApplicationId, DateTime? since, CancellationToken cancellationToken);
+    Task<Result<PagedResult<ChatThreadResponse>>> GetMyThreadsAsync(Guid currentUserId, ChatThreadsFilterRequest filter, CancellationToken cancellationToken);
+    Task<Result<ChatMessagesPageResponse>> GetMessagesAsync(Guid currentUserId, Guid jobApplicationId, ChatMessagesFilterRequest filter, CancellationToken cancellationToken);
     Task<Result<ChatMessageResponse>> SendMessageAsync(Guid currentUserId, Guid jobApplicationId, SendMessageRequest request, CancellationToken cancellationToken);
 }

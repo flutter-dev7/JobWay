@@ -19,10 +19,26 @@ public class NotificationService : INotificationService
         _pushNotificationService = pushNotificationService;
     }
 
-    public async Task<Result<List<NotificationResponse>>> GetMyNotificationsAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<NotificationResponse>>> GetMyNotificationsAsync(Guid userId, NotificationFilterRequest filter, CancellationToken cancellationToken)
     {
-        var notifications = await _unitOfWork.Notifications.GetByUserIdAsync(userId, cancellationToken);
-        return Result<List<NotificationResponse>>.Ok(notifications.Select(MapToResponse).ToList());
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (notifications, totalCount) = await _unitOfWork.Notifications.GetPagedByUserIdAsync(userId, filter, cancellationToken);
+
+        return Result<PagedResult<NotificationResponse>>.Ok(new PagedResult<NotificationResponse>
+        {
+            Items = notifications.Select(MapToResponse).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
+    }
+
+    public async Task<Result<int>> GetUnreadCountAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var count = await _unitOfWork.Notifications.CountUnreadAsync(userId, cancellationToken);
+        return Result<int>.Ok(count);
     }
 
     public async Task<Result<string>> MarkAsReadAsync(Guid userId, Guid notificationId, CancellationToken cancellationToken)

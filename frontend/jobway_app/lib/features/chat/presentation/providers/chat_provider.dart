@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../data/datasources/chat_remote_data_source.dart';
 import '../../data/repository/chat_repository_impl.dart';
-import '../../domain/entities/chat_thread.dart';
 import '../../domain/repository/chat_repository.dart';
 import '../../domain/usecases/get_chat_messages_usecase.dart';
 import '../../domain/usecases/get_chat_threads_usecase.dart';
@@ -28,6 +27,6 @@ final sendMessageUseCaseProvider = Provider(
   (ref) => SendMessageUseCase(ref.read(chatRepositoryProvider)),
 );
 
-final chatThreadsProvider = FutureProvider.autoDispose<List<ChatThread>>(
-  (ref) => ref.read(getChatThreadsUseCaseProvider)(),
-);
+// Выбранный фильтр списка бесед. Вынесен отдельно, чтобы он сохранялся,
+// когда список перезагружается (например, после отправки сообщения)
+final chatUnreadOnlyProvider = StateProvider<bool>((ref) => false);

@@ -1,4 +1,4 @@
-import '../entities/chat_thread.dart';
+import '../entities/paged_chat_threads.dart';
 import '../repository/chat_repository.dart';
 
 class GetChatThreadsUseCase {
@@ -6,5 +6,6 @@ class GetChatThreadsUseCase {
 
   GetChatThreadsUseCase(this._repository);
 
-  Future<List<ChatThread>> call() => _repository.getMyThreads();
+  Future<PagedChatThreads> call({bool unreadOnly = false, int pageNumber = 1}) =>
+      _repository.getMyThreads(unreadOnly: unreadOnly, pageNumber: pageNumber);
 }

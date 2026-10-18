@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.Notification.Request;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
@@ -38,6 +39,33 @@ public class NotificationRepository : INotificationRepository
 
         return ids.ToHashSet();
     }
+    
+    public async Task<(List<Notification> Items, int TotalCount)> GetPagedByUserIdAsync(
+        Guid userId, NotificationFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = _context.Notifications.Where(n => n.UserId == userId);
+
+        var types = filter.Types;
+        if (types is { Count: > 0 })
+            query = query.Where(n => types.Contains(n.Type));
+
+        if (filter.UnreadOnly)
+            query = query.Where(n => !n.IsRead);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(n => n.CreatedAt)
+            .ThenBy(n => n.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public Task<int> CountUnreadAsync(Guid userId, CancellationToken cancellationToken)
+        => _context.Notifications.CountAsync(n => n.UserId == userId && !n.IsRead, cancellationToken);
 
     public void Add(Notification notification) => _context.Notifications.Add(notification);
     public void Update(Notification notification) => _context.Notifications.Update(notification);

@@ -8,6 +8,7 @@ import '../../../../core/widgets/buttons/app_back_button.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../domain/entities/chat_message.dart';
 import '../providers/chat_provider.dart';
+import '../providers/chat_threads_controller.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   final String jobApplicationId;
@@ -34,17 +35,21 @@ class ChatPage extends ConsumerStatefulWidget {
 class _ChatPageState extends ConsumerState<ChatPage> {
   static const _pollInterval = Duration(seconds: 6);
 
+  // По возрастанию времени: первый элемент самый старый
   final _messages = <ChatMessage>[];
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
   Timer? _pollTimer;
   bool _isLoading = true;
   bool _isSending = false;
+  bool _isLoadingOlder = false;
+  bool _hasMoreOlder = false;
   String? _error;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _loadInitial();
     _pollTimer = Timer.periodic(_pollInterval, (_) => _poll());
   }
@@ -60,18 +65,27 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   bool _isMine(ChatMessage message) =>
       message.senderUserId != widget.otherUserId;
 
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    // В reverse-списке maxScrollExtent — это верх истории
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      _loadOlder();
+    }
+  }
+
   Future<void> _loadInitial() async {
     try {
-      final messages = await ref
+      final page = await ref
           .read(getChatMessagesUseCaseProvider)
           .call(widget.jobApplicationId);
       if (!mounted) return;
       setState(() {
-        _messages.addAll(messages);
+        _messages.addAll(page.items);
+        _hasMoreOlder = page.hasMore;
         _isLoading = false;
       });
-      _scrollToBottom();
-      ref.invalidate(chatThreadsProvider);
+      ref.invalidate(chatThreadsControllerProvider);
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -81,23 +95,52 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
+  Future<void> _loadOlder() async {
+    if (_isLoadingOlder || !_hasMoreOlder || _messages.isEmpty) return;
+
+    setState(() => _isLoadingOlder = true);
+    try {
+      final page = await ref
+          .read(getChatMessagesUseCaseProvider)
+          .call(widget.jobApplicationId, before: _messages.first.createdAt);
+      if (!mounted) return;
+
+      final existingIds = _messages.map((m) => m.id).toSet();
+      final older = page.items
+          .where((m) => !existingIds.contains(m.id))
+          .toList();
+
+      setState(() {
+        _messages.insertAll(0, older);
+        _hasMoreOlder = page.hasMore;
+        _isLoadingOlder = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingOlder = false);
+    }
+  }
+
   Future<void> _poll() async {
     if (_messages.isEmpty) return;
     try {
       final since = _messages.last.createdAt;
-      final newMessages = await ref
+      final page = await ref
           .read(getChatMessagesUseCaseProvider)
           .call(widget.jobApplicationId, since: since);
-      if (!mounted || newMessages.isEmpty) return;
+      if (!mounted || page.items.isEmpty) return;
 
       final existingIds = _messages.map((m) => m.id).toSet();
-      final toAdd = newMessages
+      final toAdd = page.items
           .where((m) => !existingIds.contains(m.id))
           .toList();
       if (toAdd.isEmpty) return;
 
+      final wasNearBottom =
+          !_scrollController.hasClients ||
+          _scrollController.position.pixels < 120;
+
       setState(() => _messages.addAll(toAdd));
-      _scrollToBottom();
+      if (wasNearBottom) _scrollToBottom();
     } catch (_) {
       // тихий фейл — просто следующий тик попробует снова
     }
@@ -107,7 +150,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
+        0,
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
       );
@@ -129,12 +172,62 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         _textController.clear();
       });
       _scrollToBottom();
-      ref.invalidate(chatThreadsProvider);
+      ref.invalidate(chatThreadsControllerProvider);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
       if (mounted) setState(() => _isSending = false);
     }
+  }
+
+  Widget _buildMessages() {
+    final colors = context.colors;
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(_error!, textAlign: TextAlign.center),
+        ),
+      );
+    }
+
+    if (_messages.isEmpty) {
+      return Center(
+        child: Text(
+          'Начните переписку',
+          style: TextStyle(fontSize: 14, color: colors.textMuted),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      reverse: true,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      itemCount: _messages.length + (_isLoadingOlder ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == _messages.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+
+        final message = _messages[_messages.length - 1 - index];
+        return _MessageBubble(message: message, isMine: _isMine(message));
+      },
+    );
   }
 
   @override
@@ -218,36 +311,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         bottom: false,
         child: Column(
           children: [
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _error != null
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Text(_error!, textAlign: TextAlign.center),
-                      ),
-                    )
-                  : _messages.isEmpty
-                  ? Center(
-                      child: Text(
-                        'Начните переписку',
-                        style: TextStyle(fontSize: 14, color: colors.textMuted),
-                      ),
-                    )
-                  : ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) {
-                        final message = _messages[index];
-                        return _MessageBubble(
-                          message: message,
-                          isMine: _isMine(message),
-                        );
-                      },
-                    ),
-            ),
+            Expanded(child: _buildMessages()),
             if (!widget.otherUserActive)
               Container(
                 width: double.infinity,

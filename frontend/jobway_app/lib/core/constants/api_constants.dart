@@ -45,6 +45,7 @@ class ApiConstants {
 
   // Notifications
   static const String myNotifications = '/notifications/my';
+  static const String unreadNotificationsCount = '/notifications/unread-count';
   static String markNotificationRead(String id) => '/notifications/$id/read';
   static const String markAllNotificationsRead = '/notifications/read-all';
 

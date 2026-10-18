@@ -1,4 +1,5 @@
-import '../entities/notification.dart';
+import '../entities/notification_filter.dart';
+import '../entities/paged_notifications.dart';
 import '../repository/notifications_repository.dart';
 
 class GetMyNotificationsUseCase {
@@ -6,5 +7,6 @@ class GetMyNotificationsUseCase {
 
   GetMyNotificationsUseCase(this._repository);
 
-  Future<List<AppNotification>> call() => _repository.getMyNotifications();
+  Future<PagedNotifications> call(NotificationFilter filter) =>
+      _repository.getMyNotifications(filter);
 }

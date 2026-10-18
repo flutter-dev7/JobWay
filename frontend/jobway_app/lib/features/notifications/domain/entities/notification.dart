@@ -16,4 +16,14 @@ class AppNotification {
     this.relatedEntityId,
     required this.createdAt,
   });
+
+  AppNotification copyWith({bool? isRead}) => AppNotification(
+    id: id,
+    type: type,
+    title: title,
+    message: message,
+    isRead: isRead ?? this.isRead,
+    relatedEntityId: relatedEntityId,
+    createdAt: createdAt,
+  );
 }

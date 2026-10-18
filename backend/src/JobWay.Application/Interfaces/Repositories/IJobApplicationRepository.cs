@@ -15,6 +15,7 @@ public interface IJobApplicationRepository
     Task<(List<JobApplication> Items, int TotalCount)> GetPagedByCandidateProfileIdAsync(Guid candidateProfileId, ApplicationFilterRequest filter, CancellationToken cancellationToken);
     Task<(List<JobApplication> Items, int TotalCount)> GetPagedByVacancyIdAsync(Guid vacancyId, ApplicationFilterRequest filter, CancellationToken cancellationToken);
     Task<List<Guid>> GetVacancyIdsByCandidateProfileIdAsync(Guid candidateProfileId, CancellationToken cancellationToken);
+    Task<List<JobApplication>> GetByIdsWithParticipantsAsync(List<Guid> ids, CancellationToken cancellationToken);
     Task<List<JobApplication>> GetCompletedWithoutReminderCheckAsync(DateTime updatedBefore, CancellationToken cancellationToken);
     void Add(JobApplication application);
     void Update(JobApplication application);

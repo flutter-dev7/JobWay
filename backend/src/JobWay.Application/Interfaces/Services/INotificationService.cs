@@ -7,7 +7,8 @@ namespace JobWay.Application.Interfaces.Services;
 
 public interface INotificationService
 {
-    Task<Result<List<NotificationResponse>>> GetMyNotificationsAsync(Guid userId, CancellationToken cancellationToken);
+    Task<Result<PagedResult<NotificationResponse>>> GetMyNotificationsAsync(Guid userId, NotificationFilterRequest filter, CancellationToken cancellationToken);
+    Task<Result<int>> GetUnreadCountAsync(Guid userId, CancellationToken cancellationToken);
     Task<Result<string>> MarkAsReadAsync(Guid userId, Guid notificationId, CancellationToken cancellationToken);
     Task<Result<string>> MarkAllAsReadAsync(Guid userId, CancellationToken cancellationToken);
     Task CreateAsync(Guid userId, NotificationType type, string title, string message, Guid? relatedEntityId, CancellationToken cancellationToken);

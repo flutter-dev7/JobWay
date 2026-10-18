@@ -19,31 +19,58 @@ public class ChatService : IChatService
         _notificationService = notificationService;
     }
 
-        public async Task<Result<List<ChatThreadResponse>>> GetMyThreadsAsync(Guid currentUserId, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ChatThreadResponse>>> GetMyThreadsAsync(Guid currentUserId, ChatThreadsFilterRequest filter, CancellationToken cancellationToken)
     {
-        var applications = await GetMyApplicationsAsync(currentUserId, cancellationToken);
-        if (applications.Count == 0)
-            return Result<List<ChatThreadResponse>>.Ok([]);
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
 
-        var latestMessages = await _unitOfWork.ChatMessages.GetLatestPerApplicationAsync(
-            applications.Select(a => a.Id).ToList(),
-            cancellationToken);
+        Guid? candidateProfileId = null;
+        Guid? companyProfileId = null;
 
-        var threads = new List<ChatThreadResponse>();
-
-        foreach (var application in applications)
+        var candidateProfile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(currentUserId, cancellationToken);
+        if (candidateProfile is not null)
         {
-            var lastMessage = latestMessages.FirstOrDefault(m => m.JobApplicationId == application.Id);
-            if (lastMessage is null) continue;
+            candidateProfileId = candidateProfile.Id;
+        }
+        else
+        {
+            var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(currentUserId, cancellationToken);
+            companyProfileId = companyProfile?.Id;
+        }
+
+        var (summaries, totalCount) = await _unitOfWork.ChatMessages.GetThreadSummariesPagedAsync(
+            candidateProfileId, companyProfileId, currentUserId, filter, cancellationToken);
+
+        var result = new PagedResult<ChatThreadResponse>
+        {
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        };
+
+        if (summaries.Count == 0)
+            return Result<PagedResult<ChatThreadResponse>>.Ok(result);
+
+        var applicationIds = summaries.Select(s => s.JobApplicationId).ToList();
+
+        var applications = (await _unitOfWork.JobApplications.GetByIdsWithParticipantsAsync(applicationIds, cancellationToken))
+            .ToDictionary(a => a.Id);
+
+        var lastMessages = (await _unitOfWork.ChatMessages.GetLastMessagesAsync(applicationIds, cancellationToken))
+            .GroupBy(m => m.JobApplicationId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.CreatedAt).First());
+
+        foreach (var summary in summaries)
+        {
+            if (!applications.TryGetValue(summary.JobApplicationId, out var application)) continue;
+            if (!lastMessages.TryGetValue(summary.JobApplicationId, out var lastMessage)) continue;
 
             var isCandidate = application.CandidateProfile.UserId == currentUserId;
             var otherUserIsActive = isCandidate
                 ? application.Vacancy.CompanyProfile.User.IsActive
                 : application.CandidateProfile.User.IsActive;
 
-            var unreadCount = await _unitOfWork.ChatMessages.GetUnreadCountAsync(application.Id, currentUserId, cancellationToken);
-
-            threads.Add(new ChatThreadResponse
+            result.Items.Add(new ChatThreadResponse
             {
                 JobApplicationId = application.Id,
                 OtherUserId = isCandidate ? application.Vacancy.CompanyProfile.UserId : application.CandidateProfile.UserId,
@@ -57,30 +84,44 @@ public class ChatService : IChatService
                 LastMessageText = lastMessage.Text,
                 LastMessageAt = lastMessage.CreatedAt,
                 OtherUserActive = otherUserIsActive,
-                UnreadCount = unreadCount
+                UnreadCount = summary.UnreadCount
             });
         }
 
-        return Result<List<ChatThreadResponse>>.Ok(threads.OrderByDescending(t => t.LastMessageAt).ToList());
+        return Result<PagedResult<ChatThreadResponse>>.Ok(result);
     }
 
-    public async Task<Result<List<ChatMessageResponse>>> GetMessagesAsync(Guid currentUserId, Guid jobApplicationId, DateTime? since, CancellationToken cancellationToken)
+    public async Task<Result<ChatMessagesPageResponse>> GetMessagesAsync(Guid currentUserId, Guid jobApplicationId, ChatMessagesFilterRequest filter, CancellationToken cancellationToken)
     {
         var application = await _unitOfWork.JobApplications.GetByIdAsync(jobApplicationId, cancellationToken);
         if (application is null)
-            return Result<List<ChatMessageResponse>>.Fail("Application not found", ErrorType.NotFound);
+            return Result<ChatMessagesPageResponse>.Fail("Application not found", ErrorType.NotFound);
 
         if (!IsParticipant(application, currentUserId))
-            return Result<List<ChatMessageResponse>>.Fail("You are not a participant of this chat", ErrorType.Forbidden);
+            return Result<ChatMessagesPageResponse>.Fail("You are not a participant of this chat", ErrorType.Forbidden);
 
-        var messages = since is null
-            ? await _unitOfWork.ChatMessages.GetByApplicationIdAsync(jobApplicationId, cancellationToken)
-            : await _unitOfWork.ChatMessages.GetByApplicationIdSinceAsync(jobApplicationId, since.Value, cancellationToken);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 100);
 
-        await _unitOfWork.ChatMessages.MarkAllAsReadAsync(jobApplicationId, currentUserId, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        List<ChatMessage> messages;
+        var hasMore = false;
 
-        return Result<List<ChatMessageResponse>>.Ok(messages.Select(Map).ToList());
+        if (filter.Since is not null)
+            messages = await _unitOfWork.ChatMessages.GetByApplicationIdSinceAsync(jobApplicationId, filter.Since.Value, cancellationToken);
+        else
+            (messages, hasMore) = await _unitOfWork.ChatMessages.GetPageAsync(jobApplicationId, filter.Before, filter.PageSize, cancellationToken);
+
+        // Подгрузка старой истории не меняет статус прочтения
+        if (filter.Before is null)
+        {
+            await _unitOfWork.ChatMessages.MarkAllAsReadAsync(jobApplicationId, currentUserId, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        return Result<ChatMessagesPageResponse>.Ok(new ChatMessagesPageResponse
+        {
+            Items = messages.Select(Map).ToList(),
+            HasMore = hasMore
+        });
     }
 
     public async Task<Result<ChatMessageResponse>> SendMessageAsync(Guid currentUserId, Guid jobApplicationId, SendMessageRequest request, CancellationToken cancellationToken)
@@ -118,19 +159,6 @@ public class ChatService : IChatService
             cancellationToken);
 
         return Result<ChatMessageResponse>.Ok(Map(message));
-    }
-
-    private async Task<List<JobApplication>> GetMyApplicationsAsync(Guid currentUserId, CancellationToken cancellationToken)
-    {
-        var candidateProfile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(currentUserId, cancellationToken);
-        if (candidateProfile is not null)
-            return await _unitOfWork.JobApplications.GetByCandidateProfileIdAsync(candidateProfile.Id, cancellationToken);
-
-        var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(currentUserId, cancellationToken);
-        if (companyProfile is not null)
-            return await _unitOfWork.JobApplications.GetByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
-
-        return [];
     }
 
     private static bool IsParticipant(JobApplication application, Guid userId)

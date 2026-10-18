@@ -2,26 +2,43 @@ import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_response.dart';
 import '../models/chat_message_model.dart';
-import '../models/chat_thread_model.dart';
+import '../models/paged_chat_messages_model.dart';
+import '../models/paged_chat_threads_model.dart';
 
 class ChatRemoteDataSource {
   final Dio _dio;
 
   ChatRemoteDataSource(this._dio);
 
-  Future<List<ChatThreadModel>> getMyThreads() async {
-    final response = await _dio.get(ApiConstants.chatThreads);
-    final list = ApiResponse.unwrap(response.data) as List;
-    return list.map((t) => ChatThreadModel.fromJson(t)).toList();
+  Future<PagedChatThreadsModel> getMyThreads({
+    required bool unreadOnly,
+    required int pageNumber,
+    required int pageSize,
+  }) async {
+    final response = await _dio.get(
+      ApiConstants.chatThreads,
+      queryParameters: {
+        if (unreadOnly) 'unreadOnly': true,
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
+      },
+    );
+    return PagedChatThreadsModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
-  Future<List<ChatMessageModel>> getMessages(String jobApplicationId, {DateTime? since}) async {
+  Future<PagedChatMessagesModel> getMessages(
+    String jobApplicationId, {
+    DateTime? since,
+    DateTime? before,
+  }) async {
     final response = await _dio.get(
       ApiConstants.chatMessages(jobApplicationId),
-      queryParameters: since != null ? {'since': since.toUtc().toIso8601String()} : null,
+      queryParameters: {
+        if (since != null) 'since': since.toUtc().toIso8601String(),
+        if (before != null) 'before': before.toUtc().toIso8601String(),
+      },
     );
-    final list = ApiResponse.unwrap(response.data) as List;
-    return list.map((m) => ChatMessageModel.fromJson(m)).toList();
+    return PagedChatMessagesModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
   Future<ChatMessageModel> sendMessage(String jobApplicationId, String text) async {

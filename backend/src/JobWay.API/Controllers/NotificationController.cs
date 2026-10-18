@@ -15,8 +15,12 @@ public class NotificationController : BaseApiController
     }
 
     [HttpGet("my")]
-    public async Task<IActionResult> GetMy(CancellationToken cancellationToken)
-        => HandleError(await _notificationService.GetMyNotificationsAsync(CurrentUserId, cancellationToken));
+    public async Task<IActionResult> GetMy([FromQuery] NotificationFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _notificationService.GetMyNotificationsAsync(CurrentUserId, filter, cancellationToken));
+
+    [HttpGet("unread-count")]
+    public async Task<IActionResult> GetUnreadCount(CancellationToken cancellationToken)
+        => HandleError(await _notificationService.GetUnreadCountAsync(CurrentUserId, cancellationToken));
 
     [HttpPut("{id:guid}/read")]
     public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken cancellationToken)
@@ -25,7 +29,7 @@ public class NotificationController : BaseApiController
     [HttpPut("read-all")]
     public async Task<IActionResult> MarkAllAsRead(CancellationToken cancellationToken)
         => HandleError(await _notificationService.MarkAllAsReadAsync(CurrentUserId, cancellationToken));
-    
+
     [HttpPost("device-token")]
     public async Task<IActionResult> RegisterDeviceToken(RegisterDeviceTokenRequest request, CancellationToken cancellationToken)
         => HandleError(await _notificationService.RegisterDeviceTokenAsync(CurrentUserId, request, cancellationToken));

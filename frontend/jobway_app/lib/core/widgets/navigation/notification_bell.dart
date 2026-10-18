@@ -32,7 +32,7 @@ class NotificationBell extends ConsumerWidget {
             ),
             onPressed: () async {
               await context.push(AppRoutes.notifications);
-              ref.invalidate(myNotificationsProvider);
+              ref.invalidate(unreadNotificationsCountProvider);
             },
           ),
           if (unreadCount > 0)

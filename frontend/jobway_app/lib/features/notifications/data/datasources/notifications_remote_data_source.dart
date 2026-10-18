@@ -1,17 +1,25 @@
 import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_response.dart';
-import '../models/notification_model.dart';
+import '../../domain/entities/notification_filter.dart';
+import '../models/paged_notifications_model.dart';
 
 class NotificationsRemoteDataSource {
   final Dio _dio;
 
   NotificationsRemoteDataSource(this._dio);
 
-  Future<List<NotificationModel>> getMyNotifications() async {
-    final response = await _dio.get(ApiConstants.myNotifications);
-    final list = ApiResponse.unwrap(response.data) as List;
-    return list.map((json) => NotificationModel.fromJson(json)).toList();
+  Future<PagedNotificationsModel> getMyNotifications(NotificationFilter filter) async {
+    final response = await _dio.get(
+      ApiConstants.myNotifications,
+      queryParameters: filter.toQueryParams(),
+    );
+    return PagedNotificationsModel.fromJson(ApiResponse.unwrap(response.data));
+  }
+
+  Future<int> getUnreadCount() async {
+    final response = await _dio.get(ApiConstants.unreadNotificationsCount);
+    return ApiResponse.unwrap(response.data) as int;
   }
 
   Future<void> markAsRead(String id) async {
