@@ -1,4 +1,4 @@
-import '../entities/review.dart';
+import '../entities/paged_reviews.dart';
 import '../repository/reviews_repository.dart';
 
 class GetReviewsForUserUseCase {
@@ -6,5 +6,6 @@ class GetReviewsForUserUseCase {
 
   GetReviewsForUserUseCase(this._repository);
 
-  Future<List<Review>> call(String userId) => _repository.getForUser(userId);
+  Future<PagedReviews> call(String userId, {int pageNumber = 1, int pageSize = 10}) =>
+      _repository.getForUser(userId, pageNumber: pageNumber, pageSize: pageSize);
 }

@@ -1,3 +1,4 @@
+import '../../domain/entities/paged_reviews.dart';
 import '../../domain/entities/review.dart';
 import '../../domain/repository/reviews_repository.dart';
 import '../datasources/reviews_remote_data_source.dart';
@@ -14,9 +15,13 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
   }
 
   @override
-  Future<List<Review>> getForUser(String userId) async {
-    final models = await _remoteDataSource.getForUser(userId);
-    return models.map((m) => m.toEntity()).toList();
+  Future<PagedReviews> getForUser(String userId, {int pageNumber = 1, int pageSize = 10}) async {
+    final model = await _remoteDataSource.getForUser(
+      userId,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+    return model.toEntity();
   }
 
   @override

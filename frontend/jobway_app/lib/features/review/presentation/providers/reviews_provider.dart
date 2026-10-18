@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:jobway_app/features/review/domain/entities/review.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../data/datasources/reviews_remote_data_source.dart';
 import '../../data/repository/reviews_repository_impl.dart';
+import '../../domain/entities/paged_reviews.dart';
 import '../../domain/repository/reviews_repository.dart';
 import '../../domain/usecases/create_review_usecase.dart';
 import '../../domain/usecases/get_average_rating_usecase.dart';
@@ -32,7 +32,8 @@ final averageRatingProvider = FutureProvider.autoDispose.family<double, String>(
   (ref, userId) => ref.read(getAverageRatingUseCaseProvider)(userId),
 );
 
-final reviewsForUserProvider = FutureProvider.autoDispose
-    .family<List<Review>, String>(
-      (ref, userId) => ref.read(getReviewsForUserUseCaseProvider)(userId),
-    );
+// Первые 2 отзыва + общее число для блока на профиле
+final reviewsPreviewProvider = FutureProvider.autoDispose.family<PagedReviews, String>(
+  (ref, userId) =>
+      ref.read(getReviewsForUserUseCaseProvider)(userId, pageNumber: 1, pageSize: 2),
+);

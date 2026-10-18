@@ -12,4 +12,12 @@ class UserModeration {
     required this.isActive,
     this.photoUrl,
   });
+
+  UserModeration copyWith({bool? isActive}) => UserModeration(
+    id: id,
+    email: email,
+    role: role,
+    isActive: isActive ?? this.isActive,
+    photoUrl: photoUrl,
+  );
 }

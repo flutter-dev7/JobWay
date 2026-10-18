@@ -20,4 +20,16 @@ class CompanyModeration {
     this.logoUrl,
     required this.verificationStatus,
   });
+
+  CompanyModeration copyWith({String? verificationStatus}) => CompanyModeration(
+    id: id,
+    userId: userId,
+    companyName: companyName,
+    description: description,
+    industry: industry,
+    website: website,
+    location: location,
+    logoUrl: logoUrl,
+    verificationStatus: verificationStatus ?? this.verificationStatus,
+  );
 }

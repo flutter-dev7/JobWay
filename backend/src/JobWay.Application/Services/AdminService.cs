@@ -1,4 +1,5 @@
 using JobWay.Application.Common;
+using JobWay.Application.DTOs.Admin.Request;
 using JobWay.Application.DTOs.Admin.Response;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Application.Interfaces.Services;
@@ -18,10 +19,43 @@ public class AdminService : IAdminService
         _notificationService = notificationService;
     }
 
-    public async Task<Result<List<CompanyModerationResponse>>> GetCompaniesAsync(CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<CompanyModerationResponse>>> GetCompaniesAsync(AdminCompaniesFilterRequest filter, CancellationToken cancellationToken)
     {
-        var companies = await _unitOfWork.CompanyProfiles.GetAllAsync(cancellationToken);
-        return Result<List<CompanyModerationResponse>>.Ok(companies.Select(MapCompany).ToList());
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (companies, totalCount) = await _unitOfWork.CompanyProfiles.GetPagedForAdminAsync(filter, cancellationToken);
+
+        return Result<PagedResult<CompanyModerationResponse>>.Ok(new PagedResult<CompanyModerationResponse>
+        {
+            Items = companies.Select(MapCompany).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
+    }
+
+    public async Task<Result<PagedResult<UserModerationResponse>>> GetUsersAsync(AdminUsersFilterRequest filter, CancellationToken cancellationToken)
+    {
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (users, totalCount) = await _unitOfWork.Users.GetPagedForAdminAsync(filter, cancellationToken);
+
+        return Result<PagedResult<UserModerationResponse>>.Ok(new PagedResult<UserModerationResponse>
+        {
+            Items = users.Select(u => new UserModerationResponse
+            {
+                Id = u.Id,
+                Email = u.Email,
+                Role = u.Role,
+                IsActive = u.IsActive,
+                PhotoUrl = u.PhotoUrl
+            }).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
     }
 
     public async Task<Result<string>> VerifyCompanyAsync(Guid companyId, CancellationToken cancellationToken)
@@ -29,19 +63,6 @@ public class AdminService : IAdminService
 
     public async Task<Result<string>> RejectCompanyAsync(Guid companyId, CancellationToken cancellationToken)
         => await ChangeVerificationStatusAsync(companyId, VerificationStatus.Rejected, cancellationToken);
-
-    public async Task<Result<List<UserModerationResponse>>> GetUsersAsync(CancellationToken cancellationToken)
-    {
-        var users = await _unitOfWork.Users.GetAllAsync(cancellationToken);
-        var candidateProfiles = await _unitOfWork.CandidateProfiles.GetAllAsync(cancellationToken);
-        var companyProfiles = await _unitOfWork.CompanyProfiles.GetAllAsync(cancellationToken);
-
-        var candidatePhotoByUserId = candidateProfiles.ToDictionary(c => c.UserId, c => c.PhotoUrl);
-        var companyLogoByUserId = companyProfiles.ToDictionary(c => c.UserId, c => c.LogoUrl);
-
-        var response = users.Select(u => MapUser(u, candidatePhotoByUserId, companyLogoByUserId)).ToList();
-        return Result<List<UserModerationResponse>>.Ok(response);
-    }
 
     public async Task<Result<string>> BlockUserAsync(Guid userId, CancellationToken cancellationToken)
         => await ChangeUserActiveStatusAsync(userId, false, cancellationToken);

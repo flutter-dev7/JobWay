@@ -1,3 +1,5 @@
+using JobWay.Application.DTOs.Admin.Request;
+using JobWay.Application.DTOs.Admin.Response;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
@@ -36,6 +38,42 @@ public class UserRepository : IUserRepository
 
     public Task<List<User>> GetAllAsync(CancellationToken cancellationToken)
         => _context.Users.ToListAsync(cancellationToken);
+    
+    public async Task<(List<AdminUserRow> Items, int TotalCount)> GetPagedForAdminAsync(
+        AdminUsersFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = _context.Users.AsQueryable();
+
+        if (filter.Role is not null)
+            query = query.Where(u => u.Role == filter.Role);
+
+        if (filter.IsActive is not null)
+            query = query.Where(u => u.IsActive == filter.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            var search = filter.Search.Trim();
+            query = query.Where(u => EF.Functions.ILike(u.Email, $"%{search}%"));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(u => u.CreatedAt)
+            .ThenBy(u => u.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .Select(u => new AdminUserRow(
+                u.Id,
+                u.Email,
+                u.Role,
+                u.IsActive,
+                _context.CandidateProfiles.Where(c => c.UserId == u.Id).Select(c => c.PhotoUrl).FirstOrDefault()
+                ?? _context.CompanyProfiles.Where(c => c.UserId == u.Id).Select(c => c.LogoUrl).FirstOrDefault()))
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 
     public async Task AddAsync(User user, CancellationToken cancellationToken)
         => await _context.Users.AddAsync(user, cancellationToken);

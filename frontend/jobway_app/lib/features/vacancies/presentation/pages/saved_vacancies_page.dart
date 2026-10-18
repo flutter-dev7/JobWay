@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/empty_state.dart';
 import '../providers/saved_vacancies_controller.dart';
@@ -60,7 +59,7 @@ class _SavedVacanciesPageState extends ConsumerState<SavedVacanciesPage> {
 
     if (state.items.isEmpty) {
       return const EmptyState(
-        icon: LucideIcons.bookmark,
+        icon: Icons.bookmark_border_rounded,
         title: 'Нет сохранённых вакансий',
         subtitle: 'Нажмите на значок закладки на вакансии, чтобы сохранить её',
       );

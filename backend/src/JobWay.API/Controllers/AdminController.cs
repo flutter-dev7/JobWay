@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.Admin.Request;
 using JobWay.Application.Interfaces.Services;
 using JobWay.Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
@@ -15,10 +16,14 @@ public class AdminController : BaseApiController
     {
         _adminService = adminService;
     }
-
+    
     [HttpGet("companies")]
-    public async Task<IActionResult> GetCompanies(CancellationToken cancellationToken)
-        => HandleError(await _adminService.GetCompaniesAsync(cancellationToken));
+    public async Task<IActionResult> GetCompanies([FromQuery] AdminCompaniesFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _adminService.GetCompaniesAsync(filter, cancellationToken));
+
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers([FromQuery] AdminUsersFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _adminService.GetUsersAsync(filter, cancellationToken));
 
     [HttpPut("companies/{id:guid}/verify")]
     public async Task<IActionResult> VerifyCompany(Guid id, CancellationToken cancellationToken)
@@ -27,10 +32,6 @@ public class AdminController : BaseApiController
     [HttpPut("companies/{id:guid}/reject")]
     public async Task<IActionResult> RejectCompany(Guid id, CancellationToken cancellationToken)
         => HandleError(await _adminService.RejectCompanyAsync(id, cancellationToken));
-
-    [HttpGet("users")]
-    public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
-        => HandleError(await _adminService.GetUsersAsync(cancellationToken));
 
     [HttpPut("users/{id:guid}/block")]
     public async Task<IActionResult> BlockUser(Guid id, CancellationToken cancellationToken)

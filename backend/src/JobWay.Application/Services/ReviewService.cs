@@ -92,10 +92,20 @@ public class ReviewService : IReviewService
         return Result<ReviewResponse>.Ok(Map(review));
     }
 
-    public async Task<Result<List<ReviewResponse>>> GetForUserAsync(Guid revieweeUserId, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ReviewResponse>>> GetForUserAsync(Guid revieweeUserId, ReviewsFilterRequest filter, CancellationToken cancellationToken)
     {
-        var reviews = await _unitOfWork.Reviews.GetByRevieweeAsync(revieweeUserId, cancellationToken);
-        return Result<List<ReviewResponse>>.Ok(reviews.Select(Map).ToList());
+        filter.PageNumber = Math.Max(filter.PageNumber, 1);
+        filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
+
+        var (reviews, totalCount) = await _unitOfWork.Reviews.GetPagedByRevieweeAsync(revieweeUserId, filter, cancellationToken);
+
+        return Result<PagedResult<ReviewResponse>>.Ok(new PagedResult<ReviewResponse>
+        {
+            Items = reviews.Select(Map).ToList(),
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        });
     }
 
     public async Task<Result<double>> GetAverageRatingAsync(Guid userId, CancellationToken cancellationToken)
@@ -106,8 +116,7 @@ public class ReviewService : IReviewService
         if (cached is not null && double.TryParse(cached, out var cachedValue))
             return Result<double>.Ok(cachedValue);
 
-        var reviews = await _unitOfWork.Reviews.GetByRevieweeAsync(userId, cancellationToken);
-        var average = reviews.Count == 0 ? 0 : reviews.Average(r => r.Rating);
+        var average = await _unitOfWork.Reviews.GetAverageRatingAsync(userId, cancellationToken);
 
         await _cacheService.SetAsync(cacheKey, average.ToString("F2"), AverageRatingCacheExpiry, cancellationToken);
 

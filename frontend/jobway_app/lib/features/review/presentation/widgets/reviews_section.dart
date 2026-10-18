@@ -11,14 +11,13 @@ import '../providers/reviews_provider.dart';
 
 class ReviewsSection extends ConsumerWidget {
   final String userId;
-  static const _previewCount = 2;
 
   const ReviewsSection({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final averageAsync = ref.watch(averageRatingProvider(userId));
-    final reviewsAsync = ref.watch(reviewsForUserProvider(userId));
+    final reviewsAsync = ref.watch(reviewsPreviewProvider(userId));
     final colors = context.colors;
 
     return SectionCard(
@@ -35,9 +34,10 @@ class ReviewsSection extends ConsumerWidget {
           ApiException.extractMessage(error),
           style: TextStyle(fontSize: 13, color: colors.textMuted),
         ),
-        data: (reviews) {
+        data: (page) {
           final average = averageAsync.valueOrNull ?? 0;
-          final preview = reviews.take(_previewCount).toList();
+          final preview = page.items;
+          final total = page.totalCount;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,7 +60,7 @@ class ReviewsSection extends ConsumerWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '(${reviews.length} ${reviews.length == 1 ? "отзыв" : "отзывов"})',
+                    '($total ${total == 1 ? "отзыв" : "отзывов"})',
                     style: TextStyle(fontSize: 13, color: colors.textMuted),
                   ),
                 ],
@@ -173,7 +173,7 @@ class ReviewsSection extends ConsumerWidget {
                     ),
                   ),
                 ),
-                if (reviews.length > _previewCount)
+                if (total > preview.length)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: GestureDetector(
@@ -181,7 +181,7 @@ class ReviewsSection extends ConsumerWidget {
                       child: Row(
                         children: [
                           Text(
-                            'Все отзывы (${reviews.length})',
+                            'Все отзывы ($total)',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,

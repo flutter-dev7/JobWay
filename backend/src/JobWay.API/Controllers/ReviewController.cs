@@ -19,8 +19,8 @@ public class ReviewController : BaseApiController
         => HandleError(await _reviewService.CreateAsync(CurrentUserId, request, cancellationToken));
 
     [HttpGet("user/{userId:guid}")]
-    public async Task<IActionResult> GetForUser(Guid userId, CancellationToken cancellationToken)
-        => HandleError(await _reviewService.GetForUserAsync(userId, cancellationToken));
+    public async Task<IActionResult> GetForUser(Guid userId, [FromQuery] ReviewsFilterRequest filter, CancellationToken cancellationToken)
+        => HandleError(await _reviewService.GetForUserAsync(userId, filter, cancellationToken));
 
     [HttpGet("user/{userId:guid}/average-rating")]
     public async Task<IActionResult> GetAverageRating(Guid userId, CancellationToken cancellationToken)

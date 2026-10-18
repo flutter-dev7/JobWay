@@ -100,7 +100,7 @@ class VacancyCard extends ConsumerWidget {
                               averageAsync.valueOrNull! > 0) ...[
                             const SizedBox(width: 6),
                             const Icon(
-                              LucideIcons.star,
+                              Icons.star_rounded,
                               size: 14,
                               color: Color(0xFFF59E0B),
                             ),
@@ -142,7 +142,9 @@ class VacancyCard extends ConsumerWidget {
                     }
                   },
                   child: Icon(
-                    isSaved ? LucideIcons.bookmarkCheck : LucideIcons.bookmark,
+                    isSaved
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
                     size: 22,
                     color: isSaved ? context.accentColor : colors.textMuted,
                   ),

@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.Review.Request;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
 
@@ -7,6 +8,8 @@ public interface IReviewRepository
 {
     Task<Review?> GetByApplicationAndTypeAsync(Guid jobApplicationId, ReviewType type, CancellationToken cancellationToken);
     Task<List<Review>> GetByRevieweeAsync(Guid revieweeUserId, CancellationToken cancellationToken);
+    Task<(List<Review> Items, int TotalCount)> GetPagedByRevieweeAsync(Guid revieweeUserId, ReviewsFilterRequest filter, CancellationToken cancellationToken);
+    Task<double> GetAverageRatingAsync(Guid revieweeUserId, CancellationToken cancellationToken);
     Task<HashSet<Guid>> GetReviewedApplicationIdsAsync(List<Guid> jobApplicationIds, ReviewType type, CancellationToken cancellationToken);
     void Add(Review review);
 }

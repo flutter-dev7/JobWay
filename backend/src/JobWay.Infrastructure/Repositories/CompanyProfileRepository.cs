@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.Admin.Request;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
 using JobWay.Infrastructure.Persistence;
@@ -23,6 +24,32 @@ public class CompanyProfileRepository : ICompanyProfileRepository
 
     public Task<List<CompanyProfile>> GetAllAsync(CancellationToken cancellationToken)
         => _context.CompanyProfiles.ToListAsync(cancellationToken);
+    
+    public async Task<(List<CompanyProfile> Items, int TotalCount)> GetPagedForAdminAsync(
+        AdminCompaniesFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = _context.CompanyProfiles.AsQueryable();
+
+        if (filter.Status is not null)
+            query = query.Where(c => c.VerificationStatus == filter.Status);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            var search = filter.Search.Trim();
+            query = query.Where(c => EF.Functions.ILike(c.CompanyName, $"%{search}%"));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(c => c.CreatedAt)
+            .ThenBy(c => c.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 
     public void Update(CompanyProfile profile) => _context.CompanyProfiles.Update(profile);
 }

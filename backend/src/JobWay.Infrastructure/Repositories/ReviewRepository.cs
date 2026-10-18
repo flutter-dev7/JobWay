@@ -1,3 +1,4 @@
+using JobWay.Application.DTOs.Review.Request;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
 using JobWay.Domain.Enums;
@@ -31,6 +32,33 @@ public class ReviewRepository : IReviewRepository
             .ToListAsync(cancellationToken);
 
         return ids.ToHashSet();
+    }
+    
+    public async Task<(List<Review> Items, int TotalCount)> GetPagedByRevieweeAsync(
+        Guid revieweeUserId, ReviewsFilterRequest filter, CancellationToken cancellationToken)
+    {
+        var query = _context.Reviews.Where(r => r.RevieweeUserId == revieweeUserId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(r => r.CreatedAt)
+            .ThenBy(r => r.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public async Task<double> GetAverageRatingAsync(Guid revieweeUserId, CancellationToken cancellationToken)
+    {
+        var average = await _context.Reviews
+            .Where(r => r.RevieweeUserId == revieweeUserId)
+            .Select(r => (double?)r.Rating)
+            .AverageAsync(cancellationToken);
+
+        return average ?? 0;
     }
 
     public void Add(Review review) => _context.Reviews.Add(review);

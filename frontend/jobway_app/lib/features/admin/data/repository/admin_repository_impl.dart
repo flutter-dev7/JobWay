@@ -1,3 +1,4 @@
+import '../../domain/entities/admin_page.dart';
 import '../../domain/entities/company_moderation.dart';
 import '../../domain/entities/user_moderation.dart';
 import '../../domain/repository/admin_repository.dart';
@@ -9,9 +10,23 @@ class AdminRepositoryImpl implements AdminRepository {
   AdminRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<List<CompanyModeration>> getCompanies() async {
-    final models = await _remoteDataSource.getCompanies();
-    return models.map((m) => m.toEntity()).toList();
+  Future<AdminPage<CompanyModeration>> getCompanies({
+    String? status,
+    String? search,
+    int pageNumber = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _remoteDataSource.getCompanies(
+      status: status,
+      search: search,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+    return AdminPage<CompanyModeration>(
+      items: response.items.map((m) => m.toEntity()).toList(),
+      hasMore: response.pageNumber < response.totalPages,
+      totalCount: response.totalCount,
+    );
   }
 
   @override
@@ -21,9 +36,25 @@ class AdminRepositoryImpl implements AdminRepository {
   Future<void> rejectCompany(String id) => _remoteDataSource.rejectCompany(id);
 
   @override
-  Future<List<UserModeration>> getUsers() async {
-    final models = await _remoteDataSource.getUsers();
-    return models.map((m) => m.toEntity()).toList();
+  Future<AdminPage<UserModeration>> getUsers({
+    String? role,
+    bool? isActive,
+    String? search,
+    int pageNumber = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _remoteDataSource.getUsers(
+      role: role,
+      isActive: isActive,
+      search: search,
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+    );
+    return AdminPage<UserModeration>(
+      items: response.items.map((m) => m.toEntity()).toList(),
+      hasMore: response.pageNumber < response.totalPages,
+      totalCount: response.totalCount,
+    );
   }
 
   @override
