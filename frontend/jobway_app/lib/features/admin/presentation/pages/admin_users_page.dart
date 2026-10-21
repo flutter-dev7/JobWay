@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/features/admin/domain/entities/user_moderation.dart';
+import 'package:jobway_app/features/admin/presentation/pages/admin_company_loader_page.dart';
+import 'package:jobway_app/features/candidate_profile/presentation/pages/candidate_profile_view_page.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -9,7 +12,7 @@ import '../widgets/admin_filter_chips.dart';
 import '../widgets/admin_search_field.dart';
 import '../widgets/user_moderation_card.dart';
 
-class AdminUsersPage extends ConsumerStatefulWidget { 
+class AdminUsersPage extends ConsumerStatefulWidget {
   const AdminUsersPage({super.key});
 
   @override
@@ -19,7 +22,12 @@ class AdminUsersPage extends ConsumerStatefulWidget {
 class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
   final _scrollController = ScrollController();
 
-  static const _labels = ['Все', 'Кандидаты', 'Работодатели', 'Заблокированные'];
+  static const _labels = [
+    'Все',
+    'Кандидаты',
+    'Работодатели',
+    'Заблокированные',
+  ];
   static const List<({String? role, bool? isActive})> _filters = [
     (role: null, isActive: null),
     (role: 'Candidate', isActive: null),
@@ -48,6 +56,28 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
     if (position.pixels >= position.maxScrollExtent - 300) {
       _controller.loadMore();
     }
+  }
+
+  void _openProfile(UserModeration user) {
+    final profileId = user.profileId;
+
+    if (profileId == null) {
+      AppSnackbar.showError(
+        user.role == 'Admin'
+            ? 'У администратора нет профиля'
+            : 'Профиль пользователя не найден',
+      );
+      return;
+    }
+
+    final Widget? page = switch (user.role) {
+      'Candidate' => CandidateProfileViewPage(candidateProfileId: profileId),
+      'Employer' => AdminCompanyLoaderPage(companyId: profileId),
+      _ => null,
+    };
+    if (page == null) return;
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
   }
 
   Widget _buildBody(AdminUsersState state) {
@@ -91,11 +121,14 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
           key: ValueKey(user.id),
           user: user,
           isUpdating: state.updatingId == user.id,
+          onTap: () => _openProfile(user),
           onToggle: () async {
             try {
               await _controller.toggle(user);
               AppSnackbar.showSuccess(
-                user.isActive ? 'Пользователь заблокирован' : 'Пользователь разблокирован',
+                user.isActive
+                    ? 'Пользователь заблокирован'
+                    : 'Пользователь разблокирован',
               );
             } catch (error) {
               AppSnackbar.showError(ApiException.extractMessage(error));

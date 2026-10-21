@@ -43,8 +43,10 @@ public class JobApplicationController : BaseApiController
     public async Task<IActionResult> UpdateStatus(Guid applicationId, UpdateJobApplicationStatusRequest request, CancellationToken cancellationToken)
         => HandleError(await _jobApplicationService.UpdateStatusAsync(CurrentUserId, applicationId, request, cancellationToken));
 
-    [Authorize(Roles = Roles.Employer)]
+    [Authorize(Roles = $"{Roles.Employer},{Roles.Admin}")]
     [HttpGet("candidate-profile/{candidateProfileId:guid}")]
     public async Task<IActionResult> GetCandidateProfile(Guid candidateProfileId, CancellationToken cancellationToken)
-        => HandleError(await _candidateProfileService.GetCandidateProfileForEmployerAsync(CurrentUserId, candidateProfileId, cancellationToken));
+        => HandleError(User.IsInRole(Roles.Admin)
+            ? await _candidateProfileService.GetCandidateProfileForAdminAsync(candidateProfileId, cancellationToken)
+            : await _candidateProfileService.GetCandidateProfileForEmployerAsync(CurrentUserId, candidateProfileId, cancellationToken));
 }

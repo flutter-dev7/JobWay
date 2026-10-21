@@ -20,6 +20,7 @@ class VacancyModel {
   final String status;
   final List<SkillModel> skills;
   final DateTime createdAt;
+  final DateTime? featuredUntil;
 
   VacancyModel({
     required this.id,
@@ -39,6 +40,7 @@ class VacancyModel {
     required this.status,
     required this.skills,
     required this.createdAt,
+    this.featuredUntil,
   });
 
   factory VacancyModel.fromJson(Map<String, dynamic> json) => VacancyModel(
@@ -59,6 +61,9 @@ class VacancyModel {
         status: json['status'],
         skills: (json['skills'] as List).map((s) => SkillModel.fromJson(s)).toList(),
         createdAt: DateTime.parse(json['createdAt']),
+        featuredUntil: json['featuredUntil'] != null
+            ? DateTime.parse(json['featuredUntil'])
+            : null,
       );
 
   Vacancy toEntity() => Vacancy(
@@ -79,5 +84,6 @@ class VacancyModel {
         status: status,
         skills: skills.map((s) => s.toEntity()).toList(),
         createdAt: createdAt,
+        featuredUntil: featuredUntil,
       );
 }

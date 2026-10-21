@@ -13,4 +13,6 @@ public class CompanyModerationResponse
     public string? Location { get; set; }
     public string? LogoUrl { get; set; }
     public VerificationStatus VerificationStatus { get; set; }
+    public CompanyTier Tier { get; set; }
+    public DateTime? TierExpiresAt { get; set; }
 }

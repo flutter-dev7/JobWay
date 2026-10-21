@@ -10,6 +10,8 @@ class CompanyModerationModel {
   final String? location;
   final String? logoUrl;
   final String verificationStatus;
+  final String tier;
+  final DateTime? tierExpiresAt;
 
   CompanyModerationModel({
     required this.id,
@@ -21,6 +23,8 @@ class CompanyModerationModel {
     this.location,
     this.logoUrl,
     required this.verificationStatus,
+    this.tier = 'Free',
+    this.tierExpiresAt,
   });
 
   factory CompanyModerationModel.fromJson(Map<String, dynamic> json) {
@@ -34,18 +38,24 @@ class CompanyModerationModel {
       location: json['location'],
       logoUrl: json['logoUrl'],
       verificationStatus: json['verificationStatus'],
+      tier: json['tier'] ?? 'Free',
+      tierExpiresAt: json['tierExpiresAt'] != null
+          ? DateTime.parse(json['tierExpiresAt'])
+          : null,
     );
   }
 
   CompanyModeration toEntity() => CompanyModeration(
-        id: id,
-        userId: userId,
-        companyName: companyName,
-        description: description,
-        industry: industry,
-        website: website,
-        location: location,
-        logoUrl: logoUrl,
-        verificationStatus: verificationStatus,
-      );
+    id: id,
+    userId: userId,
+    companyName: companyName,
+    description: description,
+    industry: industry,
+    website: website,
+    location: location,
+    logoUrl: logoUrl,
+    verificationStatus: verificationStatus,
+    tier: tier,
+    tierExpiresAt: tierExpiresAt,
+  );
 }

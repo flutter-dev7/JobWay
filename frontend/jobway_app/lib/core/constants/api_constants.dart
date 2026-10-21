@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.123.34:5025/api';
+  static const String baseUrl = 'http://192.168.31.198:5025/api';
 
   // Auth
   static const String register = '/auth/register';
@@ -43,6 +43,9 @@ class ApiConstants {
       '/applications/$applicationId/status';
   static const String myAppliedVacancyIds = '$myApplications/vacancy-ids';
 
+  static const String mySubscription = '/subscription/my';
+  static String setCompanyTier(String id) => '/admin/companies/$id/tier';
+
   // Notifications
   static const String myNotifications = '/notifications/my';
   static const String unreadNotificationsCount = '/notifications/unread-count';
@@ -56,6 +59,10 @@ class ApiConstants {
   static const String adminUsers = '/admin/users';
   static String blockUser(String id) => '/admin/users/$id/block';
   static String unblockUser(String id) => '/admin/users/$id/unblock';
+  static String adminCompanyVacancies(String id) =>
+      '/admin/companies/$id/vacancies';
+  static String featureVacancy(String id) => '/admin/vacancies/$id/feature';
+  static String adminCompanyById(String id) => '/admin/companies/$id';
 
   // Reviews
   static const String reviewCreate = '/review/create';
@@ -83,12 +90,26 @@ class ApiConstants {
     return '${uri.scheme}://${uri.authority}';
   }
 
-  static String resolveFileUrl(String path) {
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
+  static String get serverUrl => baseUrl.replaceFirst(RegExp(r'/api/?$'), '');
+
+  static String resolveFileUrl(String url) {
+    if (url.startsWith('/')) return '$serverUrl$url';
+
+    final uri = Uri.tryParse(url);
+    if (uri != null &&
+        uri.path.startsWith('/uploads/') &&
+        _isLocalHost(uri.host)) {
+      return '$serverUrl${uri.path}';
     }
-    return '$fileBaseUrl$path';
+
+    return url;
   }
+
+  static bool _isLocalHost(String host) =>
+      host == 'localhost' ||
+      host.startsWith('192.168.') ||
+      host.startsWith('10.') ||
+      host.startsWith('172.');
 
   static String extractFileName(String url) {
     final withoutQuery = url.split('?').first;

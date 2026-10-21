@@ -18,6 +18,7 @@ public class Vacancy : BaseEntity
     public VacancyStatus Status { get; set; } = VacancyStatus.Draft;
     public PaymentType PaymentType { get; set; } = PaymentType.Monthly;
     public Currency Currency { get; set; } = Currency.TJS;
+    public DateTime? FeaturedUntil { get; set; }
 
     public List<Skill> RequiredSkills { get; set; } = [];
     public List<JobApplication> Applications { get; set; } = [];

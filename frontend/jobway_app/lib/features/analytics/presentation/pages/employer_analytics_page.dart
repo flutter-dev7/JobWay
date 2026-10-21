@@ -6,6 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/widgets/display/section_card.dart';
+import '../../../subscription/presentation/widgets/pro_locked.dart';
+import '../../../subscription/presentation/widgets/subscription_sheet.dart';
 import '../../domain/entities/employer_analytics.dart';
 import '../providers/analytics_provider.dart';
 import '../widgets/analytics_badge.dart';
@@ -69,8 +71,10 @@ class _EmployerAnalyticsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final isLimited = analytics.isLimited;
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
       children: [
         Row(
@@ -107,53 +111,74 @@ class _EmployerAnalyticsBody extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: AnalyticsStatCard(
-                label: 'Средний Match Score',
-                value: '${analytics.averageMatchScore.round()}%',
-                icon: Icons.bolt_outlined,
-                accentColor: context.accentColor,
+              child: GestureDetector(
+                onTap: isLimited ? () => SubscriptionSheet.show(context) : null,
+                child: AnalyticsStatCard(
+                  label: 'Средний Match Score',
+                  value: isLimited
+                      ? '—'
+                      : '${analytics.averageMatchScore.round()}%',
+                  icon: isLimited
+                      ? Icons.lock_outline_rounded
+                      : Icons.bolt_outlined,
+                  accentColor: isLimited
+                      ? AppColors.warning
+                      : context.accentColor,
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 20),
-        SectionCard(
+        ProLocked(
+          locked: isLimited,
           title: 'Воронка по статусам',
-          icon: Icons.filter_alt_outlined,
-          trailing: const AnalyticsBadge('Всего'),
-          child: analytics.statusFunnel.isEmpty
-              ? const AnalyticsEmptyHint('Пока нет откликов')
-              : AnalyticsTrendChart(
-                  lineColor: context.accentColor,
-                  points: analytics.statusFunnel
-                      .map(
-                        (item) => AnalyticsTrendPoint(
-                          label: applicationStatusLabel(item.status),
-                          value: item.count,
-                          color: applicationStatusColor(item.status),
-                        ),
-                      )
-                      .toList(),
-                ),
+          description:
+              'Сколько откликов на каждом этапе. Доступно на тарифе Pro',
+          child: SectionCard(
+            title: 'Воронка по статусам',
+            icon: Icons.filter_alt_outlined,
+            trailing: const AnalyticsBadge('Всего'),
+            child: analytics.statusFunnel.isEmpty
+                ? const AnalyticsEmptyHint('Пока нет откликов')
+                : AnalyticsTrendChart(
+                    lineColor: context.accentColor,
+                    points: analytics.statusFunnel
+                        .map(
+                          (item) => AnalyticsTrendPoint(
+                            label: applicationStatusLabel(item.status),
+                            value: item.count,
+                            color: applicationStatusColor(item.status),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
         ),
         const SizedBox(height: 16),
-        SectionCard(
+        ProLocked(
+          locked: isLimited,
           title: 'Топ навыков соискателей',
-          icon: Icons.star_outline_rounded,
-          trailing: const AnalyticsBadge('Топ-5'),
-          child: analytics.topSkills.isEmpty
-              ? const AnalyticsEmptyHint('Пока нет данных')
-              : AnalyticsTrendChart(
-                  lineColor: AppColors.star,
-                  points: analytics.topSkills
-                      .map(
-                        (item) => AnalyticsTrendPoint(
-                          label: item.nameRu,
-                          value: item.count,
-                        ),
-                      )
-                      .toList(),
-                ),
+          description:
+              'Какие навыки чаще всего у откликнувшихся. Доступно на тарифе Pro',
+          child: SectionCard(
+            title: 'Топ навыков соискателей',
+            icon: Icons.star_outline_rounded,
+            trailing: const AnalyticsBadge('Топ-5'),
+            child: analytics.topSkills.isEmpty
+                ? const AnalyticsEmptyHint('Пока нет данных')
+                : AnalyticsTrendChart(
+                    lineColor: AppColors.star,
+                    points: analytics.topSkills
+                        .map(
+                          (item) => AnalyticsTrendPoint(
+                            label: item.nameRu,
+                            value: item.count,
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
         ),
         const SizedBox(height: 20),
         Text(
@@ -169,7 +194,7 @@ class _EmployerAnalyticsBody extends StatelessWidget {
           const AnalyticsEmptyHint('Нет вакансий')
         else
           ...analytics.vacancies.map(
-            (item) => VacancyAnalyticsCard(item: item),
+            (item) => VacancyAnalyticsCard(item: item, matchLocked: isLimited),
           ),
       ],
     );

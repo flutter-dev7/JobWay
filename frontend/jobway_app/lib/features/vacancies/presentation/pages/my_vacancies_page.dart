@@ -5,6 +5,7 @@ import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
+import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -54,6 +55,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
     setState(() => _updatingVacancyId = id);
     try {
       await action(id);
+      ref.invalidate(subscriptionProvider);
       AppSnackbar.showSuccess(successMessage);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));

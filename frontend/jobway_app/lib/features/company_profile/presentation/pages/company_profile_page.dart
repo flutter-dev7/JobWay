@@ -8,6 +8,8 @@ import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
+import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
+import 'package:jobway_app/features/subscription/presentation/widgets/subscription_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
@@ -127,100 +129,110 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
             ),
           ),
         ),
-        data: (profile) => ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
-          children: [
-            VerificationBadge(status: profile.verificationStatus),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(22),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(
-                      Theme.of(context).brightness == Brightness.dark
-                          ? 0.2
-                          : 0.035,
+        data: (profile) => RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(subscriptionProvider);
+            ref.invalidate(companyProfileProvider);
+            await ref.read(companyProfileProvider.future);
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+            children: [
+              VerificationBadge(status: profile.verificationStatus),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 0.2
+                            : 0.035,
+                      ),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
                     ),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  ProfilePhoto(
-                    photoUrl:
-                        profile.logoUrl != null && profile.logoUrl!.isNotEmpty
-                        ? ApiConstants.resolveFileUrl(profile.logoUrl!)
-                        : null,
-                    fallbackText: profile.companyName.trim().isNotEmpty
-                        ? profile.companyName.trim()[0].toUpperCase()
-                        : '?',
-                    onEdit: _changeLogo,
-                    isUploading: _isUploadingLogo,
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    profile.companyName,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    ProfilePhoto(
+                      photoUrl:
+                          profile.logoUrl != null && profile.logoUrl!.isNotEmpty
+                          ? ApiConstants.resolveFileUrl(profile.logoUrl!)
+                          : null,
+                      fallbackText: profile.companyName.trim().isNotEmpty
+                          ? profile.companyName.trim()[0].toUpperCase()
+                          : '?',
+                      onEdit: _changeLogo,
+                      isUploading: _isUploadingLogo,
                     ),
-                  ),
-                  if (profile.location != null) ...[
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 14),
                     Text(
-                      profile.location!,
+                      profile.companyName,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 14,
-                        color: colors.textSecondary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
                       ),
                     ),
+                    if (profile.location != null) ...[
+                      const SizedBox(height: 7),
+                      Text(
+                        profile.location!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-            if (profile.description != null &&
-                profile.description!.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              SectionCard(
-                title: 'О компании',
-                icon: Icons.notes_rounded,
-                child: Text(
-                  profile.description!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.6,
-                    color: colors.textSecondary,
-                  ),
                 ),
               ),
-            ],
-            const SizedBox(height: 16),
-            SectionCard(
-              title: 'Информация',
-              icon: Icons.info_outline,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (profile.industry != null &&
-                      profile.industry!.isNotEmpty) ...[
-                    InfoRow(label: 'Индустрия', value: profile.industry!),
-                    const SizedBox(height: 14),
+              const SizedBox(height: 16),
+              SubscriptionCard(companyName: profile.companyName),
+              if (profile.description != null &&
+                  profile.description!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                SectionCard(
+                  title: 'О компании',
+                  icon: Icons.notes_rounded,
+                  child: Text(
+                    profile.description!,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.6,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              SectionCard(
+                title: 'Информация',
+                icon: Icons.info_outline,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (profile.industry != null &&
+                        profile.industry!.isNotEmpty) ...[
+                      InfoRow(label: 'Индустрия', value: profile.industry!),
+                      const SizedBox(height: 14),
+                    ],
+                    if (profile.website != null && profile.website!.isNotEmpty)
+                      _WebsiteLine(url: profile.website!),
                   ],
-                  if (profile.website != null && profile.website!.isNotEmpty)
-                    _WebsiteLine(url: profile.website!),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ReviewsSection(userId: profile.userId),
-          ],
+              const SizedBox(height: 16),
+              ReviewsSection(userId: profile.userId),
+            ],
+          ),
         ),
       ),
     );

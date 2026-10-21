@@ -114,6 +114,10 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#FFFFFF"
   image: "assets/images/logo_screen_round.png"
+  color_dark: "#0B0F19"
+  image_dark: "assets/images/logo_screen_round.png"
   android_12:
     color: "#FFFFFF"
     image: "assets/images/logo_screen_round.png"
+    color_dark: "#0B0F19"
+    image_dark: "assets/images/logo_screen_round.png"

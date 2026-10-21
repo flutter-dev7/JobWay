@@ -11,4 +11,5 @@ public interface ICandidateProfileService
     Task<Result<CandidateProfileResponse>> UploadResumeAsync(Guid userId, UploadResumeRequest request, CancellationToken cancellationToken);
     Task<Result<CandidateProfileResponse>> UploadPhotoAsync(Guid userId, UploadPhotoRequest request, CancellationToken cancellationToken);
     Task<Result<CandidateProfileResponse>> GetCandidateProfileForEmployerAsync(Guid employerUserId, Guid candidateProfileId, CancellationToken cancellationToken);
+    Task<Result<CandidateProfileResponse>> GetCandidateProfileForAdminAsync(Guid candidateProfileId, CancellationToken cancellationToken);
 }

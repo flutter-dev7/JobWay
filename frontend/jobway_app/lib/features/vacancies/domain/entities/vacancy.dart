@@ -18,6 +18,7 @@ class Vacancy {
   final String status;
   final List<Skill> skills;
   final DateTime createdAt;
+  final DateTime? featuredUntil;
 
   const Vacancy({
     required this.id,
@@ -37,5 +38,10 @@ class Vacancy {
     required this.status,
     required this.skills,
     required this.createdAt,
+    this.featuredUntil,
   });
+
+  // Продвигается ли вакансия прямо сейчас (дата окончания ещё не наступила)
+  bool get isFeatured =>
+      featuredUntil != null && featuredUntil!.isAfter(DateTime.now());
 }

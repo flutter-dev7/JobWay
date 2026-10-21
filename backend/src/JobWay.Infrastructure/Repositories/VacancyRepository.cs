@@ -53,12 +53,17 @@ public class VacancyRepository : IVacancyRepository
 
         var totalCount = await query.CountAsync(cancellationToken);
 
+        var now = DateTime.UtcNow;
+
         var items = await query
-            .OrderByDescending(v => v.CreatedAt)
+            .OrderByDescending(v => v.FeaturedUntil != null && v.FeaturedUntil > now)
+            .ThenByDescending(v => v.CreatedAt)
+            .ThenBy(v => v.Id)
             .Skip((filter.PageNumber - 1) * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync(cancellationToken);
 
+        
         return (items, totalCount);
     }
 
@@ -103,6 +108,11 @@ public class VacancyRepository : IVacancyRepository
 
         return (items, totalCount);
     }
+    
+    public Task<int> CountActiveByCompanyProfileIdAsync(Guid companyProfileId, CancellationToken cancellationToken)
+        => _context.Vacancies.CountAsync(
+            v => v.CompanyProfileId == companyProfileId && v.Status == VacancyStatus.Active,
+            cancellationToken);
 
     public void Add(Vacancy vacancy) => _context.Vacancies.Add(vacancy);
     public void Update(Vacancy vacancy) => _context.Vacancies.Update(vacancy);

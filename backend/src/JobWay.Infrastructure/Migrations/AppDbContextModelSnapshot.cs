@@ -150,6 +150,12 @@ namespace JobWay.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("TierExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -468,6 +474,9 @@ namespace JobWay.Infrastructure.Migrations
 
                     b.Property<int>("ExperienceLevel")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("FeaturedUntil")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Location")
                         .HasMaxLength(200)

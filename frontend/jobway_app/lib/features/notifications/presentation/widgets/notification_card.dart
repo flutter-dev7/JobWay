@@ -13,62 +13,50 @@ class NotificationCard extends StatelessWidget {
     required this.onTap,
   });
 
-  IconData _icon() {
+  static const _blue = Color(0xFF3157D5);
+  static const _green = Color(0xFF059669);
+  static const _amber = Color(0xFFD97706);
+  static const _star = Color(0xFFF59E0B);
+  static const _red = Color(0xFFDC2626);
+  static const _gray = Color(0xFF6B7280);
+
+  ({IconData icon, Color color}) _style() {
     switch (notification.type) {
       case 'NewApplication':
-        return Icons.person_add_outlined;
+        return (icon: Icons.person_add_outlined, color: _blue);
       case 'ApplicationStatusChanged':
-        return Icons.event_available_outlined;
+        return (icon: Icons.event_available_outlined, color: _green);
       case 'NewMatchingVacancy':
-        return Icons.notifications_active_outlined;
+        return (icon: Icons.notifications_active_outlined, color: _amber);
       case 'NewReview':
-        return Icons.star_outline_rounded;
+        return (icon: Icons.star_outline_rounded, color: _star);
       case 'ReviewReminder':
-        return Icons.rate_review_outlined;
+        return (icon: Icons.rate_review_outlined, color: _star);
       case 'NewMessage':
-        return Icons.send_rounded;
+        return (icon: Icons.send_rounded, color: _blue);
+      case 'NewEmployerRegistered':
+        return (icon: Icons.business_rounded, color: _blue);
+      case 'CompanyVerified':
+        return (icon: Icons.verified_outlined, color: _green);
+      case 'CompanyRejected':
+        return (icon: Icons.gpp_bad_outlined, color: _red);
+      case 'SubscriptionChanged':
+        return (icon: Icons.workspace_premium_outlined, color: _star);
+      case 'VacancyPromoted':
+        return (icon: Icons.bolt_rounded, color: _amber);
+      case 'AccountBlocked':
+        return (icon: Icons.block_rounded, color: _red);
+      case 'AccountUnblocked':
+        return (icon: Icons.lock_open_rounded, color: _green);
       default:
-        return Icons.info_outline;
-    }
-  }
-
-  Color _iconBackground() {
-    switch (notification.type) {
-      case 'NewApplication':
-        return const Color(0xFFDCE5FF);
-      case 'ApplicationStatusChanged':
-        return const Color(0xFFDCFCE7);
-      case 'NewMatchingVacancy':
-        return const Color(0xFFFEF3C7);
-      case 'NewReview':
-        return const Color(0xFFFEF3C7);
-      case 'NewMessage':
-        return const Color(0xFFDCE5FF);
-      default:
-        return const Color(0xFFF3F4F6);
-    }
-  }
-
-  Color _iconColor() {
-    switch (notification.type) {
-      case 'NewApplication':
-        return const Color(0xFF3157D5);
-      case 'ApplicationStatusChanged':
-        return const Color(0xFF059669);
-      case 'NewMatchingVacancy':
-        return const Color(0xFFD97706);
-      case 'NewReview':
-        return const Color(0xFFF59E0B);
-      case 'NewMessage':
-        return const Color(0xFF3157D5);
-      default:
-        return const Color(0xFF6B7280);
+        return (icon: Icons.info_outline, color: _gray);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final style = _style();
 
     return GestureDetector(
       onTap: onTap,
@@ -95,10 +83,10 @@ class NotificationCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: _iconBackground(),
+                color: style.color.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(_icon(), size: 20, color: _iconColor()),
+              child: Icon(style.icon, size: 20, color: style.color),
             ),
             const SizedBox(width: 12),
             Expanded(

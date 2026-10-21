@@ -6,6 +6,7 @@ class UserModerationModel {
   final String role;
   final bool isActive;
   final String? photoUrl;
+  final String? profileId;
 
   UserModerationModel({
     required this.id,
@@ -13,6 +14,7 @@ class UserModerationModel {
     required this.role,
     required this.isActive,
     this.photoUrl,
+    this.profileId,
   });
 
   factory UserModerationModel.fromJson(Map<String, dynamic> json) {
@@ -22,8 +24,16 @@ class UserModerationModel {
       role: json['role'],
       isActive: json['isActive'],
       photoUrl: json['photoUrl'],
+      profileId: json['profileId'],
     );
   }
 
-  UserModeration toEntity() => UserModeration(id: id, email: email, role: role, isActive: isActive, photoUrl: photoUrl);
+  UserModeration toEntity() => UserModeration(
+    id: id,
+    email: email,
+    role: role,
+    isActive: isActive,
+    photoUrl: photoUrl,
+    profileId: profileId,
+  );
 }

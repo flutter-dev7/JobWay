@@ -156,6 +156,7 @@ class VacancyCard extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
+                if (vacancy.isFeatured) const _TopBadge(),
                 _Tag(
                   icon: LucideIcons.briefcase,
                   label: employmentTypeLabel(vacancy.employmentType),
@@ -237,6 +238,38 @@ class _Tag extends StatelessWidget {
           Text(
             label,
             style: TextStyle(fontSize: 11, color: colors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopBadge extends StatelessWidget {
+  const _TopBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    const color = Color(0xFFD97706);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF3C7),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.bolt_rounded, size: 13, color: color),
+          SizedBox(width: 4),
+          Text(
+            'Топ',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
         ],
       ),

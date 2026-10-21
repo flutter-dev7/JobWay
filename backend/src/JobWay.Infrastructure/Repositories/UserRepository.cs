@@ -69,7 +69,9 @@ public class UserRepository : IUserRepository
                 u.Role,
                 u.IsActive,
                 _context.CandidateProfiles.Where(c => c.UserId == u.Id).Select(c => c.PhotoUrl).FirstOrDefault()
-                ?? _context.CompanyProfiles.Where(c => c.UserId == u.Id).Select(c => c.LogoUrl).FirstOrDefault()))
+                ?? _context.CompanyProfiles.Where(c => c.UserId == u.Id).Select(c => c.LogoUrl).FirstOrDefault(),
+                _context.CandidateProfiles.Where(c => c.UserId == u.Id).Select(c => (Guid?)c.Id).FirstOrDefault()
+                ?? _context.CompanyProfiles.Where(c => c.UserId == u.Id).Select(c => (Guid?)c.Id).FirstOrDefault()))
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);

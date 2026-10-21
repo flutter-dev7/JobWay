@@ -11,6 +11,10 @@ public class EmployerAnalyticsResponse
     public List<StatusFunnelItem> StatusFunnel { get; set; } = [];
     public List<TopSkillItem> TopSkills { get; set; } = [];
     public List<VacancyAnalyticsItem> Vacancies { get; set; } = [];
+
+    // На Free воронка, навыки и совпадение не передаются, это Pro
+    public CompanyTier Tier { get; set; }
+    public bool IsLimited { get; set; }
 }
 
 public class StatusFunnelItem

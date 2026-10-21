@@ -31,7 +31,19 @@ const _chips = [
   ),
   _NotificationChip(label: 'Отзывы', types: ['NewReview', 'ReviewReminder']),
   _NotificationChip(label: 'Вакансии', types: ['NewMatchingVacancy']),
-  _NotificationChip(label: 'Система', types: ['System']),
+  _NotificationChip(
+    label: 'Система',
+    types: [
+      'System',
+      'NewEmployerRegistered',
+      'CompanyVerified',
+      'CompanyRejected',
+      'SubscriptionChanged',
+      'VacancyPromoted',
+      'AccountBlocked',
+      'AccountUnblocked',
+    ],
+  ),
 ];
 
 class NotificationsPage extends ConsumerStatefulWidget {

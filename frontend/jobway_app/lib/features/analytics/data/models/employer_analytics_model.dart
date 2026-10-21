@@ -26,15 +26,20 @@ class TopSkillItemModel {
     required this.count,
   });
 
-  factory TopSkillItemModel.fromJson(Map<String, dynamic> json) => TopSkillItemModel(
+  factory TopSkillItemModel.fromJson(Map<String, dynamic> json) =>
+      TopSkillItemModel(
         skillId: json['skillId'],
         nameRu: json['nameRu'],
         nameTj: json['nameTj'],
         count: json['count'],
       );
 
-  TopSkillItem toEntity() =>
-      TopSkillItem(skillId: skillId, nameRu: nameRu, nameTj: nameTj, count: count);
+  TopSkillItem toEntity() => TopSkillItem(
+    skillId: skillId,
+    nameRu: nameRu,
+    nameTj: nameTj,
+    count: count,
+  );
 }
 
 class VacancyAnalyticsItemModel {
@@ -52,7 +57,8 @@ class VacancyAnalyticsItemModel {
     required this.averageMatchScore,
   });
 
-  factory VacancyAnalyticsItemModel.fromJson(Map<String, dynamic> json) => VacancyAnalyticsItemModel(
+  factory VacancyAnalyticsItemModel.fromJson(Map<String, dynamic> json) =>
+      VacancyAnalyticsItemModel(
         vacancyId: json['vacancyId'],
         title: json['title'],
         status: json['status'],
@@ -61,12 +67,12 @@ class VacancyAnalyticsItemModel {
       );
 
   VacancyAnalyticsItem toEntity() => VacancyAnalyticsItem(
-        vacancyId: vacancyId,
-        title: title,
-        status: status,
-        applicationsCount: applicationsCount,
-        averageMatchScore: averageMatchScore,
-      );
+    vacancyId: vacancyId,
+    title: title,
+    status: status,
+    applicationsCount: applicationsCount,
+    averageMatchScore: averageMatchScore,
+  );
 }
 
 class EmployerAnalyticsModel {
@@ -77,6 +83,7 @@ class EmployerAnalyticsModel {
   final List<StatusFunnelItemModel> statusFunnel;
   final List<TopSkillItemModel> topSkills;
   final List<VacancyAnalyticsItemModel> vacancies;
+  final bool isLimited;
 
   EmployerAnalyticsModel({
     required this.totalVacancies,
@@ -86,6 +93,7 @@ class EmployerAnalyticsModel {
     required this.statusFunnel,
     required this.topSkills,
     required this.vacancies,
+    this.isLimited = false,
   });
 
   factory EmployerAnalyticsModel.fromJson(Map<String, dynamic> json) {
@@ -98,21 +106,24 @@ class EmployerAnalyticsModel {
       statusFunnel: (data['statusFunnel'] as List)
           .map((e) => StatusFunnelItemModel.fromJson(e))
           .toList(),
-      topSkills:
-          (data['topSkills'] as List).map((e) => TopSkillItemModel.fromJson(e)).toList(),
+      topSkills: (data['topSkills'] as List)
+          .map((e) => TopSkillItemModel.fromJson(e))
+          .toList(),
       vacancies: (data['vacancies'] as List)
           .map((e) => VacancyAnalyticsItemModel.fromJson(e))
           .toList(),
+      isLimited: data['isLimited'] ?? false,
     );
   }
 
   EmployerAnalytics toEntity() => EmployerAnalytics(
-        totalVacancies: totalVacancies,
-        activeVacancies: activeVacancies,
-        totalApplications: totalApplications,
-        averageMatchScore: averageMatchScore,
-        statusFunnel: statusFunnel.map((e) => e.toEntity()).toList(),
-        topSkills: topSkills.map((e) => e.toEntity()).toList(),
-        vacancies: vacancies.map((e) => e.toEntity()).toList(),
-      );
+    totalVacancies: totalVacancies,
+    activeVacancies: activeVacancies,
+    totalApplications: totalApplications,
+    averageMatchScore: averageMatchScore,
+    statusFunnel: statusFunnel.map((e) => e.toEntity()).toList(),
+    topSkills: topSkills.map((e) => e.toEntity()).toList(),
+    vacancies: vacancies.map((e) => e.toEntity()).toList(),
+    isLimited: isLimited,
+  );
 }

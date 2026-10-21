@@ -91,6 +91,7 @@ public class SavedVacancyService : ISavedVacancyService
             NameTj = s.NameTj,
             Category = s.Category
         }).ToList(),
+        FeaturedUntil = vacancy.FeaturedUntil,
         CreatedAt = vacancy.CreatedAt
     };
 }

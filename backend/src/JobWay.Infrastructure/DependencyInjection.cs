@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<ISubscriptionService, SubscriptionService>();
         
         if (string.Equals(configuration["Storage:Provider"], "Local", StringComparison.OrdinalIgnoreCase))
         {

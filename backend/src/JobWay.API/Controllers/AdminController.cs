@@ -44,4 +44,20 @@ public class AdminController : BaseApiController
     [HttpPut("vacancies/{id:guid}/archive")]
     public async Task<IActionResult> ArchiveVacancy(Guid id, CancellationToken cancellationToken)
         => HandleError(await _adminService.ArchiveVacancyAsync(id, cancellationToken));
+    
+    [HttpPut("companies/{id:guid}/tier")]
+    public async Task<IActionResult> SetCompanyTier(Guid id, SetCompanyTierRequest request, CancellationToken cancellationToken)
+        => HandleError(await _adminService.SetCompanyTierAsync(id, request, cancellationToken));
+
+    [HttpPut("vacancies/{id:guid}/feature")]
+    public async Task<IActionResult> FeatureVacancy(Guid id, FeatureVacancyRequest request, CancellationToken cancellationToken)
+        => HandleError(await _adminService.FeatureVacancyAsync(id, request, cancellationToken));
+    
+    [HttpGet("companies/{id:guid}/vacancies")]
+    public async Task<IActionResult> GetCompanyActiveVacancies(Guid id, CancellationToken cancellationToken)
+        => HandleError(await _adminService.GetCompanyActiveVacanciesAsync(id, cancellationToken));
+    
+    [HttpGet("companies/{id:guid}")]
+    public async Task<IActionResult> GetCompany(Guid id, CancellationToken cancellationToken)
+        => HandleError(await _adminService.GetCompanyAsync(id, cancellationToken));
 }

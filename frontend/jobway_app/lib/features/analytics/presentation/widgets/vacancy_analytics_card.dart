@@ -14,7 +14,14 @@ String vacancyStatusLabel(String status) => switch (status) {
 class VacancyAnalyticsCard extends StatelessWidget {
   final VacancyAnalyticsItem item;
 
-  const VacancyAnalyticsCard({super.key, required this.item});
+  // На тарифе Free средний процент совпадения скрыт (доступен только в Pro)
+  final bool matchLocked;
+
+  const VacancyAnalyticsCard({
+    super.key,
+    required this.item,
+    this.matchLocked = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,38 +73,51 @@ class VacancyAnalyticsCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(Icons.bolt_outlined, size: 16, color: colors.textMuted),
-                const SizedBox(width: 6),
-                Text(
-                  'Match ${item.averageMatchScore.round()}%',
-                  style: TextStyle(fontSize: 13, color: colors.textSecondary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Stack(
-              children: [
-                Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: colors.surfaceMuted,
-                    borderRadius: BorderRadius.circular(4),
+            if (matchLocked)
+              Row(
+                children: [
+                  Icon(Icons.lock_outline_rounded, size: 16, color: colors.textMuted),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Match: доступно на Pro',
+                    style: TextStyle(fontSize: 13, color: colors.textMuted),
                   ),
-                ),
-                FractionallySizedBox(
-                  widthFactor: matchFraction == 0 ? 0.02 : matchFraction,
-                  child: Container(
+                ],
+              )
+            else ...[
+              Row(
+                children: [
+                  Icon(Icons.bolt_outlined, size: 16, color: colors.textMuted),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Match ${item.averageMatchScore.round()}%',
+                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Stack(
+                children: [
+                  Container(
                     height: 6,
                     decoration: BoxDecoration(
-                      color: AppColors.success,
+                      color: colors.surfaceMuted,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  FractionallySizedBox(
+                    widthFactor: matchFraction == 0 ? 0.02 : matchFraction,
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: AppColors.success,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

@@ -43,6 +43,7 @@ class EmployerAnalytics {
   final List<StatusFunnelItem> statusFunnel;
   final List<TopSkillItem> topSkills;
   final List<VacancyAnalyticsItem> vacancies;
+  final bool isLimited;
 
   const EmployerAnalytics({
     required this.totalVacancies,
@@ -52,5 +53,6 @@ class EmployerAnalytics {
     required this.statusFunnel,
     required this.topSkills,
     required this.vacancies,
+    this.isLimited = false,
   });
 }

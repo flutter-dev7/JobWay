@@ -1,4 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/features/admin/domain/entities/admin_vacancy.dart';
+import 'package:jobway_app/features/admin/domain/usecases/feature_vacancy_usecase.dart';
+import 'package:jobway_app/features/admin/domain/usecases/get_company_usecase.dart';
+import 'package:jobway_app/features/admin/domain/usecases/get_company_vacancies_usecase.dart';
+import 'package:jobway_app/features/admin/domain/usecases/set_company_tier_usecase.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../data/datasources/admin_remote_data_source.dart';
@@ -21,13 +26,51 @@ final adminRepositoryProvider = Provider<AdminRepository>(
   (ref) => AdminRepositoryImpl(ref.read(adminRemoteDataSourceProvider)),
 );
 
-final getCompaniesUseCaseProvider = Provider((ref) => GetCompaniesUseCase(ref.read(adminRepositoryProvider)));
-final verifyCompanyUseCaseProvider = Provider((ref) => VerifyCompanyUseCase(ref.read(adminRepositoryProvider)));
-final rejectCompanyUseCaseProvider = Provider((ref) => RejectCompanyUseCase(ref.read(adminRepositoryProvider)));
+final getCompaniesUseCaseProvider = Provider(
+  (ref) => GetCompaniesUseCase(ref.read(adminRepositoryProvider)),
+);
+final verifyCompanyUseCaseProvider = Provider(
+  (ref) => VerifyCompanyUseCase(ref.read(adminRepositoryProvider)),
+);
+final rejectCompanyUseCaseProvider = Provider(
+  (ref) => RejectCompanyUseCase(ref.read(adminRepositoryProvider)),
+);
 
-final getUsersUseCaseProvider = Provider((ref) => GetUsersUseCase(ref.read(adminRepositoryProvider)));
-final blockUserUseCaseProvider = Provider((ref) => BlockUserUseCase(ref.read(adminRepositoryProvider)));
-final unblockUserUseCaseProvider = Provider((ref) => UnblockUserUseCase(ref.read(adminRepositoryProvider)));
+final getUsersUseCaseProvider = Provider(
+  (ref) => GetUsersUseCase(ref.read(adminRepositoryProvider)),
+);
+final blockUserUseCaseProvider = Provider(
+  (ref) => BlockUserUseCase(ref.read(adminRepositoryProvider)),
+);
+final unblockUserUseCaseProvider = Provider(
+  (ref) => UnblockUserUseCase(ref.read(adminRepositoryProvider)),
+);
+
+final setCompanyTierUseCaseProvider = Provider(
+  (ref) => SetCompanyTierUseCase(ref.read(adminRepositoryProvider)),
+);
+
+final getCompanyVacanciesUseCaseProvider = Provider(
+  (ref) => GetCompanyVacanciesUseCase(ref.read(adminRepositoryProvider)),
+);
+final featureVacancyUseCaseProvider = Provider(
+  (ref) => FeatureVacancyUseCase(ref.read(adminRepositoryProvider)),
+);
+
+final adminCompanyVacanciesProvider = FutureProvider.autoDispose
+    .family<List<AdminVacancy>, String>(
+      (ref, companyId) =>
+          ref.read(getCompanyVacanciesUseCaseProvider)(companyId),
+    );
+
+final getCompanyUseCaseProvider = Provider(
+  (ref) => GetCompanyUseCase(ref.read(adminRepositoryProvider)),
+);
+
+final adminCompanyByIdProvider = FutureProvider.autoDispose
+    .family<CompanyModeration, String>(
+      (ref, companyId) => ref.read(getCompanyUseCaseProvider)(companyId),
+    );
 
 // --- Компании: пагинация, фильтр по статусу, поиск ---
 
@@ -95,7 +138,7 @@ class AdminCompaniesController extends StateNotifier<AdminCompaniesState> {
   int _requestId = 0;
 
   AdminCompaniesController(this._getCompanies, this._verify, this._reject)
-      : super(const AdminCompaniesState(status: defaultStatus)) {
+    : super(const AdminCompaniesState(status: defaultStatus)) {
     load();
   }
 
@@ -103,7 +146,11 @@ class AdminCompaniesController extends StateNotifier<AdminCompaniesState> {
     final requestId = ++_requestId;
     state = state.copyWith(isLoading: true, isLoadingMore: false, error: null);
     try {
-      final page = await _getCompanies(status: state.status, search: state.search, pageNumber: 1);
+      final page = await _getCompanies(
+        status: state.status,
+        search: state.search,
+        pageNumber: 1,
+      );
       if (!mounted || requestId != _requestId) return;
       state = state.copyWith(
         items: page.items,
@@ -114,7 +161,10 @@ class AdminCompaniesController extends StateNotifier<AdminCompaniesState> {
       );
     } catch (error) {
       if (!mounted || requestId != _requestId) return;
-      state = state.copyWith(isLoading: false, error: ApiException.extractMessage(error));
+      state = state.copyWith(
+        isLoading: false,
+        error: ApiException.extractMessage(error),
+      );
     }
   }
 
@@ -125,7 +175,11 @@ class AdminCompaniesController extends StateNotifier<AdminCompaniesState> {
     state = state.copyWith(isLoadingMore: true);
     try {
       final nextPage = state.pageNumber + 1;
-      final page = await _getCompanies(status: state.status, search: state.search, pageNumber: nextPage);
+      final page = await _getCompanies(
+        status: state.status,
+        search: state.search,
+        pageNumber: nextPage,
+      );
       if (!mounted || requestId != _requestId) return;
       state = state.copyWith(
         items: [...state.items, ...page.items],
@@ -155,6 +209,12 @@ class AdminCompaniesController extends StateNotifier<AdminCompaniesState> {
     if (search == state.search) return;
     state = state.copyWith(search: search, items: const [], hasMore: true);
     load();
+  }
+
+  void replaceCompany(CompanyModeration updated) {
+    state = state.copyWith(
+      items: state.items.map((c) => c.id == updated.id ? updated : c).toList(),
+    );
   }
 
   Future<void> verify(String id) async {
@@ -189,22 +249,31 @@ class AdminCompaniesController extends StateNotifier<AdminCompaniesState> {
       items: leavesFilter
           ? state.items.where((c) => c.id != id).toList()
           : state.items
-              .map((c) => c.id == id ? c.copyWith(verificationStatus: newStatus) : c)
-              .toList(),
-      totalCount: leavesFilter && state.totalCount > 0 ? state.totalCount - 1 : state.totalCount,
+                .map(
+                  (c) => c.id == id
+                      ? c.copyWith(verificationStatus: newStatus)
+                      : c,
+                )
+                .toList(),
+      totalCount: leavesFilter && state.totalCount > 0
+          ? state.totalCount - 1
+          : state.totalCount,
       clearUpdatingId: true,
     );
   }
 }
 
 final adminCompaniesControllerProvider =
-    StateNotifierProvider.autoDispose<AdminCompaniesController, AdminCompaniesState>(
-  (ref) => AdminCompaniesController(
-    ref.read(getCompaniesUseCaseProvider),
-    ref.read(verifyCompanyUseCaseProvider),
-    ref.read(rejectCompanyUseCaseProvider),
-  ),
-);
+    StateNotifierProvider.autoDispose<
+      AdminCompaniesController,
+      AdminCompaniesState
+    >(
+      (ref) => AdminCompaniesController(
+        ref.read(getCompaniesUseCaseProvider),
+        ref.read(verifyCompanyUseCaseProvider),
+        ref.read(rejectCompanyUseCaseProvider),
+      ),
+    );
 
 // --- Пользователи: пагинация, фильтр по роли и блокировке, поиск ---
 
@@ -274,7 +343,7 @@ class AdminUsersController extends StateNotifier<AdminUsersState> {
   int _requestId = 0;
 
   AdminUsersController(this._getUsers, this._block, this._unblock)
-      : super(const AdminUsersState()) {
+    : super(const AdminUsersState()) {
     load();
   }
 
@@ -298,7 +367,10 @@ class AdminUsersController extends StateNotifier<AdminUsersState> {
       );
     } catch (error) {
       if (!mounted || requestId != _requestId) return;
-      state = state.copyWith(isLoading: false, error: ApiException.extractMessage(error));
+      state = state.copyWith(
+        isLoading: false,
+        error: ApiException.extractMessage(error),
+      );
     }
   }
 
@@ -360,15 +432,21 @@ class AdminUsersController extends StateNotifier<AdminUsersState> {
 
       final newActive = !user.isActive;
       // В фильтре «Заблокированные» разблокированный пользователь уходит из списка
-      final leavesFilter = state.isActive != null && state.isActive != newActive;
+      final leavesFilter =
+          state.isActive != null && state.isActive != newActive;
 
       state = state.copyWith(
         users: leavesFilter
             ? state.users.where((u) => u.id != user.id).toList()
             : state.users
-                .map((u) => u.id == user.id ? u.copyWith(isActive: newActive) : u)
-                .toList(),
-        totalCount: leavesFilter && state.totalCount > 0 ? state.totalCount - 1 : state.totalCount,
+                  .map(
+                    (u) =>
+                        u.id == user.id ? u.copyWith(isActive: newActive) : u,
+                  )
+                  .toList(),
+        totalCount: leavesFilter && state.totalCount > 0
+            ? state.totalCount - 1
+            : state.totalCount,
         clearUpdatingId: true,
       );
     } catch (_) {
@@ -380,9 +458,9 @@ class AdminUsersController extends StateNotifier<AdminUsersState> {
 
 final adminUsersControllerProvider =
     StateNotifierProvider.autoDispose<AdminUsersController, AdminUsersState>(
-  (ref) => AdminUsersController(
-    ref.read(getUsersUseCaseProvider),
-    ref.read(blockUserUseCaseProvider),
-    ref.read(unblockUserUseCaseProvider),
-  ),
-);
+      (ref) => AdminUsersController(
+        ref.read(getUsersUseCaseProvider),
+        ref.read(blockUserUseCaseProvider),
+        ref.read(unblockUserUseCaseProvider),
+      ),
+    );

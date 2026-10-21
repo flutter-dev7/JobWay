@@ -4,6 +4,8 @@ class UserModeration {
   final String role;
   final bool isActive;
   final String? photoUrl;
+  // Id профиля кандидата или компании
+  final String? profileId;
 
   const UserModeration({
     required this.id,
@@ -11,6 +13,7 @@ class UserModeration {
     required this.role,
     required this.isActive,
     this.photoUrl,
+    this.profileId,
   });
 
   UserModeration copyWith({bool? isActive}) => UserModeration(
@@ -19,5 +22,6 @@ class UserModeration {
     role: role,
     isActive: isActive ?? this.isActive,
     photoUrl: photoUrl,
+    profileId: profileId,
   );
 }

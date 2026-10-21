@@ -30,12 +30,44 @@ public class AnalyticsService : IAnalyticsService
         if (companyProfile is null)
             return Result<EmployerAnalyticsResponse>.Fail("Company profile not found", ErrorType.NotFound);
 
-        var cached = await _cacheService.GetAsync(CacheKey(companyProfile.Id), cancellationToken);
-        if (cached is not null)
-            return Result<EmployerAnalyticsResponse>.Ok(JsonSerializer.Deserialize<EmployerAnalyticsResponse>(cached));
+        var tier = TierRules.GetEffectiveTier(companyProfile);
 
-        var vacancies = await _unitOfWork.Vacancies.GetByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
-        var applications = await _unitOfWork.JobApplications.GetByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
+        // В кэше лежит полный расчёт: тариф накладывается после чтения
+        var cached = await _cacheService.GetAsync(CacheKey(companyProfile.Id), cancellationToken);
+        var response = cached is null ? null : JsonSerializer.Deserialize<EmployerAnalyticsResponse>(cached);
+
+        if (response is null)
+        {
+            response = await BuildAnalyticsAsync(companyProfile.Id, cancellationToken);
+            await _cacheService.SetAsync(CacheKey(companyProfile.Id), JsonSerializer.Serialize(response), CacheDuration, cancellationToken);
+        }
+
+        return Result<EmployerAnalyticsResponse>.Ok(ApplyTier(response, tier));
+    }
+
+    // Закрывает на Free то, что обещано только в Pro. Меняет объект уже после записи в кэш
+    private static EmployerAnalyticsResponse ApplyTier(EmployerAnalyticsResponse response, CompanyTier tier)
+    {
+        response.Tier = tier;
+        response.IsLimited = tier != CompanyTier.Pro;
+
+        if (!response.IsLimited)
+            return response;
+
+        response.AverageMatchScore = 0;
+        response.StatusFunnel = [];
+        response.TopSkills = [];
+
+        foreach (var vacancy in response.Vacancies)
+            vacancy.AverageMatchScore = 0;
+
+        return response;
+    }
+
+    private async Task<EmployerAnalyticsResponse> BuildAnalyticsAsync(Guid companyProfileId, CancellationToken cancellationToken)
+    {
+        var vacancies = await _unitOfWork.Vacancies.GetByCompanyProfileIdAsync(companyProfileId, cancellationToken);
+        var applications = await _unitOfWork.JobApplications.GetByCompanyProfileIdAsync(companyProfileId, cancellationToken);
 
         var applicationsByVacancy = applications
             .GroupBy(a => a.VacancyId)
@@ -82,7 +114,7 @@ public class AnalyticsService : IAnalyticsService
             .Take(5)
             .ToList();
 
-        var response = new EmployerAnalyticsResponse
+        return new EmployerAnalyticsResponse
         {
             TotalVacancies = vacancies.Count,
             ActiveVacancies = vacancies.Count(v => v.Status == VacancyStatus.Active),
@@ -92,9 +124,5 @@ public class AnalyticsService : IAnalyticsService
             TopSkills = topSkills,
             Vacancies = vacancyItems
         };
-
-        await _cacheService.SetAsync(CacheKey(companyProfile.Id), JsonSerializer.Serialize(response), CacheDuration, cancellationToken);
-
-        return Result<EmployerAnalyticsResponse>.Ok(response);
     }
 }

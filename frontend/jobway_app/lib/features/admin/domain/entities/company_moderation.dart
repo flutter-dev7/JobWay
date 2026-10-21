@@ -8,6 +8,8 @@ class CompanyModeration {
   final String? location;
   final String? logoUrl;
   final String verificationStatus;
+  final String tier;
+  final DateTime? tierExpiresAt;
 
   const CompanyModeration({
     required this.id,
@@ -19,7 +21,11 @@ class CompanyModeration {
     this.location,
     this.logoUrl,
     required this.verificationStatus,
+    this.tier = 'Free',
+    this.tierExpiresAt,
   });
+
+  bool get isPro => tier == 'Pro';
 
   CompanyModeration copyWith({String? verificationStatus}) => CompanyModeration(
     id: id,
@@ -31,5 +37,7 @@ class CompanyModeration {
     location: location,
     logoUrl: logoUrl,
     verificationStatus: verificationStatus ?? this.verificationStatus,
+    tier: tier,
+    tierExpiresAt: tierExpiresAt,
   );
 }

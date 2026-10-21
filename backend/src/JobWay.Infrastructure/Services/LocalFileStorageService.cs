@@ -1,17 +1,9 @@
 using JobWay.Application.Interfaces.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace JobWay.Infrastructure.Services;
 
 public class LocalFileStorageService : IFileStorageService
 {
-    private readonly string _publicBaseUrl;
-
-    public LocalFileStorageService(IConfiguration configuration)
-    {
-        _publicBaseUrl = (configuration["Storage:PublicBaseUrl"] ?? string.Empty).TrimEnd('/');
-    }
-
     public async Task<string> SaveAsync(string containerName, string fileName, Stream content, CancellationToken cancellationToken)
     {
         var safeName = Path.GetFileName(fileName);
@@ -22,7 +14,8 @@ public class LocalFileStorageService : IFileStorageService
         await using var fileStream = new FileStream(filePath, FileMode.Create);
         await content.CopyToAsync(fileStream, cancellationToken);
 
-        return $"{_publicBaseUrl}/uploads/{containerName}/{safeName}";
+        // Только путь без адреса сервера: хост подставляет приложение из baseUrl
+        return $"/uploads/{containerName}/{safeName}";
     }
 
     public Task DeleteAsync(string containerName, string existingFileUrl, CancellationToken cancellationToken)

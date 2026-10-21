@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:jobway_app/features/admin/data/models/admin_vacancy_model.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_response.dart';
 import '../models/company_moderation_model.dart';
@@ -83,6 +84,42 @@ class AdminRemoteDataSource {
       totalPages: data['totalPages'],
       totalCount: data['totalCount'],
     );
+  }
+
+  Future<CompanyModerationModel> setCompanyTier(
+    String id, {
+    required String tier,
+    required int days,
+  }) async {
+    final response = await _dio.put(
+      ApiConstants.setCompanyTier(id),
+      data: {'tier': tier, 'days': days},
+    );
+    return CompanyModerationModel.fromJson(ApiResponse.unwrap(response.data));
+  }
+
+  Future<List<AdminVacancyModel>> getCompanyVacancies(String companyId) async {
+    final response = await _dio.get(
+      ApiConstants.adminCompanyVacancies(companyId),
+    );
+    final list = ApiResponse.unwrap(response.data) as List;
+    return list.map((json) => AdminVacancyModel.fromJson(json)).toList();
+  }
+
+  Future<AdminVacancyModel> featureVacancy(
+    String id, {
+    required int days,
+  }) async {
+    final response = await _dio.put(
+      ApiConstants.featureVacancy(id),
+      data: {'days': days},
+    );
+    return AdminVacancyModel.fromJson(ApiResponse.unwrap(response.data));
+  }
+
+  Future<CompanyModerationModel> getCompany(String id) async {
+    final response = await _dio.get(ApiConstants.adminCompanyById(id));
+    return CompanyModerationModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
   Future<void> blockUser(String id) async {

@@ -110,6 +110,19 @@ public class VacancyService : IVacancyService
         if (companyProfile.VerificationStatus != VerificationStatus.Verified)
             return Result<VacancyResponse>.Fail("Company must be verified by an admin before publishing vacancies", ErrorType.Forbidden);
 
+        // Повторная публикация уже активной вакансии лимит не расходует
+        var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
+        if (vacancy is not null && vacancy.CompanyProfileId == companyProfile.Id && vacancy.Status != VacancyStatus.Active)
+        {
+            var limit = TierRules.GetActiveVacancyLimit(companyProfile);
+            var activeCount = await _unitOfWork.Vacancies.CountActiveByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
+
+            if (activeCount >= limit)
+                return Result<VacancyResponse>.Fail(
+                    $"Достигнут лимит активных вакансий на вашем тарифе ({limit}). Закройте одну из вакансий или перейдите на Pro.",
+                    ErrorType.Forbidden);
+        }
+
         var result = await ChangeStatusAsync(employerUserId, vacancyId, VacancyStatus.Active, cancellationToken);
 
         if (result.IsSuccess)
@@ -255,6 +268,7 @@ public class VacancyService : IVacancyService
             NameTj = s.NameTj,
             Category = s.Category
         }).ToList(),
+        FeaturedUntil = vacancy.FeaturedUntil,
         CreatedAt = vacancy.CreatedAt
     };
 }

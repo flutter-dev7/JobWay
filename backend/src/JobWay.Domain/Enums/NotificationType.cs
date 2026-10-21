@@ -9,5 +9,11 @@ public enum NotificationType
     NewReview,
     ReviewReminder,
     NewEmployerRegistered,
-    NewMessage
+    NewMessage,
+    CompanyVerified,
+    CompanyRejected,
+    SubscriptionChanged,
+    VacancyPromoted,
+    AccountBlocked,
+    AccountUnblocked
 }

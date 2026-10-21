@@ -1,4 +1,3 @@
-// Application/Services/CandidateProfileService.cs — заменить целиком
 using System.Text.Json;
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.CandidateProfile.Request;
@@ -138,6 +137,15 @@ public class CandidateProfileService : ICandidateProfileService
             return Result<CandidateProfileResponse>.Fail("Candidate not found", ErrorType.NotFound);
 
         return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
+    }
+    
+    public async Task<Result<CandidateProfileResponse>> GetCandidateProfileForAdminAsync(Guid candidateProfileId, CancellationToken cancellationToken)
+    {
+        var profile = await _unitOfWork.CandidateProfiles.GetByIdAsync(candidateProfileId, cancellationToken);
+
+        return profile is null
+            ? Result<CandidateProfileResponse>.Fail("Candidate not found", ErrorType.NotFound)
+            : Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
     }
 
     private static CandidateProfileResponse MapToResponse(CandidateProfile profile) => new()
