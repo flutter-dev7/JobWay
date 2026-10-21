@@ -41,7 +41,8 @@ class Vacancy {
     this.featuredUntil,
   });
 
-  // Продвигается ли вакансия прямо сейчас (дата окончания ещё не наступила)
-  bool get isFeatured =>
-      featuredUntil != null && featuredUntil!.isAfter(DateTime.now());
+    bool get isFeatured =>
+      status == 'Active' &&
+      featuredUntil != null &&
+      featuredUntil!.isAfter(DateTime.now());
 }

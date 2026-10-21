@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancies_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancy_ids_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_today_vacancies_count_usecase.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/promote_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/save_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/unsave_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/update_vacancy_usecase.dart';
@@ -56,7 +57,6 @@ final closeVacancyUseCaseProvider = Provider(
   (ref) => CloseVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
 );
 
-// features/vacancies/presentation/providers/vacancies_provider.dart — добавить
 final saveVacancyUseCaseProvider = Provider(
   (ref) => SaveVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
 );
@@ -65,6 +65,10 @@ final unsaveVacancyUseCaseProvider = Provider(
 );
 final getSavedVacanciesUseCaseProvider = Provider(
   (ref) => GetSavedVacanciesUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+
+final promoteVacancyUseCaseProvider = Provider(
+  (ref) => PromoteVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
 );
 
 final getSavedVacancyIdsUseCaseProvider = Provider(

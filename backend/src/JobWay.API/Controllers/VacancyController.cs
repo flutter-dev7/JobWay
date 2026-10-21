@@ -74,4 +74,9 @@ public class VacancyController : BaseApiController
     [HttpGet("saved/ids")]
     public async Task<IActionResult> GetSavedIds(CancellationToken cancellationToken)
         => HandleError(await _savedVacancyService.GetSavedIdsAsync(CurrentUserId, cancellationToken));
+    
+    [Authorize(Roles = Roles.Employer)]
+    [HttpPost("{id:guid}/promote")]
+    public async Task<IActionResult> Promote(Guid id, CancellationToken cancellationToken)
+        => HandleError(await _vacancyService.PromoteAsync(CurrentUserId, id, cancellationToken));
 }

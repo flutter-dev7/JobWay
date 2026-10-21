@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,9 @@ import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
 import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
+import 'package:jobway_app/features/subscription/presentation/widgets/promote_vacancy_sheet.dart';
+import 'package:jobway_app/features/subscription/presentation/widgets/subscription_sheet.dart';
+import 'package:jobway_app/features/vacancies/domain/entities/vacancy.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
@@ -64,6 +68,55 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
     }
   }
 
+  Future<void> _promote(Vacancy vacancy) async {
+    final subscription = ref.read(subscriptionProvider).valueOrNull;
+
+    final result = await PromoteVacancySheet.show(
+      context,
+      vacancyTitle: vacancy.title,
+      companyName: vacancy.companyName,
+      subscription: subscription,
+    );
+    if (!mounted || result == null) return;
+
+    if (result == PromoteSheetResult.upgrade) {
+      SubscriptionSheet.show(context, companyName: vacancy.companyName);
+      return;
+    }
+
+    await _runAction(vacancy.id, _controller.promote, 'Вакансия поднята в топ');
+  }
+
+  Future<bool> _confirmClose(Vacancy vacancy) async {
+    final text = vacancy.isFeatured
+        ? 'Вакансия «${vacancy.title}» пропадёт из ленты кандидатов, а продвижение в топ закончится досрочно. Потраченное продвижение не возвращается.\n\nНовые отклики приходить не будут, существующие отклики и переписки останутся.'
+        : 'Вакансия «${vacancy.title}» пропадёт из ленты кандидатов, новые отклики приходить не будут. Существующие отклики и переписки останутся.';
+
+    final result = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Закрыть вакансию?'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Text(text, textAlign: TextAlign.center),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Отмена'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Закрыть'),
+          ),
+        ],
+      ),
+    );
+
+    return result == true;
+  }
+
   Widget _buildBody(MyVacanciesState state) {
     if (state.isLoading && state.items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -93,6 +146,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
             );
     }
 
+    final isPro = ref.watch(subscriptionProvider).valueOrNull?.isPro ?? false;
     return ListView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -115,8 +169,13 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
             _controller.publish,
             'Вакансия опубликована',
           ),
-          onClose: () =>
-              _runAction(vacancy.id, _controller.close, 'Вакансия закрыта'),
+          onClose: () async {
+            final confirmed = await _confirmClose(vacancy);
+            if (!mounted || !confirmed) return;
+            await _runAction(vacancy.id, _controller.close, 'Вакансия закрыта');
+          },
+          onPromote: () => _promote(vacancy),
+          promoteLocked: !isPro,
           onEdit: () async {
             await context.push(AppRoutes.editVacancy, extra: vacancy);
             _controller.load();

@@ -513,6 +513,33 @@ namespace JobWay.Infrastructure.Migrations
                     b.ToTable("Vacancies");
                 });
 
+            modelBuilder.Entity("JobWay.Domain.Entities.VacancyPromotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Days")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VacancyId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("VacancyId");
+
+                    b.ToTable("VacancyPromotions");
+                });
+
             modelBuilder.Entity("SkillVacancy", b =>
                 {
                     b.Property<Guid>("RequiredSkillsId")
@@ -655,6 +682,17 @@ namespace JobWay.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("CompanyProfile");
+                });
+
+            modelBuilder.Entity("JobWay.Domain.Entities.VacancyPromotion", b =>
+                {
+                    b.HasOne("JobWay.Domain.Entities.Vacancy", "Vacancy")
+                        .WithMany()
+                        .HasForeignKey("VacancyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vacancy");
                 });
 
             modelBuilder.Entity("SkillVacancy", b =>

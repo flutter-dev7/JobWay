@@ -28,9 +28,11 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
     return model.toEntity();
   }
 
-    @override
+  @override
   Future<VacanciesPage> getMyVacancies(MyVacanciesFilter filter) async {
-    final response = await _remoteDataSource.getMyVacancies(filter.toQueryParams());
+    final response = await _remoteDataSource.getMyVacancies(
+      filter.toQueryParams(),
+    );
     return VacanciesPage(
       items: response.items.map((m) => m.toEntity()).toList(),
       pageNumber: response.pageNumber,
@@ -110,6 +112,12 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
   }
 
   @override
+  Future<Vacancy> promote(String id) async {
+    final model = await _remoteDataSource.promote(id);
+    return model.toEntity();
+  }
+
+  @override
   Future<int> getTodayCount() => _remoteDataSource.getTodayCount();
 
   @override
@@ -118,7 +126,7 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
   @override
   Future<void> unsave(String vacancyId) => _remoteDataSource.unsave(vacancyId);
 
-    @override
+  @override
   Future<VacanciesPage> getSaved(VacancyFilter filter) async {
     final response = await _remoteDataSource.getSaved(filter.toQueryParams());
     return VacanciesPage(

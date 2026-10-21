@@ -82,6 +82,7 @@ public class AdminService : IAdminService
             return Result<string>.Fail("Vacancy not found", ErrorType.NotFound);
 
         vacancy.Status = VacancyStatus.Archived;
+        vacancy.FeaturedUntil = null;
 
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

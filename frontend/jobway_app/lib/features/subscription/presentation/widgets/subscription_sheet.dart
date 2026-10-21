@@ -242,6 +242,26 @@ class _SubscriptionSheetState extends ConsumerState<SubscriptionSheet> {
             'Черновики и закрытые вакансии не учитываются',
             style: TextStyle(fontSize: 11, color: colors.textMuted),
           ),
+          if (subscription.isPro) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Продвижений в этом месяце',
+                  style: TextStyle(fontSize: 13, color: colors.textSecondary),
+                ),
+                Text(
+                  '${subscription.promotionsUsed} из ${subscription.promotionsLimit}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: context.accentColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -284,7 +304,7 @@ class _SubscriptionSheetState extends ConsumerState<SubscriptionSheet> {
     final benefits = [
       'До ${SubscriptionContacts.proLimit} активных вакансий одновременно',
       'Полная аналитика по вакансиям',
-      'Продвижение вакансий в ленте',
+      'Продвижение в топ: 2 раза в месяц по 7 дней',
     ];
 
     return Column(

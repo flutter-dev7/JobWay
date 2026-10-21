@@ -40,8 +40,10 @@ abstract class VacanciesRepository {
 
   Future<Vacancy> publish(String id);
   Future<Vacancy> close(String id);
+  Future<Vacancy> promote(String id);
 
   Future<void> save(String vacancyId);
   Future<void> unsave(String vacancyId);
   Future<VacanciesPage> getSaved(VacancyFilter filter);
-  Future<List<String>> getSavedIds();}
+  Future<List<String>> getSavedIds();
+}

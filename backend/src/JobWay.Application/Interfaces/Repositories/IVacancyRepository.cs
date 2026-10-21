@@ -11,6 +11,8 @@ public interface IVacancyRepository
     Task<(List<Vacancy> Items, int TotalCount)> GetPagedByCompanyProfileIdAsync(Guid companyProfileId, MyVacanciesFilterRequest filter, CancellationToken cancellationToken);
     Task<int> CountCreatedTodayAsync(CancellationToken cancellationToken);
     Task<int> CountActiveByCompanyProfileIdAsync(Guid companyProfileId, CancellationToken cancellationToken);
+    Task<int> CountPromotionsSinceAsync(Guid companyProfileId, DateTime since, CancellationToken cancellationToken);
+    void AddPromotion(VacancyPromotion promotion);
     void Add(Vacancy vacancy);
     void Update(Vacancy vacancy);
 }

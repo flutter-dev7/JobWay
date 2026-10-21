@@ -23,13 +23,17 @@ public class SubscriptionService : ISubscriptionService
 
         var tier = TierRules.GetEffectiveTier(company);
         var activeCount = await _unitOfWork.Vacancies.CountActiveByCompanyProfileIdAsync(company.Id, cancellationToken);
+        var promotionsUsed = await _unitOfWork.Vacancies.CountPromotionsSinceAsync(company.Id, TierRules.CurrentMonthStartUtc(), cancellationToken);
 
         return Result<SubscriptionResponse>.Ok(new SubscriptionResponse
         {
             Tier = tier,
             TierExpiresAt = tier == CompanyTier.Pro ? company.TierExpiresAt : null,
             ActiveVacanciesCount = activeCount,
-            ActiveVacanciesLimit = TierRules.GetActiveVacancyLimit(company)
+            ActiveVacanciesLimit = TierRules.GetActiveVacancyLimit(company),
+            PromotionsUsed = promotionsUsed,
+            PromotionsLimit = TierRules.GetMonthlyPromotionLimit(company),
+            PromotionDays = TierRules.PromotionDays
         });
     }
 }

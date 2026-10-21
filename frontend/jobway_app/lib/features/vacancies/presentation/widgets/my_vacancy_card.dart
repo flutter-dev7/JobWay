@@ -6,6 +6,8 @@ import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/utils/time_ago.dart';
 import '../../../../core/widgets/display/company_avatar.dart';
 import '../../domain/entities/vacancy.dart';
+import 'vacancy_tags_row.dart';
+import 'vacancy_top_ribbon.dart';
 
 class MyVacancyCard extends StatelessWidget {
   final Vacancy vacancy;
@@ -13,6 +15,8 @@ class MyVacancyCard extends StatelessWidget {
   final VoidCallback? onClose;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
+  final VoidCallback? onPromote;
+  final bool promoteLocked;
   final bool isUpdating;
 
   const MyVacancyCard({
@@ -22,6 +26,8 @@ class MyVacancyCard extends StatelessWidget {
     this.onClose,
     this.onTap,
     this.onEdit,
+    this.onPromote,
+    this.promoteLocked = false,
     this.isUpdating = false,
   });
 
@@ -60,247 +66,289 @@ class MyVacancyCard extends StatelessWidget {
     if (vacancy.salaryFrom != null && vacancy.salaryTo != null) {
       return '${vacancy.salaryFrom!.toStringAsFixed(0)} – ${vacancy.salaryTo!.toStringAsFixed(0)} $currency $suffix';
     }
-    if (vacancy.salaryFrom != null)
+    if (vacancy.salaryFrom != null) {
       return 'от ${vacancy.salaryFrom!.toStringAsFixed(0)} $currency $suffix';
+    }
     return 'до ${vacancy.salaryTo!.toStringAsFixed(0)} $currency $suffix';
+  }
+
+  String _remainingLabel(DateTime until) {
+    final diff = until.difference(DateTime.now());
+    if (diff.inDays >= 1) return 'ещё ${diff.inDays} дн.';
+    if (diff.inHours >= 1) return 'ещё ${diff.inHours} ч.';
+    return 'скоро закончится';
+  }
+
+  List<Widget> _buildActions(BuildContext context) {
+    final colors = context.colors;
+    final isFeatured = vacancy.isFeatured;
+    final actions = <Widget>[];
+
+    if (vacancy.status == 'Active' && !isFeatured && onPromote != null) {
+      actions.add(
+        _ActionIcon(
+          icon: promoteLocked ? LucideIcons.lock : Icons.bolt_rounded,
+          tooltip: promoteLocked
+              ? 'Продвинуть в топ (Pro)'
+              : 'Продвинуть в топ',
+          color: VacancyTopStyle.amberDeep,
+          borderColor: const Color(0xFFFDE68A),
+          onPressed: isUpdating ? null : onPromote,
+        ),
+      );
+    }
+
+    actions.add(
+      _ActionIcon(
+        icon: LucideIcons.pencil,
+        tooltip: 'Изменить',
+        color: colors.textPrimary,
+        borderColor: colors.border,
+        onPressed: onEdit,
+      ),
+    );
+
+    if (vacancy.status == 'Draft') {
+      actions.add(
+        _ActionIcon(
+          icon: LucideIcons.rocket,
+          tooltip: 'Опубликовать',
+          color: colors.textPrimary,
+          borderColor: colors.border,
+          onPressed: isUpdating ? null : onPublish,
+        ),
+      );
+    } else if (vacancy.status == 'Active') {
+      actions.add(
+        _ActionIcon(
+          icon: LucideIcons.lock,
+          tooltip: 'Закрыть вакансию',
+          color: const Color(0xFFDC2626),
+          borderColor: const Color(0xFFFECACA),
+          onPressed: isUpdating ? null : onClose,
+        ),
+      );
+    } else {
+      actions.add(
+        _ActionIcon(
+          icon: LucideIcons.users,
+          tooltip: 'Отклики',
+          color: colors.textPrimary,
+          borderColor: colors.border,
+          onPressed: onTap,
+        ),
+      );
+    }
+
+    return actions;
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final color = _statusColor();
-    final showActions = vacancy.status == 'Draft' || vacancy.status == 'Active';
+    final statusColor = _statusColor();
+    final isFeatured = vacancy.isFeatured;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final salary = _formatSalary();
+    final hasSalary = salary.isNotEmpty;
+    final actions = _buildActions(context);
+
+    final cardColor = isFeatured
+        ? Color.alphaBlend(
+            VacancyTopStyle.amber.withOpacity(isDark ? 0.06 : 0.05),
+            colors.surface,
+          )
+        : colors.surface;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: colors.surface,
+          color: cardColor,
           borderRadius: BorderRadius.circular(20),
+          border: isFeatured
+              ? Border.all(
+                  color: VacancyTopStyle.amber.withOpacity(0.55),
+                  width: 1.5,
+                )
+              : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(
-                Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.03,
-              ),
+              color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CompanyAvatar(
-                  companyName: vacancy.companyName,
-                  logoUrl: vacancy.companyLogoUrl,
-                  size: 44,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(isFeatured ? 18.5 : 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isFeatured)
+                VacancyTopRibbon(
+                  title: 'В топе ленты',
+                  trailing:
+                      'до ${TimeAgo.formatDate(vacancy.featuredUntil!)} · ${_remainingLabel(vacancy.featuredUntil!)}',
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    vacancy.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    _statusLabel(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _Tag(
-                  icon: LucideIcons.briefcase,
-                  label: employmentTypeLabel(vacancy.employmentType),
-                ),
-                _Tag(
-                  icon: LucideIcons.trendingUp,
-                  label: experienceLevelLabel(vacancy.experienceLevel),
-                ),
-                if (vacancy.location != null)
-                  _Tag(icon: LucideIcons.mapPin, label: vacancy.location!),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (_formatSalary().isNotEmpty)
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          vacancy.paymentType == 'Monthly'
-                              ? 'Зарплата в месяц'
-                              : 'Оплата',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: colors.textMuted,
+              Padding(
+                padding: const EdgeInsets.all(VacancyCardLayout.padding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: VacancyCardLayout.headerHeight,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CompanyAvatar(
+                            companyName: vacancy.companyName,
+                            logoUrl: vacancy.companyLogoUrl,
+                            size: VacancyCardLayout.headerHeight,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _formatSalary(),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: context.accentColor,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  vacancy.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  TimeAgo.format(vacancy.createdAt),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  const Spacer(),
-                Text(
-                  TimeAgo.format(vacancy.createdAt),
-                  style: TextStyle(fontSize: 12, color: colors.textMuted),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Divider(height: 1, color: colors.border),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onEdit,
-                    icon: const Icon(LucideIcons.pencil, size: 16),
-                    label: const Text('Изменить'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colors.textPrimary,
-                      side: BorderSide(color: colors.border),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              _statusLabel(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: statusColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    const SizedBox(height: VacancyCardLayout.gap),
+                    VacancyTagsRow(vacancy: vacancy),
+                    const SizedBox(height: VacancyCardLayout.gap),
+                    SizedBox(
+                      height: VacancyCardLayout.bottomHeight,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  hasSalary
+                                      ? (vacancy.paymentType == 'Monthly'
+                                            ? 'Зарплата в месяц'
+                                            : 'Оплата')
+                                      : 'Зарплата',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: colors.textMuted,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  hasSalary ? salary : 'Не указана',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: hasSalary
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
+                                    color: hasSalary
+                                        ? context.accentColor
+                                        : colors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          for (var i = 0; i < actions.length; i++) ...[
+                            if (i > 0) const SizedBox(width: 6),
+                            actions[i],
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                if (showActions) ...[
-                  const SizedBox(width: 10),
-                  if (vacancy.status == 'Draft')
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: isUpdating ? null : onPublish,
-                        icon: const Icon(LucideIcons.rocket, size: 16),
-                        label: const Text('Опубликовать'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colors.textPrimary,
-                          side: BorderSide(color: colors.border),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (vacancy.status == 'Active')
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: isUpdating ? null : onClose,
-                        icon: const Icon(LucideIcons.lock, size: 16),
-                        label: const Text('Закрыть'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFDC2626),
-                          side: const BorderSide(color: Color(0xFFFECACA)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ],
-            ),
-            if (!showActions) ...[
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'Смотреть отклики',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: context.accentColor,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    LucideIcons.arrowRight,
-                    size: 14,
-                    color: context.accentColor,
-                  ),
-                ],
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _Tag extends StatelessWidget {
+class _ActionIcon extends StatelessWidget {
   final IconData icon;
-  final String label;
+  final String tooltip;
+  final Color color;
+  final Color borderColor;
+  final VoidCallback? onPressed;
 
-  const _Tag({required this.icon, required this.label});
+  const _ActionIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.color,
+    required this.borderColor,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: colors.surfaceMuted,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: colors.textSecondary),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11, color: colors.textSecondary),
+    return Tooltip(
+      message: tooltip,
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            padding: EdgeInsets.zero,
+            foregroundColor: color,
+            side: BorderSide(color: borderColor),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-        ],
+          child: Icon(icon, size: 17),
+        ),
       ),
     );
   }

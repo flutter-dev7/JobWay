@@ -167,6 +167,49 @@ public class VacancyService : IVacancyService
 
     public async Task<Result<VacancyResponse>> CloseAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken)
         => await ChangeStatusAsync(employerUserId, vacancyId, VacancyStatus.Closed, cancellationToken);
+    
+        public async Task<Result<VacancyResponse>> PromoteAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken)
+    {
+        var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);
+        if (companyProfile is null)
+            return Result<VacancyResponse>.Fail("Company profile not found", ErrorType.NotFound);
+
+        if (TierRules.GetEffectiveTier(companyProfile) != CompanyTier.Pro)
+            return Result<VacancyResponse>.Fail("Самостоятельное продвижение доступно на тарифе Pro", ErrorType.Forbidden);
+
+        var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
+        if (vacancy is null)
+            return Result<VacancyResponse>.Fail("Vacancy not found", ErrorType.NotFound);
+
+        if (vacancy.CompanyProfileId != companyProfile.Id)
+            return Result<VacancyResponse>.Fail("You do not own this vacancy", ErrorType.Forbidden);
+
+        if (vacancy.Status != VacancyStatus.Active)
+            return Result<VacancyResponse>.Fail("Продвигать можно только активную вакансию", ErrorType.Validation);
+
+        var now = DateTime.UtcNow;
+
+        if (vacancy.FeaturedUntil is { } featuredUntil && featuredUntil > now)
+            return Result<VacancyResponse>.Fail($"Вакансия уже в топе до {featuredUntil:dd.MM.yyyy}", ErrorType.Conflict);
+
+        var limit = TierRules.GetMonthlyPromotionLimit(companyProfile);
+        var used = await _unitOfWork.Vacancies.CountPromotionsSinceAsync(companyProfile.Id, TierRules.CurrentMonthStartUtc(), cancellationToken);
+
+        if (used >= limit)
+            return Result<VacancyResponse>.Fail(
+                $"Лимит продвижений на этот месяц исчерпан ({limit}). Он обновится 1-го числа.",
+                ErrorType.Forbidden);
+
+        vacancy.FeaturedUntil = now.AddDays(TierRules.PromotionDays);
+
+        _unitOfWork.Vacancies.AddPromotion(new VacancyPromotion { VacancyId = vacancy.Id, Days = TierRules.PromotionDays });
+        _unitOfWork.Vacancies.Update(vacancy);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
+
+        return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
+    }
 
     public async Task<Result<VacancyResponse>> GetByIdAsync(Guid vacancyId, CancellationToken cancellationToken)
     {
@@ -235,6 +278,9 @@ public class VacancyService : IVacancyService
             return Result<VacancyResponse>.Fail("You do not own this vacancy", ErrorType.Forbidden);
 
         vacancy.Status = status;
+        
+        if (status != VacancyStatus.Active)
+            vacancy.FeaturedUntil = null;
 
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

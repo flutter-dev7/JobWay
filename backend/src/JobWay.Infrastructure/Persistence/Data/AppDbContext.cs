@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<VacancyPromotion> VacancyPromotions => Set<VacancyPromotion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -4,6 +4,7 @@ import '../../domain/entities/my_vacancies_filter.dart';
 import '../../domain/entities/vacancy.dart';
 import '../../domain/usecases/close_vacancy_usecase.dart';
 import '../../domain/usecases/get_my_vacancies_usecase.dart';
+import '../../domain/usecases/promote_vacancy_usecase.dart';
 import '../../domain/usecases/publish_vacancy_usecase.dart';
 import 'vacancies_provider.dart';
 
@@ -47,10 +48,15 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
   final GetMyVacanciesUseCase _getMyVacancies;
   final PublishVacancyUseCase _publish;
   final CloseVacancyUseCase _close;
+  final PromoteVacancyUseCase _promote;
   int _requestId = 0;
 
-  MyVacanciesController(this._getMyVacancies, this._publish, this._close)
-    : super(const MyVacanciesState()) {
+  MyVacanciesController(
+    this._getMyVacancies,
+    this._publish,
+    this._close,
+    this._promote,
+  ) : super(const MyVacanciesState()) {
     load();
   }
 
@@ -60,7 +66,7 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
     try {
       final filter = state.filter.copyWith(pageNumber: 1);
       final page = await _getMyVacancies(filter);
-      if (requestId != _requestId) return;
+      if (!mounted || requestId != _requestId) return;
       state = state.copyWith(
         items: page.items,
         isLoading: false,
@@ -68,7 +74,7 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
         filter: filter,
       );
     } catch (error) {
-      if (requestId != _requestId) return;
+      if (!mounted || requestId != _requestId) return;
       state = state.copyWith(
         isLoading: false,
         error: ApiException.extractMessage(error),
@@ -82,9 +88,11 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
     final requestId = _requestId;
     state = state.copyWith(isLoadingMore: true);
     try {
-      final filter = state.filter.copyWith(pageNumber: state.filter.pageNumber + 1);
+      final filter = state.filter.copyWith(
+        pageNumber: state.filter.pageNumber + 1,
+      );
       final page = await _getMyVacancies(filter);
-      if (requestId != _requestId) return;
+      if (!mounted || requestId != _requestId) return;
       state = state.copyWith(
         items: [...state.items, ...page.items],
         isLoadingMore: false,
@@ -92,7 +100,7 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
         filter: filter,
       );
     } catch (_) {
-      if (requestId != _requestId) return;
+      if (!mounted || requestId != _requestId) return;
       state = state.copyWith(isLoadingMore: false);
     }
   }
@@ -110,9 +118,12 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
 
   Future<void> close(String id) async => _applyUpdated(await _close(id));
 
+  Future<void> promote(String id) async => _applyUpdated(await _promote(id));
+
   // Обновляет вакансию в списке на месте. Если она больше не подходит
   // под выбранный статус (например, Draft → Active при фильтре «Черновики»), убирает её.
   void _applyUpdated(Vacancy updated) {
+    if (!mounted) return;
     final filterStatus = state.filter.status;
     final leavesFilter = filterStatus != null && updated.status != filterStatus;
 
@@ -124,21 +135,20 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
   }
 }
 
+MyVacanciesController _createController(Ref ref) => MyVacanciesController(
+  ref.read(getMyVacanciesUseCaseProvider),
+  ref.read(publishVacancyUseCaseProvider),
+  ref.read(closeVacancyUseCaseProvider),
+  ref.read(promoteVacancyUseCaseProvider),
+);
+
 final myVacanciesControllerProvider =
     StateNotifierProvider.autoDispose<MyVacanciesController, MyVacanciesState>(
-  (ref) => MyVacanciesController(
-    ref.read(getMyVacanciesUseCaseProvider),
-    ref.read(publishVacancyUseCaseProvider),
-    ref.read(closeVacancyUseCaseProvider),
-  ),
-);
+      _createController,
+    );
 
 // Отдельный экземпляр для вкладки «Отклики»: свой список и свой фильтр
 final applicationsOverviewControllerProvider =
     StateNotifierProvider.autoDispose<MyVacanciesController, MyVacanciesState>(
-  (ref) => MyVacanciesController(
-    ref.read(getMyVacanciesUseCaseProvider),
-    ref.read(publishVacancyUseCaseProvider),
-    ref.read(closeVacancyUseCaseProvider),
-  ),
-);
+      _createController,
+    );

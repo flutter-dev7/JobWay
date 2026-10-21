@@ -113,6 +113,13 @@ public class VacancyRepository : IVacancyRepository
         => _context.Vacancies.CountAsync(
             v => v.CompanyProfileId == companyProfileId && v.Status == VacancyStatus.Active,
             cancellationToken);
+    
+    public Task<int> CountPromotionsSinceAsync(Guid companyProfileId, DateTime since, CancellationToken cancellationToken)
+        => _context.VacancyPromotions.CountAsync(
+            p => p.Vacancy.CompanyProfileId == companyProfileId && p.CreatedAt >= since,
+            cancellationToken);
+
+    public void AddPromotion(VacancyPromotion promotion) => _context.VacancyPromotions.Add(promotion);
 
     public void Add(Vacancy vacancy) => _context.Vacancies.Add(vacancy);
     public void Update(Vacancy vacancy) => _context.Vacancies.Update(vacancy);
