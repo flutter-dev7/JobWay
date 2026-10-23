@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.123.34:5025/api';
+  static const String baseUrl = 'http://192.168.1.5:5025/api';
 
   // Auth
   static const String register = '/auth/register';
@@ -75,6 +75,13 @@ class ApiConstants {
   static const String chatThreads = '/chat/threads';
   static String chatMessages(String jobApplicationId) =>
       '/chat/$jobApplicationId/messages';
+
+  // Search
+  static const String searchCompanies = '/search/companies';
+  static const String searchCandidates = '/search/candidates';
+  static String publicCompany(String id) => '/companies/$id';
+  static String publicCompanyVacancies(String id) => '/companies/$id/vacancies';
+  static const String candidateVisibility = '/candidate-profile/me/visibility';
 
   // Analytics
   static const String employerAnalytics = '/analytics/employer';

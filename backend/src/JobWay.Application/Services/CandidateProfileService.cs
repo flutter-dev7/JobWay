@@ -122,21 +122,54 @@ public class CandidateProfileService : ICandidateProfileService
         return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
     }
     
-    public async Task<Result<CandidateProfileResponse>> GetCandidateProfileForEmployerAsync(Guid employerUserId, Guid candidateProfileId, CancellationToken cancellationToken)
+        public async Task<Result<CandidateProfileResponse>> GetCandidateProfileForEmployerAsync(Guid employerUserId, Guid candidateProfileId, CancellationToken cancellationToken)
     {
         var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);
         if (companyProfile is null)
             return Result<CandidateProfileResponse>.Fail("Company profile not found", ErrorType.NotFound);
 
-        var hasApplied = await _unitOfWork.JobApplications.ExistsForCandidateAndCompanyAsync(candidateProfileId, companyProfile.Id, cancellationToken);
-        if (!hasApplied)
-            return Result<CandidateProfileResponse>.Fail("You can only view profiles of candidates who applied to your vacancies", ErrorType.Forbidden);
-
         var profile = await _unitOfWork.CandidateProfiles.GetByIdAsync(candidateProfileId, cancellationToken);
         if (profile is null || !profile.User.IsActive)
             return Result<CandidateProfileResponse>.Fail("Candidate not found", ErrorType.NotFound);
 
-        return Result<CandidateProfileResponse>.Ok(MapToResponse(profile));
+        var hasApplied = await _unitOfWork.JobApplications.ExistsForCandidateAndCompanyAsync(candidateProfileId, companyProfile.Id, cancellationToken);
+
+        if (!hasApplied)
+        {
+            if (!profile.IsVisibleToEmployers || companyProfile.VerificationStatus != VerificationStatus.Verified)
+                return Result<CandidateProfileResponse>.Fail(
+                    "Профиль доступен только кандидатам, которые откликнулись на ваши вакансии или открыли профиль для поиска",
+                    ErrorType.Forbidden);
+        }
+
+        var response = MapToResponse(profile);
+        response.BirthDate = null; // работодателю дата рождения не нужна
+
+        return Result<CandidateProfileResponse>.Ok(response);
+    }
+
+    public async Task<Result<bool>> GetVisibilityAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var profile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(userId, cancellationToken);
+
+        return profile is null
+            ? Result<bool>.Fail("Profile not found", ErrorType.NotFound)
+            : Result<bool>.Ok(profile.IsVisibleToEmployers);
+    }
+
+    public async Task<Result<bool>> SetVisibilityAsync(Guid userId, bool isVisible, CancellationToken cancellationToken)
+    {
+        var profile = await _unitOfWork.CandidateProfiles.GetByUserIdAsync(userId, cancellationToken);
+        if (profile is null)
+            return Result<bool>.Fail("Profile not found", ErrorType.NotFound);
+
+        profile.IsVisibleToEmployers = isVisible;
+        _unitOfWork.CandidateProfiles.Update(profile);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKey(userId), cancellationToken);
+
+        return Result<bool>.Ok(isVisible);
     }
     
     public async Task<Result<CandidateProfileResponse>> GetCandidateProfileForAdminAsync(Guid candidateProfileId, CancellationToken cancellationToken)

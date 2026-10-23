@@ -106,6 +106,7 @@ using (var scope = app.Services.CreateScope())
 
     await context.Database.MigrateAsync();
     await DataSeeder.SeedAsync(context);
+    await SkillCatalogSeeder.SeedMissingAsync(context);
 }
 
 app.UseSwagger();

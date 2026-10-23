@@ -12,4 +12,6 @@ public interface ICandidateProfileService
     Task<Result<CandidateProfileResponse>> UploadPhotoAsync(Guid userId, UploadPhotoRequest request, CancellationToken cancellationToken);
     Task<Result<CandidateProfileResponse>> GetCandidateProfileForEmployerAsync(Guid employerUserId, Guid candidateProfileId, CancellationToken cancellationToken);
     Task<Result<CandidateProfileResponse>> GetCandidateProfileForAdminAsync(Guid candidateProfileId, CancellationToken cancellationToken);
+    Task<Result<bool>> GetVisibilityAsync(Guid userId, CancellationToken cancellationToken);
+    Task<Result<bool>> SetVisibilityAsync(Guid userId, bool isVisible, CancellationToken cancellationToken);
 }

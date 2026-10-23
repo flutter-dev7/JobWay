@@ -12,6 +12,8 @@ abstract class VacanciesRepository {
   Future<Vacancy> create({
     required String title,
     required String description,
+    required String responsibilities,
+    required String requirements,
     required String employmentType,
     required String experienceLevel,
     required String paymentType,
@@ -26,6 +28,8 @@ abstract class VacanciesRepository {
     String id, {
     required String title,
     required String description,
+    required String responsibilities,
+    required String requirements,
     required String employmentType,
     required String experienceLevel,
     required String paymentType,

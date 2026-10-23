@@ -17,6 +17,5 @@ public class CompanyProfile : BaseEntity
     public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.NotVerified;
     public CompanyTier Tier { get; set; } = CompanyTier.Free;
     public DateTime? TierExpiresAt { get; set; }
-
     public List<Vacancy> Vacancies { get; set; } = [];
 }

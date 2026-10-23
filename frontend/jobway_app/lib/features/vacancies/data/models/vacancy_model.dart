@@ -1,4 +1,3 @@
-// features/vacancies/data/models/vacancy_model.dart
 import '../../../skills/data/models/skill_model.dart';
 import '../../domain/entities/vacancy.dart';
 
@@ -9,6 +8,8 @@ class VacancyModel {
   final String companyName;
   final String title;
   final String description;
+  final String? responsibilities;
+  final String? requirements;
   final String employmentType;
   final String experienceLevel;
   final String paymentType;
@@ -29,6 +30,8 @@ class VacancyModel {
     required this.companyName,
     required this.title,
     required this.description,
+    this.responsibilities,
+    this.requirements,
     required this.employmentType,
     required this.experienceLevel,
     required this.paymentType,
@@ -50,6 +53,8 @@ class VacancyModel {
         companyName: json['companyName'],
         title: json['title'],
         description: json['description'],
+        responsibilities: json['responsibilities'],
+        requirements: json['requirements'],
         employmentType: json['employmentType'],
         experienceLevel: json['experienceLevel'],
         paymentType: json['paymentType'],
@@ -73,6 +78,8 @@ class VacancyModel {
         companyName: companyName,
         title: title,
         description: description,
+        responsibilities: responsibilities,
+        requirements: requirements,
         employmentType: employmentType,
         experienceLevel: experienceLevel,
         paymentType: paymentType,

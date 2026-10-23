@@ -84,6 +84,8 @@ public static class DependencyInjection
         
         services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
         services.AddScoped<IChatService, ChatService>();
+        
+        services.AddScoped<ISearchService, SearchService>();
 
         return services;
     }

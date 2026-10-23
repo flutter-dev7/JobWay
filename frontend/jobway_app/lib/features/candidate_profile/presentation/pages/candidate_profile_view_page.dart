@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/core/widgets/feedback/app_snackbar.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
@@ -26,22 +27,6 @@ class CandidateProfileViewPage extends ConsumerWidget {
       AppSnackbar.showError('Не удалось открыть резюме');
     }
   }
-
-  String _experienceLevelLabel(String level) => switch (level) {
-    'NoExperience' => 'Без опыта',
-    'Junior' => 'Junior',
-    'Middle' => 'Middle',
-    'Senior' => 'Senior',
-    _ => level,
-  };
-
-  String _employmentTypeLabel(String type) => switch (type) {
-    'FullTime' => 'Полная занятость',
-    'PartTime' => 'Частичная занятость',
-    'Remote' => 'Удалённо',
-    'Internship' => 'Стажировка',
-    _ => type,
-  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -151,13 +136,13 @@ class CandidateProfileViewPage extends ConsumerWidget {
                   InfoRow(
                     icon: Icons.trending_up_rounded,
                     label: 'Уровень опыта',
-                    value: _experienceLevelLabel(profile.experienceLevel),
+                    value: experienceLevelLabel(profile.experienceLevel),
                   ),
                   const SizedBox(height: 16),
                   InfoRow(
                     icon: LucideIcons.briefcase,
                     label: 'Тип занятости',
-                    value: _employmentTypeLabel(profile.desiredEmploymentType),
+                    value: employmentTypeLabel(profile.desiredEmploymentType),
                   ),
                 ],
               ),

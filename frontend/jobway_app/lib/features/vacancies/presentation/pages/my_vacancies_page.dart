@@ -6,6 +6,7 @@ import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
+import 'package:jobway_app/features/search/presentation/widgets/search_entry_button.dart';
 import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
 import 'package:jobway_app/features/subscription/presentation/widgets/promote_vacancy_sheet.dart';
 import 'package:jobway_app/features/subscription/presentation/widgets/subscription_sheet.dart';
@@ -212,6 +213,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
           ),
         ),
         actions: [
+          const SearchEntryButton(forEmployer: true),
           const NotificationBell(),
           Padding(
             padding: const EdgeInsets.only(right: 12),

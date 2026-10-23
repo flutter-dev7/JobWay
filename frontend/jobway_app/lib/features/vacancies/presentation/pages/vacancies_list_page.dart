@@ -6,6 +6,7 @@ import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/today_badge_storage.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
+import 'package:jobway_app/features/search/presentation/widgets/search_entry_button.dart';
 import 'package:jobway_app/features/vacancies/presentation/widgets/quick_filter_chips.dart';
 import '../../domain/entities/vacancy_filter.dart';
 import '../providers/vacancies_provider.dart';
@@ -116,7 +117,10 @@ class _VacanciesListPageState extends ConsumerState<VacanciesListPage> {
             color: colors.textPrimary,
           ),
         ),
-        actions: const [NotificationBell()],
+        actions: const [
+          SearchEntryButton(forEmployer: false),
+          NotificationBell(),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(vacanciesControllerProvider.notifier).load(),

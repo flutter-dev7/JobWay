@@ -45,6 +45,8 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
   Future<Vacancy> create({
     required String title,
     required String description,
+    required String responsibilities,
+    required String requirements,
     required String employmentType,
     required String experienceLevel,
     required String paymentType,
@@ -57,6 +59,8 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
     final model = await _remoteDataSource.create(
       title: title,
       description: description,
+      responsibilities: responsibilities,
+      requirements: requirements,
       employmentType: employmentType,
       experienceLevel: experienceLevel,
       paymentType: paymentType,
@@ -74,6 +78,8 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
     String id, {
     required String title,
     required String description,
+    required String responsibilities,
+    required String requirements,
     required String employmentType,
     required String experienceLevel,
     required String paymentType,
@@ -87,6 +93,8 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
       id,
       title: title,
       description: description,
+      responsibilities: responsibilities,
+      requirements: requirements,
       employmentType: employmentType,
       experienceLevel: experienceLevel,
       paymentType: paymentType,

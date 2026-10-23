@@ -7,6 +7,7 @@ import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
+import 'package:jobway_app/features/search/presentation/widgets/profile_visibility_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -376,6 +377,8 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                         ),
                       ),
               ),
+              const SizedBox(height: 16),
+              const ProfileVisibilityCard(),
               const SizedBox(height: 16),
               ReviewsSection(userId: profile.userId),
             ],

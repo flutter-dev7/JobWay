@@ -10,6 +10,8 @@ public class UpdateVacancyRequest
 
     [Required]
     public string Description { get; set; } = string.Empty;
+    public string? Responsibilities { get; set; }
+    public string? Requirements { get; set; }
 
     public EmploymentType EmploymentType { get; set; }
     public ExperienceLevel ExperienceLevel { get; set; }

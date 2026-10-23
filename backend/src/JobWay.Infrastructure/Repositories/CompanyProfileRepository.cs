@@ -1,6 +1,9 @@
 using JobWay.Application.DTOs.Admin.Request;
+using JobWay.Application.DTOs.Search.Request;
+using JobWay.Application.DTOs.Search.Response;
 using JobWay.Application.Interfaces.Repositories;
 using JobWay.Domain.Entities;
+using JobWay.Domain.Enums;
 using JobWay.Infrastructure.Persistence;
 using JobWay.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
@@ -50,6 +53,52 @@ public class CompanyProfileRepository : ICompanyProfileRepository
 
         return (items, totalCount);
     }
+    
+    public async Task<(List<CompanySearchItem> Items, int TotalCount)> SearchPublicAsync(
+        CompanySearchRequest filter, CancellationToken cancellationToken)
+    {
+        // Публично видны только верифицированные компании с активным аккаунтом
+        var query = _context.CompanyProfiles
+            .Where(c => c.VerificationStatus == VerificationStatus.Verified && c.User.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            var search = filter.Search.Trim();
+            query = query.Where(c =>
+                EF.Functions.ILike(c.CompanyName, $"%{search}%")
+                || (c.Industry != null && EF.Functions.ILike(c.Industry, $"%{search}%"))
+                || (c.Location != null && EF.Functions.ILike(c.Location, $"%{search}%")));
+        }
+
+        if (filter.OnlyWithVacancies)
+            query = query.Where(c => c.Vacancies.Any(v => v.Status == VacancyStatus.Active));
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Select(c => new CompanySearchItem
+            {
+                Id = c.Id,
+                CompanyName = c.CompanyName,
+                Industry = c.Industry,
+                Location = c.Location,
+                LogoUrl = c.LogoUrl,
+                ActiveVacanciesCount = c.Vacancies.Count(v => v.Status == VacancyStatus.Active)
+            })
+            .OrderByDescending(i => i.ActiveVacanciesCount)
+            .ThenBy(i => i.CompanyName)
+            .ThenBy(i => i.Id)
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public Task<CompanyProfile?> GetPublicByIdAsync(Guid id, CancellationToken cancellationToken)
+        => _context.CompanyProfiles.FirstOrDefaultAsync(
+            c => c.Id == id && c.VerificationStatus == VerificationStatus.Verified && c.User.IsActive,
+            cancellationToken);
 
     public void Update(CompanyProfile profile) => _context.CompanyProfiles.Update(profile);
 }

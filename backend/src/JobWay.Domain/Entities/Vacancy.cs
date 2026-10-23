@@ -10,6 +10,8 @@ public class Vacancy : BaseEntity
 
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;
+    public string? Responsibilities { get; set; }
+    public string? Requirements { get; set; }
     public EmploymentType EmploymentType { get; set; }
     public ExperienceLevel ExperienceLevel { get; set; }
     public string? Location { get; set; }

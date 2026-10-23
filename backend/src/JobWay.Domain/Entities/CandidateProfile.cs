@@ -16,6 +16,8 @@ public class CandidateProfile : BaseEntity
     public string? PhotoUrl { get; set; }
     public ExperienceLevel ExperienceLevel { get; set; }
     public EmploymentType DesiredEmploymentType { get; set; }
+    public bool IsVisibleToEmployers { get; set; }
+
 
     public List<Skill> Skills { get; set; } = [];
     public List<JobApplication> Applications { get; set; } = [];

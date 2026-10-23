@@ -1,4 +1,4 @@
-// features/vacancies/presentation/widgets/vacancy_filter_sheet.dart — заменить целиком
+// features/vacancies/presentation/widgets/vacancy_filter_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
@@ -31,12 +31,14 @@ class _VacancyFilterSheetState extends State<VacancyFilterSheet> {
   static const _paymentTypes = ['Monthly', 'Daily', 'PerShift'];
   static const _currencies = ['TJS', 'USD', 'EUR', 'RUB'];
 
-  static const _employmentTypes = [
+    static const _employmentTypes = [
     'FullTime',
     'PartTime',
     'Remote',
     'Internship',
+    'Gig',
   ];
+  
   static const _experienceLevels = [
     'NoExperience',
     'Junior',

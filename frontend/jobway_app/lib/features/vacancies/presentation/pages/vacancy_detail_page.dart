@@ -4,8 +4,8 @@ import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/applications/presentation/providers/applications_provider.dart';
-import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import 'package:jobway_app/features/vacancies/presentation/providers/saved_vacancies_controller.dart';
+import 'package:jobway_app/features/vacancies/presentation/widgets/vacancy_bullet_section.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/network/api_exception.dart';
@@ -193,25 +193,30 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text.rich(
-                  TextSpan(
-                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
-                    children: [
-                      TextSpan(
-                        text: vacancy.companyName,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                      if (vacancy.location != null)
-                        TextSpan(text: '  ·  📍 ${vacancy.location}'),
-                      TextSpan(
-                        text:
-                            '  ·  Опубликовано ${TimeAgo.format(vacancy.createdAt)}',
-                      ),
-                    ],
+                Text(
+                  vacancy.companyName,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 6,
+                  children: [
+                    if (vacancy.location != null &&
+                        vacancy.location!.isNotEmpty)
+                      _MetaItem(
+                        icon: Icons.location_on_outlined,
+                        text: vacancy.location!,
+                      ),
+                    _MetaItem(
+                      icon: Icons.schedule_rounded,
+                      text: 'Опубликовано ${TimeAgo.format(vacancy.createdAt)}',
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 14),
                 Wrap(
@@ -273,6 +278,16 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                     ),
                   ),
                 ),
+                VacancyBulletSection(
+                  title: 'Обязанности',
+                  icon: Icons.checklist_rounded,
+                  text: vacancy.responsibilities,
+                ),
+                VacancyBulletSection(
+                  title: 'Требования',
+                  icon: Icons.fact_check_outlined,
+                  text: vacancy.requirements,
+                ),
                 const SizedBox(height: 16),
                 SectionCard(
                   title: 'Требуемые навыки',
@@ -293,8 +308,6 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                               .toList(),
                         ),
                 ),
-                const SizedBox(height: 16),
-                ReviewsSection(userId: vacancy.companyUserId),
               ],
             ),
             Positioned(
@@ -329,6 +342,13 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                         ? AppButton(
                             label: 'Вы откликнулись',
                             icon: Icons.check_rounded,
+                            color: const Color(0xFF9CA3AF),
+                            onPressed: () {},
+                          )
+                        : vacancy.status != 'Active'
+                        ? AppButton(
+                            label: 'Вакансия закрыта',
+                            icon: Icons.lock_outline_rounded,
                             color: const Color(0xFF9CA3AF),
                             onPressed: () {},
                           )
@@ -372,6 +392,32 @@ class _Pill extends StatelessWidget {
           color: colors.textSecondary,
         ),
       ),
+    );
+  }
+}
+
+class _MetaItem extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _MetaItem({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: colors.textMuted),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            text,
+            style: TextStyle(fontSize: 13, color: colors.textSecondary),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -7,6 +7,8 @@ class Vacancy {
   final String companyName;
   final String title;
   final String description;
+  final String? responsibilities;
+  final String? requirements;
   final String employmentType;
   final String experienceLevel;
   final String paymentType;
@@ -27,6 +29,8 @@ class Vacancy {
     required this.companyName,
     required this.title,
     required this.description,
+    this.responsibilities,
+    this.requirements,
     required this.employmentType,
     required this.experienceLevel,
     required this.paymentType,
@@ -41,7 +45,7 @@ class Vacancy {
     this.featuredUntil,
   });
 
-    bool get isFeatured =>
+  bool get isFeatured =>
       status == 'Active' &&
       featuredUntil != null &&
       featuredUntil!.isAfter(DateTime.now());

@@ -8,10 +8,12 @@ import '../../../../core/utils/enum_labels.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/display/section_card.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/inputs/app_multiline_field.dart';
 import '../../../../core/widgets/inputs/app_text_field.dart';
 import '../../../../core/widgets/navigation/app_page_app_bar.dart';
 import '../../../skills/presentation/widgets/skills_selector.dart';
 import '../../domain/entities/vacancy.dart';
+import '../../domain/vacancy_form_rules.dart';
 import '../providers/vacancies_provider.dart';
 
 class EditVacancyPage extends ConsumerStatefulWidget {
@@ -26,6 +28,8 @@ class EditVacancyPage extends ConsumerStatefulWidget {
 class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _responsibilitiesController;
+  late final TextEditingController _requirementsController;
   late final TextEditingController _locationController;
   late final TextEditingController _salaryFromController;
   late final TextEditingController _salaryToController;
@@ -58,6 +62,12 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
     final vacancy = widget.vacancy;
     _titleController = TextEditingController(text: vacancy.title);
     _descriptionController = TextEditingController(text: vacancy.description);
+    _responsibilitiesController = TextEditingController(
+      text: vacancy.responsibilities ?? '',
+    );
+    _requirementsController = TextEditingController(
+      text: vacancy.requirements ?? '',
+    );
     _locationController = TextEditingController(text: vacancy.location ?? '');
     _salaryFromController = TextEditingController(
       text: vacancy.salaryFrom != null
@@ -80,6 +90,8 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _responsibilitiesController.dispose();
+    _requirementsController.dispose();
     _locationController.dispose();
     _salaryFromController.dispose();
     _salaryToController.dispose();
@@ -100,12 +112,18 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
   }
 
   Future<void> _save() async {
-    if (_titleController.text.trim().isEmpty) {
-      AppSnackbar.showError('Введите название вакансии');
-      return;
-    }
-    if (_descriptionController.text.trim().isEmpty) {
-      AppSnackbar.showError('Добавьте описание вакансии');
+    final error = VacancyFormRules.validateAll(
+      title: _titleController.text,
+      description: _descriptionController.text,
+      responsibilities: _responsibilitiesController.text,
+      requirements: _requirementsController.text,
+      location: _locationController.text,
+      salaryFrom: _salaryFromController.text,
+      salaryTo: _salaryToController.text,
+      skillCount: _selectedSkillIds.length,
+    );
+    if (error != null) {
+      AppSnackbar.showError(error);
       return;
     }
 
@@ -117,19 +135,15 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
             widget.vacancy.id,
             title: _titleController.text.trim(),
             description: _descriptionController.text.trim(),
+            responsibilities: _responsibilitiesController.text.trim(),
+            requirements: _requirementsController.text.trim(),
             employmentType: _employmentType,
             experienceLevel: _experienceLevel,
             paymentType: _paymentType,
             currency: _currency,
-            location: _locationController.text.trim().isEmpty
-                ? null
-                : _locationController.text.trim(),
-            salaryFrom: _salaryFromController.text.trim().isEmpty
-                ? null
-                : double.tryParse(_salaryFromController.text.trim()),
-            salaryTo: _salaryToController.text.trim().isEmpty
-                ? null
-                : double.tryParse(_salaryToController.text.trim()),
+            location: _locationController.text.trim(),
+            salaryFrom: VacancyFormRules.parseMoney(_salaryFromController.text),
+            salaryTo: VacancyFormRules.parseMoney(_salaryToController.text),
             skillIds: _selectedSkillIds,
           );
       if (!mounted) return;
@@ -163,16 +177,36 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
                   icon: Icons.title_rounded,
                 ),
                 const SizedBox(height: 14),
-                AppTextField(
+                AppMultilineField(
                   controller: _descriptionController,
                   label: 'Описание',
-                  icon: Icons.notes_rounded,
+                  minLines: 5,
+                  maxLines: 10,
+                  maxLength: VacancyFormRules.maxDescriptionLength,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SectionCard(
+            title: 'Обязанности и требования',
+            icon: Icons.checklist_rounded,
+            child: Column(
+              children: [
+                AppMultilineField(
+                  controller: _responsibilitiesController,
+                  label: 'Обязанности (каждый пункт с новой строки)',
+                  minLines: 4,
+                  maxLines: 10,
+                  maxLength: VacancyFormRules.maxListLength,
                 ),
                 const SizedBox(height: 14),
-                AppTextField(
-                  controller: _locationController,
-                  label: 'Локация',
-                  icon: Icons.location_on_outlined,
+                AppMultilineField(
+                  controller: _requirementsController,
+                  label: 'Требования (каждый пункт с новой строки)',
+                  minLines: 4,
+                  maxLines: 10,
+                  maxLength: VacancyFormRules.maxListLength,
                 ),
               ],
             ),
@@ -211,6 +245,12 @@ class _EditVacancyPageState extends ConsumerState<EditVacancyPage> {
                   onChanged: (value) =>
                       setState(() => _experienceLevel = value!),
                   decoration: _dropdownDecoration(context),
+                ),
+                const SizedBox(height: 14),
+                AppTextField(
+                  controller: _locationController,
+                  label: 'Локация',
+                  icon: Icons.location_on_outlined,
                 ),
                 const SizedBox(height: 14),
                 Row(

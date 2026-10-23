@@ -18,9 +18,9 @@ String paymentTypeLabel(String type) => switch (type) {
 
 String experienceLevelLabel(String level) => switch (level) {
   'NoExperience' => 'Без опыта',
-  'Junior' => 'Junior',
-  'Middle' => 'Middle',
-  'Senior' => 'Senior',
+  'Junior' => 'До 1 года',
+  'Middle' => 'От 1 до 3 лет',
+  'Senior' => 'Более 3 лет',
   _ => level,
 };
 

@@ -42,6 +42,15 @@ public class CompanyProfileService : ICompanyProfileService
 
         return Result<CompanyProfileResponse>.Ok(response);
     }
+    
+    public async Task<Result<CompanyProfileResponse>> GetPublicProfileAsync(Guid companyId, CancellationToken cancellationToken)
+    {
+        var profile = await _unitOfWork.CompanyProfiles.GetPublicByIdAsync(companyId, cancellationToken);
+
+        return profile is null
+            ? Result<CompanyProfileResponse>.Fail("Company not found", ErrorType.NotFound)
+            : Result<CompanyProfileResponse>.Ok(MapToResponse(profile));
+    }
 
     public async Task<Result<CompanyProfileResponse>> UpdateMyProfileAsync(Guid userId, UpdateCompanyProfileRequest request, CancellationToken cancellationToken)
     {

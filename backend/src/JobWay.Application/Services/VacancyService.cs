@@ -34,7 +34,7 @@ public class VacancyService : IVacancyService
 
     private static string VacancyCacheKey(Guid id) => $"vacancy:{id}";
 
-    public async Task<Result<VacancyResponse>> CreateAsync(Guid employerUserId, CreateVacancyRequest request, CancellationToken cancellationToken)
+        public async Task<Result<VacancyResponse>> CreateAsync(Guid employerUserId, CreateVacancyRequest request, CancellationToken cancellationToken)
     {
         var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);
 
@@ -42,21 +42,31 @@ public class VacancyService : IVacancyService
             return Result<VacancyResponse>.Fail("Company profile not found", ErrorType.NotFound);
 
         var skills = await _unitOfWork.Skills.GetAllAsync(cancellationToken);
+        var selectedSkills = skills.Where(s => request.SkillIds.Contains(s.Id)).ToList();
+
+        var validationError = VacancyRules.Validate(
+            request.Title, request.Description, request.Responsibilities, request.Requirements,
+            request.Location, request.SalaryFrom, request.SalaryTo, selectedSkills.Count);
+
+        if (validationError is not null)
+            return Result<VacancyResponse>.Fail(validationError, ErrorType.Validation);
 
         var vacancy = new Vacancy
         {
             CompanyProfileId = companyProfile.Id,
             CompanyProfile = companyProfile,
-            Title = request.Title,
-            Description = request.Description,
+            Title = request.Title.Trim(),
+            Description = request.Description.Trim(),
+            Responsibilities = request.Responsibilities!.Trim(),
+            Requirements = request.Requirements!.Trim(),
             EmploymentType = request.EmploymentType,
             ExperienceLevel = request.ExperienceLevel,
             PaymentType = request.PaymentType,
             Currency = request.Currency,
-            Location = request.Location,
+            Location = request.Location!.Trim(),
             SalaryFrom = request.SalaryFrom,
             SalaryTo = request.SalaryTo,
-            RequiredSkills = skills.Where(s => request.SkillIds.Contains(s.Id)).ToList()
+            RequiredSkills = selectedSkills
         };
 
         _unitOfWork.Vacancies.Add(vacancy);
@@ -80,18 +90,28 @@ public class VacancyService : IVacancyService
         if (vacancy.CompanyProfileId != companyProfile.Id)
             return Result<VacancyResponse>.Fail("You do not own this vacancy", ErrorType.Forbidden);
 
-        vacancy.Title = request.Title;
-        vacancy.Description = request.Description;
+        var skills = await _unitOfWork.Skills.GetAllAsync(cancellationToken);
+        var selectedSkills = skills.Where(s => request.SkillIds.Contains(s.Id)).ToList();
+
+        var validationError = VacancyRules.Validate(
+            request.Title, request.Description, request.Responsibilities, request.Requirements,
+            request.Location, request.SalaryFrom, request.SalaryTo, selectedSkills.Count);
+
+        if (validationError is not null)
+            return Result<VacancyResponse>.Fail(validationError, ErrorType.Validation);
+
+        vacancy.Title = request.Title.Trim();
+        vacancy.Description = request.Description.Trim();
+        vacancy.Responsibilities = request.Responsibilities!.Trim();
+        vacancy.Requirements = request.Requirements!.Trim();
         vacancy.EmploymentType = request.EmploymentType;
         vacancy.ExperienceLevel = request.ExperienceLevel;
         vacancy.PaymentType = request.PaymentType;
-        vacancy.Currency = request.Currency; 
-        vacancy.Location = request.Location;
+        vacancy.Currency = request.Currency;
+        vacancy.Location = request.Location!.Trim();
         vacancy.SalaryFrom = request.SalaryFrom;
         vacancy.SalaryTo = request.SalaryTo;
-
-        var skills = await _unitOfWork.Skills.GetAllAsync(cancellationToken);
-        vacancy.RequiredSkills = skills.Where(s => request.SkillIds.Contains(s.Id)).ToList();
+        vacancy.RequiredSkills = selectedSkills;
 
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -110,10 +130,18 @@ public class VacancyService : IVacancyService
         if (companyProfile.VerificationStatus != VerificationStatus.Verified)
             return Result<VacancyResponse>.Fail("Company must be verified by an admin before publishing vacancies", ErrorType.Forbidden);
 
-        // Повторная публикация уже активной вакансии лимит не расходует
         var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
         if (vacancy is not null && vacancy.CompanyProfileId == companyProfile.Id && vacancy.Status != VacancyStatus.Active)
         {
+            var validationError = VacancyRules.Validate(
+                vacancy.Title, vacancy.Description, vacancy.Responsibilities, vacancy.Requirements,
+                vacancy.Location, vacancy.SalaryFrom, vacancy.SalaryTo, vacancy.RequiredSkills.Count);
+
+            if (validationError is not null)
+                return Result<VacancyResponse>.Fail(
+                    $"{validationError}. Откройте вакансию через «Изменить» и дополните её.",
+                    ErrorType.Validation);
+
             var limit = TierRules.GetActiveVacancyLimit(companyProfile);
             var activeCount = await _unitOfWork.Vacancies.CountActiveByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
 
@@ -263,6 +291,19 @@ public class VacancyService : IVacancyService
             TotalCount = totalCount
         });
     }
+    
+    public async Task<Result<List<VacancyResponse>>> GetPublicCompanyVacanciesAsync(Guid companyProfileId, CancellationToken cancellationToken)
+    {
+        var company = await _unitOfWork.CompanyProfiles.GetPublicByIdAsync(companyProfileId, cancellationToken);
+        if (company is null)
+            return Result<List<VacancyResponse>>.Fail("Company not found", ErrorType.NotFound);
+
+        // Активных вакансий не больше лимита тарифа, поэтому одной страницы достаточно
+        var filter = new MyVacanciesFilterRequest { Status = VacancyStatus.Active, PageNumber = 1, PageSize = 50 };
+        var (vacancies, _) = await _unitOfWork.Vacancies.GetPagedByCompanyProfileIdAsync(company.Id, filter, cancellationToken);
+
+        return Result<List<VacancyResponse>>.Ok(vacancies.Select(MapToResponse).ToList());
+    }
 
     private async Task<Result<VacancyResponse>> ChangeStatusAsync(Guid employerUserId, Guid vacancyId, VacancyStatus status, CancellationToken cancellationToken)
     {
@@ -298,6 +339,8 @@ public class VacancyService : IVacancyService
         CompanyName = vacancy.CompanyProfile.CompanyName,
         Title = vacancy.Title,
         Description = vacancy.Description,
+        Responsibilities = vacancy.Responsibilities,
+        Requirements = vacancy.Requirements,
         EmploymentType = vacancy.EmploymentType,
         ExperienceLevel = vacancy.ExperienceLevel,
         PaymentType = vacancy.PaymentType,

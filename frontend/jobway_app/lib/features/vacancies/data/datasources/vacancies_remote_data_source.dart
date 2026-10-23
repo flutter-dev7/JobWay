@@ -67,9 +67,11 @@ class VacanciesRemoteDataSource {
     );
   }
 
-  Future<VacancyModel> create({
+    Future<VacancyModel> create({
     required String title,
     required String description,
+    required String responsibilities,
+    required String requirements,
     required String employmentType,
     required String experienceLevel,
     required String paymentType,
@@ -84,6 +86,8 @@ class VacanciesRemoteDataSource {
       data: {
         'title': title,
         'description': description,
+        'responsibilities': responsibilities,
+        'requirements': requirements,
         'employmentType': employmentType,
         'experienceLevel': experienceLevel,
         'paymentType': paymentType,
@@ -101,6 +105,8 @@ class VacanciesRemoteDataSource {
     String id, {
     required String title,
     required String description,
+    required String responsibilities,
+    required String requirements,
     required String employmentType,
     required String experienceLevel,
     required String paymentType,
@@ -115,6 +121,8 @@ class VacanciesRemoteDataSource {
       data: {
         'title': title,
         'description': description,
+        'responsibilities': responsibilities,
+        'requirements': requirements,
         'employmentType': employmentType,
         'experienceLevel': experienceLevel,
         'paymentType': paymentType,

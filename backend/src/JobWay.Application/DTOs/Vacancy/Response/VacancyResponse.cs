@@ -11,6 +11,8 @@ public class VacancyResponse
     public string CompanyName { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;
+    public string? Responsibilities { get; set; }
+    public string? Requirements { get; set; }
     public EmploymentType EmploymentType { get; set; }
     public ExperienceLevel ExperienceLevel { get; set; }
     public PaymentType PaymentType { get; set; }
