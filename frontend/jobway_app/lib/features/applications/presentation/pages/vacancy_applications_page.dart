@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
+import 'package:jobway_app/features/analytics/presentation/providers/analytics_provider.dart';
 import 'package:jobway_app/features/review/presentation/widgets/review_bottom_sheet.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
@@ -63,6 +65,7 @@ class _VacancyApplicationsPageState
     setState(() => _updatingApplicationId = applicationId);
     try {
       await _controller.updateStatus(applicationId, status);
+      ref.invalidate(employerAnalyticsProvider);
       AppSnackbar.showSuccess('Статус обновлён');
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
@@ -84,50 +87,35 @@ class _VacancyApplicationsPageState
 
   Widget _buildHeader(VacancyApplicationsState state) {
     final colors = context.colors;
-    final isByMatch = state.filter.sortBy == 'matchScore';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            _applicationsCountLabel(state.totalCount),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: colors.textSecondary,
-            ),
-          ),
-          PopupMenuButton<String>(
-            initialValue: state.filter.sortBy,
-            onSelected: _controller.applySort,
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'date', child: Text('Сначала новые')),
-              PopupMenuItem(
-                value: 'matchScore',
-                child: Text('Лучшие совпадения'),
-              ),
-            ],
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  LucideIcons.arrowUpDown,
-                  size: 18,
-                  color: colors.textSecondary,
+          Row(
+            children: [
+              Text(
+                _applicationsCountLabel(state.totalCount),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
                 ),
-                const SizedBox(width: 4),
+              ),
+              if (state.filter.status != null) ...[
+                const SizedBox(width: 8),
                 Text(
-                  isByMatch ? 'Лучшие совпадения' : 'Сначала новые',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textSecondary,
-                  ),
+                  '· ${applicationStatusLabel(state.filter.status!)}',
+                  style: TextStyle(fontSize: 13, color: colors.textMuted),
                 ),
               ],
-            ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _SortSwitcher(
+            selected: state.filter.sortBy,
+            onChanged: _controller.applySort,
           ),
         ],
       ),
@@ -231,6 +219,72 @@ class _VacancyApplicationsPageState
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SortSwitcher extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  const _SortSwitcher({required this.selected, required this.onChanged});
+
+  static const _options = [
+    (value: 'date', label: 'Сначала новые', icon: Icons.schedule_rounded),
+    (value: 'matchScore', label: 'Лучшие совпадения', icon: Icons.bolt_rounded),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.border),
+      ),
+      child: Row(
+        children: _options.map((option) {
+          final isSelected = option.value == selected;
+          final textColor = isSelected ? colors.surface : colors.textSecondary;
+
+          return Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onChanged(option.value),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? colors.textPrimary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(option.icon, size: 15, color: textColor),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        option.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

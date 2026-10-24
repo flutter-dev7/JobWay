@@ -102,10 +102,11 @@ class _AdminCompanyDetailPageState
     if (confirmed == true) _setTier('Free');
   }
 
-  Widget _buildTierSection() {
+    Widget _buildTierSection() {
     final colors = context.colors;
     const proColor = Color(0xFFF59E0B);
     final tierColor = _company.isPro ? proColor : colors.textSecondary;
+    final isVerified = _company.verificationStatus == 'Verified';
 
     return SectionCard(
       title: 'Тариф',
@@ -116,10 +117,7 @@ class _AdminCompanyDetailPageState
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: tierColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(10),
@@ -145,62 +143,77 @@ class _AdminCompanyDetailPageState
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            'На сколько дней выдать или продлить',
-            style: TextStyle(fontSize: 12, color: colors.textMuted),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: _durations.map((days) {
-              final isSelected = _days == days;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: GestureDetector(
-                  onTap: () => setState(() => _days = days),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? colors.textPrimary
-                          : colors.surfaceMuted,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+          if (!isVerified)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colors.surfaceMuted,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline, size: 18, color: colors.textMuted),
+                  const SizedBox(width: 10),
+                  Expanded(
                     child: Text(
-                      '$days дн.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? colors.surface
-                            : colors.textSecondary,
+                      'Тариф Pro можно выдать только после верификации компании.',
+                      style: TextStyle(fontSize: 13, height: 1.4, color: colors.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else ...[
+            Text(
+              'На сколько дней выдать или продлить',
+              style: TextStyle(fontSize: 12, color: colors.textMuted),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: _durations.map((days) {
+                final isSelected = _days == days;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () => setState(() => _days = days),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? colors.textPrimary : colors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '$days дн.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected ? colors.surface : colors.textSecondary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          AppButton(
-            label: _company.isPro ? 'Продлить Pro' : 'Выдать Pro',
-            isLoading: _isSaving,
-            onPressed: () => _setTier('Pro'),
-          ),
-          if (_company.isPro) ...[
-            const SizedBox(height: 8),
-            Center(
-              child: TextButton(
-                onPressed: _isSaving ? null : _confirmDowngrade,
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFDC2626),
-                ),
-                child: const Text('Перевести на Free'),
-              ),
+                );
+              }).toList(),
             ),
+            const SizedBox(height: 16),
+            AppButton(
+              label: _company.isPro ? 'Продлить Pro' : 'Выдать Pro',
+              isLoading: _isSaving,
+              onPressed: () => _setTier('Pro'),
+            ),
+            if (_company.isPro) ...[
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  onPressed: _isSaving ? null : _confirmDowngrade,
+                  style: TextButton.styleFrom(foregroundColor: const Color(0xFFDC2626)),
+                  child: const Text('Перевести на Free'),
+                ),
+              ),
+            ],
           ],
         ],
       ),

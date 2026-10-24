@@ -97,9 +97,11 @@ public class VacancyRepository : IVacancyRepository
             query = query.Where(v => v.Status == filter.Status);
 
         var totalCount = await query.CountAsync(cancellationToken);
+        var now = DateTime.UtcNow;
 
         var items = await query
-            .OrderByDescending(v => v.CreatedAt)
+            .OrderByDescending(v => v.Status == VacancyStatus.Active && v.FeaturedUntil != null && v.FeaturedUntil > now)
+            .ThenByDescending(v => v.CreatedAt)
             .ThenBy(v => v.Id)
             .Skip((filter.PageNumber - 1) * filter.PageSize)
             .Take(filter.PageSize)

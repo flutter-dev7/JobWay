@@ -6,6 +6,7 @@ import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:jobway_app/core/widgets/navigation/notification_bell.dart';
+import 'package:jobway_app/features/analytics/presentation/providers/analytics_provider.dart';
 import 'package:jobway_app/features/search/presentation/widgets/search_entry_button.dart';
 import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
 import 'package:jobway_app/features/subscription/presentation/widgets/promote_vacancy_sheet.dart';
@@ -61,12 +62,85 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
     try {
       await action(id);
       ref.invalidate(subscriptionProvider);
+      ref.invalidate(employerAnalyticsProvider);
       AppSnackbar.showSuccess(successMessage);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
       if (mounted) setState(() => _updatingVacancyId = null);
     }
+  }
+
+  Future<bool> _confirmPublish(Vacancy vacancy) async {
+    final subscription = ref.read(subscriptionProvider).valueOrNull;
+
+    if (subscription != null && subscription.isLimitReached) {
+      final upgrade = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: const Text('Достигнут лимит'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              'На вашем тарифе можно держать до ${subscription.activeVacanciesLimit} '
+              'активных вакансий. Закройте одну из них'
+              '${subscription.isPro ? '.' : ' или перейдите на Pro.'}',
+              textAlign: TextAlign.center,
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(subscription.isPro ? 'Понятно' : 'Закрыть'),
+            ),
+            if (!subscription.isPro)
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Улучшить до Pro'),
+              ),
+          ],
+        ),
+      );
+
+      if (upgrade == true && mounted) {
+        SubscriptionSheet.show(context, companyName: vacancy.companyName);
+      }
+      return false;
+    }
+
+    final slots = subscription == null
+        ? ''
+        : '\n\nПосле публикации активных вакансий будет '
+              '${subscription.activeVacanciesCount + 1} из ${subscription.activeVacanciesLimit}.';
+
+    final result = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Опубликовать вакансию?'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Text(
+            'Вакансия «${vacancy.title}» появится в ленте кандидатов, '
+            'а подходящие кандидаты получат уведомление.$slots',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Отмена'),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Опубликовать'),
+          ),
+        ],
+      ),
+    );
+
+    return result == true;
   }
 
   Future<void> _promote(Vacancy vacancy) async {
@@ -165,11 +239,15 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
         return MyVacancyCard(
           vacancy: vacancy,
           isUpdating: _updatingVacancyId == vacancy.id,
-          onPublish: () => _runAction(
-            vacancy.id,
-            _controller.publish,
-            'Вакансия опубликована',
-          ),
+          onPublish: () async {
+            final confirmed = await _confirmPublish(vacancy);
+            if (!mounted || !confirmed) return;
+            await _runAction(
+              vacancy.id,
+              _controller.publish,
+              'Вакансия опубликована',
+            );
+          },
           onClose: () async {
             final confirmed = await _confirmClose(vacancy);
             if (!mounted || !confirmed) return;
@@ -180,6 +258,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
           onEdit: () async {
             await context.push(AppRoutes.editVacancy, extra: vacancy);
             _controller.load();
+            ref.invalidate(employerAnalyticsProvider);
           },
           onTap: () => context.push(
             AppRoutes.vacancyApplications(vacancy.id),

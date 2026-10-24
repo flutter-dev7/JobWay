@@ -36,43 +36,47 @@ class _ProfileVisibilityCardState extends ConsumerState<ProfileVisibilityCard> {
     final colors = context.colors;
     final isVisible = ref.watch(profileVisibilityProvider).valueOrNull;
 
-    // Пока состояние не загрузилось или произошла ошибка, карточку не показываем
+    // Для работодателя и администратора (и пока не загрузилось) карточки нет
     if (isVisible == null) return const SizedBox.shrink();
 
-    return SectionCard(
-      title: 'Видимость профиля',
-      icon: Icons.visibility_outlined,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Виден работодателям',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: SectionCard(
+        title: 'Приватность',
+        icon: Icons.visibility_outlined,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Виден работодателям',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Верифицированные компании смогут найти вас в поиске и увидеть '
-                  'имя, фото, город, навыки и резюме. Дата рождения не показывается.',
-                  style: TextStyle(fontSize: 12, height: 1.5, color: colors.textSecondary),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    'Верифицированные компании смогут найти вас в поиске и увидеть '
+                    'имя, фото, город, навыки и резюме. Дата рождения не показывается. '
+                    'Компании, на вакансии которых вы откликнулись, видят ваш профиль в любом случае.',
+                    style: TextStyle(fontSize: 12, height: 1.5, color: colors.textSecondary),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Switch(
-            value: isVisible,
-            onChanged: _isSaving ? null : _toggle,
-            activeColor: context.accentColor,
-            activeTrackColor: context.accentColor.withOpacity(0.2),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Switch(
+              value: isVisible,
+              onChanged: _isSaving ? null : _toggle,
+              activeColor: context.accentColor,
+              activeTrackColor: context.accentColor.withOpacity(0.2),
+            ),
+          ],
+        ),
       ),
     );
   }

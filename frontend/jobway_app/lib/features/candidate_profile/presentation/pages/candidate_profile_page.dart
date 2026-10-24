@@ -6,8 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
+import 'package:jobway_app/core/widgets/display/profile_completion_card.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
-import 'package:jobway_app/features/search/presentation/widgets/profile_visibility_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -40,6 +40,11 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
     } catch (_) {
       AppSnackbar.showError('Не удалось открыть резюме');
     }
+  }
+
+  Future<void> _openEdit(Object profile) async {
+    await context.push(AppRoutes.editCandidateProfile, extra: profile);
+    ref.invalidate(candidateProfileProvider);
   }
 
   Future<void> _changePhoto() async {
@@ -266,6 +271,20 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                   ],
                 ),
               ),
+              ProfileCompletionCard(
+                total: 4,
+                missing: [
+                  if (profile.bio == null || profile.bio!.trim().isEmpty)
+                    'О себе',
+                  if (profile.skills.isEmpty) 'Навыки',
+                  if (profile.resumeFileUrl == null ||
+                      profile.resumeFileUrl!.isEmpty)
+                    'Резюме',
+                  if (profile.location == null || profile.location!.isEmpty)
+                    'Город',
+                ],
+                onFill: () => _openEdit(profile),
+              ),
               const SizedBox(height: 16),
               SectionCard(
                 title: 'Основная информация',
@@ -302,83 +321,75 @@ class _CandidateProfilePageState extends ConsumerState<CandidateProfilePage> {
                 ),
               ],
               const SizedBox(height: 16),
-              SectionCard(
-                title: 'Навыки',
-                icon: Icons.auto_awesome_outlined,
-                child: profile.skills.isEmpty
-                    ? Text(
-                        'Навыки пока не добавлены',
-                        style: TextStyle(fontSize: 14, color: colors.textMuted),
-                      )
-                    : Wrap(
-                        spacing: 8,
-                        runSpacing: 10,
-                        children: profile.skills
-                            .map((skill) => SkillChip(label: skill.nameRu))
-                            .toList(),
+              if (profile.skills.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                SectionCard(
+                  title: 'Навыки',
+                  icon: Icons.auto_awesome_outlined,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 10,
+                    children: profile.skills
+                        .map((skill) => SkillChip(label: skill.nameRu))
+                        .toList(),
+                  ),
+                ),
+              ],
+              if (profile.resumeFileUrl != null &&
+                  profile.resumeFileUrl!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                SectionCard(
+                  title: 'Резюме',
+                  icon: Icons.attach_file_rounded,
+                  child: GestureDetector(
+                    onTap: () => _openResume(profile.resumeFileUrl!),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-              ),
-              const SizedBox(height: 16),
-              SectionCard(
-                title: 'Резюме',
-                icon: Icons.attach_file_rounded,
-                child:
-                    profile.resumeFileUrl == null ||
-                        profile.resumeFileUrl!.isEmpty
-                    ? Text(
-                        'Резюме не загружено — добавьте его в редактировании профиля',
-                        style: TextStyle(fontSize: 14, color: colors.textMuted),
-                      )
-                    : GestureDetector(
-                        onTap: () => _openResume(profile.resumeFileUrl!),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: colors.surfaceMuted,
-                            borderRadius: BorderRadius.circular(12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEE2E2),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.picture_as_pdf_outlined,
+                              size: 20,
+                              color: Color(0xFFDC2626),
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFEE2E2),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.picture_as_pdf_outlined,
-                                  size: 20,
-                                  color: Color(0xFFDC2626),
-                                ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              ApiConstants.extractFileName(
+                                profile.resumeFileUrl!,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  ApiConstants.extractFileName(
-                                    profile.resumeFileUrl!,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.textPrimary,
-                                  ),
-                                ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: colors.textPrimary,
                               ),
-                              Icon(
-                                Icons.open_in_new_rounded,
-                                size: 18,
-                                color: colors.textMuted,
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                          Icon(
+                            Icons.open_in_new_rounded,
+                            size: 18,
+                            color: colors.textMuted,
+                          ),
+                        ],
                       ),
-              ),
-              const SizedBox(height: 16),
-              const ProfileVisibilityCard(),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               ReviewsSection(userId: profile.userId),
             ],

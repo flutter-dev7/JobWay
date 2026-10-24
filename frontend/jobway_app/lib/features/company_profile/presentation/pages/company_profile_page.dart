@@ -7,6 +7,7 @@ import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
 import 'package:jobway_app/core/widgets/display/info_row.dart';
+import 'package:jobway_app/core/widgets/display/profile_completion_card.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
 import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
 import 'package:jobway_app/features/subscription/presentation/widgets/subscription_card.dart';
@@ -18,7 +19,6 @@ import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/display/profile_photo.dart';
 import '../../../../core/widgets/display/section_card.dart';
 import '../providers/company_profile_provider.dart';
-import '../widgets/verification_badge.dart';
 
 class CompanyProfilePage extends ConsumerStatefulWidget {
   const CompanyProfilePage({super.key});
@@ -51,6 +51,11 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
     } finally {
       if (mounted) setState(() => _isUploadingLogo = false);
     }
+  }
+
+  Future<void> _openEdit(Object profile) async {
+    await context.push(AppRoutes.editCompanyProfile, extra: profile);
+    ref.invalidate(companyProfileProvider);
   }
 
   @override
@@ -139,8 +144,6 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
             children: [
-              VerificationBadge(status: profile.verificationStatus),
-              const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
@@ -191,11 +194,28 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                         ),
                       ),
                     ],
+                    const SizedBox(height: 14),
+                    _VerificationPill(status: profile.verificationStatus),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               SubscriptionCard(companyName: profile.companyName),
+              ProfileCompletionCard(
+                total: 4,
+                missing: [
+                  if (profile.description == null ||
+                      profile.description!.trim().isEmpty)
+                    'Описание',
+                  if (profile.industry == null || profile.industry!.isEmpty)
+                    'Индустрия',
+                  if (profile.website == null || profile.website!.isEmpty)
+                    'Сайт',
+                  if (profile.location == null || profile.location!.isEmpty)
+                    'Локация',
+                ],
+                onFill: () => _openEdit(profile),
+              ),
               if (profile.description != null &&
                   profile.description!.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -213,22 +233,27 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                 ),
               ],
               const SizedBox(height: 16),
-              SectionCard(
-                title: 'Информация',
-                icon: Icons.info_outline,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (profile.industry != null &&
-                        profile.industry!.isNotEmpty) ...[
-                      InfoRow(label: 'Индустрия', value: profile.industry!),
-                      const SizedBox(height: 14),
+              if ((profile.industry != null && profile.industry!.isNotEmpty) ||
+                  (profile.website != null && profile.website!.isNotEmpty)) ...[
+                const SizedBox(height: 16),
+                SectionCard(
+                  title: 'Информация',
+                  icon: Icons.info_outline,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (profile.industry != null &&
+                          profile.industry!.isNotEmpty) ...[
+                        InfoRow(label: 'Индустрия', value: profile.industry!),
+                        const SizedBox(height: 14),
+                      ],
+                      if (profile.website != null &&
+                          profile.website!.isNotEmpty)
+                        _WebsiteLine(url: profile.website!),
                     ],
-                    if (profile.website != null && profile.website!.isNotEmpty)
-                      _WebsiteLine(url: profile.website!),
-                  ],
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 16),
               ReviewsSection(userId: profile.userId),
             ],
@@ -297,6 +322,90 @@ class _WebsiteLine extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _VerificationPill extends StatelessWidget {
+  final String status;
+
+  const _VerificationPill({required this.status});
+
+  ({String label, String? hint, IconData icon, Color color}) _style() {
+    switch (status) {
+      case 'Verified':
+        return (
+          label: 'Верифицирована',
+          hint: null,
+          icon: Icons.verified_rounded,
+          color: const Color(0xFF059669),
+        );
+      case 'Pending':
+        return (
+          label: 'На проверке',
+          hint: 'Заявка на проверке у администратора',
+          icon: Icons.hourglass_top_rounded,
+          color: const Color(0xFFD97706),
+        );
+      case 'Rejected':
+        return (
+          label: 'Верификация отклонена',
+          hint: 'Проверьте данные компании и обратитесь в поддержку',
+          icon: Icons.gpp_bad_outlined,
+          color: const Color(0xFFDC2626),
+        );
+      default:
+        return (
+          label: 'Не верифицирована',
+          hint: 'Публиковать вакансии можно после верификации',
+          icon: Icons.shield_outlined,
+          color: const Color(0xFF6B7280),
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final style = _style();
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: style.color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(style.icon, size: 15, color: style.color),
+              const SizedBox(width: 6),
+              Text(
+                style.label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: style.color,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (style.hint != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            style.hint!,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.4,
+              color: colors.textMuted,
+            ),
+          ),
+        ],
       ],
     );
   }

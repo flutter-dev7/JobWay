@@ -20,6 +20,7 @@ public class JobApplicationServiceTests
     private readonly Mock<IJobApplicationRepository> _jobApplicationRepositoryMock = new();
     private readonly Mock<IMatchingService> _matchingServiceMock = new();
     private readonly Mock<INotificationService> _notificationServiceMock = new();
+    private readonly Mock<ICacheService> _cacheServiceMock = new();
 
     private readonly JobApplicationService _sut;
 
@@ -30,7 +31,7 @@ public class JobApplicationServiceTests
         _unitOfWorkMock.Setup(u => u.Vacancies).Returns(_vacancyRepositoryMock.Object);
         _unitOfWorkMock.Setup(u => u.JobApplications).Returns(_jobApplicationRepositoryMock.Object);
 
-        _sut = new JobApplicationService(_unitOfWorkMock.Object, _matchingServiceMock.Object, _notificationServiceMock.Object);
+        _sut = new JobApplicationService(_unitOfWorkMock.Object, _matchingServiceMock.Object, _notificationServiceMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]

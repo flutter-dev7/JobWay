@@ -1,34 +1,121 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/widgets/navigation/floating_nav_bar.dart';
+import 'package:jobway_app/features/admin/presentation/pages/admin_companies_page.dart';
+import 'package:jobway_app/features/admin/presentation/pages/admin_profile_page.dart';
+import 'package:jobway_app/features/admin/presentation/pages/admin_users_page.dart';
+import 'package:jobway_app/features/admin/presentation/providers/admin_provider.dart';
+import 'package:jobway_app/features/analytics/presentation/pages/employer_analytics_page.dart';
+import 'package:jobway_app/features/analytics/presentation/providers/analytics_provider.dart';
+import 'package:jobway_app/features/applications/presentation/pages/applications_overview_page.dart';
+import 'package:jobway_app/features/applications/presentation/pages/my_applications_page.dart';
+import 'package:jobway_app/features/applications/presentation/providers/applications_provider.dart';
+import 'package:jobway_app/features/candidate_profile/presentation/pages/candidate_profile_page.dart';
+import 'package:jobway_app/features/candidate_profile/presentation/providers/candidate_profile_provider.dart';
+import 'package:jobway_app/features/chat/presentation/pages/chat_threads_page.dart';
+import 'package:jobway_app/features/chat/presentation/providers/chat_threads_controller.dart';
+import 'package:jobway_app/features/company_profile/presentation/pages/company_profile_page.dart';
+import 'package:jobway_app/features/company_profile/presentation/providers/company_profile_provider.dart';
+import 'package:jobway_app/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
+import 'package:jobway_app/features/vacancies/presentation/pages/my_vacancies_page.dart';
+import 'package:jobway_app/features/vacancies/presentation/pages/saved_vacancies_page.dart';
+import 'package:jobway_app/features/vacancies/presentation/pages/vacancies_list_page.dart';
+import 'package:jobway_app/features/vacancies/presentation/providers/my_vacancies_controller.dart';
+import 'package:jobway_app/features/vacancies/presentation/providers/saved_vacancies_controller.dart';
+import 'package:jobway_app/features/vacancies/presentation/providers/vacancies_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../../../../core/theme/app_theme_extension.dart';
-import '../../../../core/widgets/navigation/floating_nav_bar.dart';
-import '../../../admin/presentation/pages/admin_companies_page.dart';
-import '../../../admin/presentation/pages/admin_profile_page.dart';
-import '../../../admin/presentation/pages/admin_users_page.dart';
-import '../../../analytics/presentation/pages/employer_analytics_page.dart';
-import '../../../applications/presentation/pages/applications_overview_page.dart';
-import '../../../applications/presentation/pages/my_applications_page.dart';
-import '../../../candidate_profile/presentation/pages/candidate_profile_page.dart';
-import '../../../chat/presentation/pages/chat_threads_page.dart';
-import '../../../company_profile/presentation/pages/company_profile_page.dart';
-import '../../../vacancies/presentation/pages/my_vacancies_page.dart';
-import '../../../vacancies/presentation/pages/saved_vacancies_page.dart';
-import '../../../vacancies/presentation/pages/vacancies_list_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   final String role;
 
   const HomePage({super.key, required this.role});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage>
+    with WidgetsBindingObserver {
+  // Не обновляем одну вкладку чаще этого интервала
+  static const _refreshInterval = Duration(seconds: 20);
+
   int _currentIndex = 0;
+  final _lastRefresh = <int, DateTime>{0: DateTime.now()};
 
   late final List<FloatingNavItem> _navItems = _buildNavItems();
   late final List<Widget> _pages = _buildPages();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshTab(_currentIndex, force: true);
+    }
+  }
+
+  void _refreshTab(int index, {bool force = false}) {
+    final last = _lastRefresh[index];
+    if (!force &&
+        last != null &&
+        DateTime.now().difference(last) < _refreshInterval) {
+      return;
+    }
+    _lastRefresh[index] = DateTime.now();
+
+    ref.invalidate(unreadNotificationsCountProvider);
+
+    switch (widget.role) {
+      case 'Employer':
+        switch (index) {
+          case 0:
+            ref.read(myVacanciesControllerProvider.notifier).load();
+            ref.invalidate(subscriptionProvider);
+          case 1:
+            ref.read(applicationsOverviewControllerProvider.notifier).load();
+          case 2:
+            ref.read(chatThreadsControllerProvider.notifier).load();
+          case 3:
+            ref.invalidate(employerAnalyticsProvider);
+          case 4:
+            ref.invalidate(companyProfileProvider);
+            ref.invalidate(subscriptionProvider);
+        }
+      case 'Admin':
+        switch (index) {
+          case 0:
+            ref.read(adminCompaniesControllerProvider.notifier).load();
+          case 1:
+            ref.read(adminUsersControllerProvider.notifier).load();
+        }
+      default:
+        switch (index) {
+          case 0:
+            ref.read(vacanciesControllerProvider.notifier).load();
+          case 1:
+            ref.read(savedVacanciesControllerProvider.notifier).load();
+          case 2:
+            ref.read(chatThreadsControllerProvider.notifier).load();
+          case 3:
+            ref.read(myApplicationsControllerProvider.notifier).load();
+            ref.invalidate(myAppliedVacancyIdsProvider);
+          case 4:
+            ref.invalidate(candidateProfileProvider);
+        }
+    }
+  }
 
   List<FloatingNavItem> _buildNavItems() {
     switch (widget.role) {
@@ -100,7 +187,10 @@ class _HomePageState extends State<HomePage> {
             child: Center(
               child: FloatingNavBar(
                 currentIndex: _currentIndex,
-                onTap: (index) => setState(() => _currentIndex = index),
+                onTap: (index) {
+                  setState(() => _currentIndex = index);
+                  _refreshTab(index);
+                },
                 items: _navItems,
               ),
             ),

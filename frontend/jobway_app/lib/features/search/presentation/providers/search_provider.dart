@@ -49,6 +49,10 @@ final publicCompanyVacanciesProvider = FutureProvider.autoDispose.family<List<Va
   (ref, id) => ref.read(searchRemoteDataSourceProvider).getCompanyVacancies(id),
 );
 
-final profileVisibilityProvider = FutureProvider.autoDispose<bool>(
-  (ref) => ref.read(searchRemoteDataSourceProvider).getVisibility(),
-);
+final profileVisibilityProvider = FutureProvider.autoDispose<bool?>((ref) async {
+  try {
+    return await ref.read(searchRemoteDataSourceProvider).getVisibility();
+  } catch (_) {
+    return null;
+  }
+});

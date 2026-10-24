@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jobway_app/features/search/presentation/widgets/profile_visibility_card.dart';
 import 'package:jobway_app/features/settings/presentation/widgets/delete_account_dialog.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/providers/core_providers.dart';
@@ -77,6 +78,7 @@ class SettingsPage extends ConsumerWidget {
               onTap: () => context.push(AppRoutes.changePassword),
             ),
           ),
+          const ProfileVisibilityCard(),
           const SizedBox(height: 16),
           SectionCard(
             title: 'Оформление',

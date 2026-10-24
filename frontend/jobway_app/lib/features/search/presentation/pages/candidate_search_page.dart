@@ -14,7 +14,8 @@ class CandidateSearchPage extends ConsumerStatefulWidget {
   const CandidateSearchPage({super.key});
 
   @override
-  ConsumerState<CandidateSearchPage> createState() => _CandidateSearchPageState();
+  ConsumerState<CandidateSearchPage> createState() =>
+      _CandidateSearchPageState();
 }
 
 class _CandidateSearchPageState extends ConsumerState<CandidateSearchPage> {
@@ -48,7 +49,9 @@ class _CandidateSearchPageState extends ConsumerState<CandidateSearchPage> {
     final state = ref.watch(candidateSearchControllerProvider);
     final controller = ref.read(candidateSearchControllerProvider.notifier);
     final colors = context.colors;
-    final selectedIndex = _filters.indexOf(state.filter).clamp(0, _filters.length - 1);
+    final selectedIndex = _filters
+        .indexOf(state.filter)
+        .clamp(0, _filters.length - 1);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -89,13 +92,14 @@ class _CandidateSearchPageState extends ConsumerState<CandidateSearchPage> {
               emptyIcon: Icons.person_search_rounded,
               emptyTitle: 'Кандидаты не найдены',
               emptySubtitle:
-                  'В поиске видны кандидаты, которые открыли профиль для работодателей, '
-                  'и те, кто откликнулся на ваши вакансии',
+                  'В поиске видны только кандидаты, которые открыли профиль для работодателей',
               itemBuilder: (context, candidate) => CandidateSearchCard(
                 candidate: candidate,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => CandidateProfileViewPage(candidateProfileId: candidate.id),
+                    builder: (_) => CandidateProfileViewPage(
+                      candidateProfileId: candidate.id,
+                    ),
                   ),
                 ),
               ),

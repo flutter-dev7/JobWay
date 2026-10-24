@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/constants/api_constants.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
+import 'package:jobway_app/core/widgets/inputs/app_multiline_field.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
@@ -218,10 +219,13 @@ class _EditCandidateProfilePageState
           SectionCard(
             title: 'О себе',
             icon: Icons.notes_rounded,
-            child: AppTextField(
+            child: AppMultilineField(
               controller: _bioController,
               label: 'Расскажите о себе',
-              icon: Icons.info_outline,
+              hint: 'Опыт, достижения, чем вы занимались',
+              minLines: 5,
+              maxLines: 12,
+              maxLength: 1500,
             ),
           ),
           const SizedBox(height: 16),

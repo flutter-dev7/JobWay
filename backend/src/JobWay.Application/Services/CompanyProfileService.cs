@@ -24,8 +24,8 @@ public class CompanyProfileService : ICompanyProfileService
         _cacheService = cacheService;
     }
 
-    private static string CacheKey(Guid userId) => $"company-profile:{userId}";
-
+    private static string CacheKey(Guid userId) => CacheKeys.CompanyProfile(userId);
+    
     public async Task<Result<CompanyProfileResponse>> GetMyProfileAsync(Guid userId, CancellationToken cancellationToken)
     {
         var cached = await _cacheService.GetAsync(CacheKey(userId), cancellationToken);

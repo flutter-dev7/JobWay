@@ -1,3 +1,4 @@
+using System.Text.Json;
 using JobWay.Application.Common;
 using JobWay.Application.DTOs.Skill.Response;
 using JobWay.Application.DTOs.Vacancy.Request;
@@ -11,11 +12,17 @@ namespace JobWay.Application.Services;
 
 public class SavedVacancyService : ISavedVacancyService
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private static readonly TimeSpan IdsCacheDuration = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan ListCacheDuration = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan VersionCacheDuration = TimeSpan.FromDays(1);
 
-    public SavedVacancyService(IUnitOfWork unitOfWork)
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
+
+    public SavedVacancyService(IUnitOfWork unitOfWork, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<string>> SaveAsync(Guid userId, Guid vacancyId, CancellationToken cancellationToken)
@@ -30,6 +37,8 @@ public class SavedVacancyService : ISavedVacancyService
         _unitOfWork.SavedVacancies.Add(new SavedVacancy { UserId = userId, VacancyId = vacancyId });
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await InvalidateAsync(userId, cancellationToken);
+
         return Result<string>.Ok("Vacancy saved");
     }
 
@@ -42,6 +51,8 @@ public class SavedVacancyService : ISavedVacancyService
         _unitOfWork.SavedVacancies.Remove(saved);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await InvalidateAsync(userId, cancellationToken);
+
         return Result<string>.Ok("Vacancy removed from saved");
     }
 
@@ -50,21 +61,59 @@ public class SavedVacancyService : ISavedVacancyService
         filter.PageNumber = Math.Max(filter.PageNumber, 1);
         filter.PageSize = Math.Clamp(filter.PageSize, 1, 50);
 
+        var version = await _cacheService.GetAsync(CacheKeys.SavedVersion(userId), cancellationToken) ?? "0";
+        var cacheKey = CacheKeys.Saved(userId, version, filter.PageNumber, filter.PageSize);
+
+        var cached = await _cacheService.GetAsync(cacheKey, cancellationToken);
+        if (cached is not null)
+        {
+            var cachedResult = JsonSerializer.Deserialize<PagedResult<VacancyResponse>>(cached);
+            if (cachedResult is not null)
+                return Result<PagedResult<VacancyResponse>>.Ok(cachedResult);
+        }
+
         var (vacancies, totalCount) = await _unitOfWork.SavedVacancies.GetPagedSavedVacanciesAsync(userId, filter, cancellationToken);
 
-        return Result<PagedResult<VacancyResponse>>.Ok(new PagedResult<VacancyResponse>
+        var result = new PagedResult<VacancyResponse>
         {
             Items = vacancies.Select(MapToResponse).ToList(),
             PageNumber = filter.PageNumber,
             PageSize = filter.PageSize,
             TotalCount = totalCount
-        });
+        };
+
+        await _cacheService.SetAsync(cacheKey, JsonSerializer.Serialize(result), ListCacheDuration, cancellationToken);
+
+        return Result<PagedResult<VacancyResponse>>.Ok(result);
     }
 
     public async Task<Result<List<Guid>>> GetSavedIdsAsync(Guid userId, CancellationToken cancellationToken)
     {
+        var cacheKey = CacheKeys.SavedIds(userId);
+
+        var cached = await _cacheService.GetAsync(cacheKey, cancellationToken);
+        if (cached is not null)
+        {
+            var cachedIds = JsonSerializer.Deserialize<List<Guid>>(cached);
+            if (cachedIds is not null)
+                return Result<List<Guid>>.Ok(cachedIds);
+        }
+
         var ids = await _unitOfWork.SavedVacancies.GetSavedVacancyIdsAsync(userId, cancellationToken);
+        await _cacheService.SetAsync(cacheKey, JsonSerializer.Serialize(ids), IdsCacheDuration, cancellationToken);
+
         return Result<List<Guid>>.Ok(ids);
+    }
+
+    // Сбрасываем Id и «версию» страниц списка: прежние страницы больше не читаются
+    private async Task InvalidateAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        await _cacheService.RemoveAsync(CacheKeys.SavedIds(userId), cancellationToken);
+        await _cacheService.SetAsync(
+            CacheKeys.SavedVersion(userId),
+            Guid.NewGuid().ToString("N"),
+            VersionCacheDuration,
+            cancellationToken);
     }
 
     private static VacancyResponse MapToResponse(Vacancy vacancy) => new()
@@ -75,6 +124,8 @@ public class SavedVacancyService : ISavedVacancyService
         CompanyName = vacancy.CompanyProfile.CompanyName,
         Title = vacancy.Title,
         Description = vacancy.Description,
+        Responsibilities = vacancy.Responsibilities,
+        Requirements = vacancy.Requirements,
         EmploymentType = vacancy.EmploymentType,
         ExperienceLevel = vacancy.ExperienceLevel,
         PaymentType = vacancy.PaymentType,

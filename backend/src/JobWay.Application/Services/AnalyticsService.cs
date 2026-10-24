@@ -22,8 +22,8 @@ public class AnalyticsService : IAnalyticsService
         _cacheService = cacheService;
     }
 
-    private static string CacheKey(Guid companyProfileId) => $"employer-analytics:{companyProfileId}";
-
+    private static string CacheKey(Guid companyProfileId) => CacheKeys.EmployerAnalytics(companyProfileId);
+    
     public async Task<Result<EmployerAnalyticsResponse>> GetEmployerAnalyticsAsync(Guid employerUserId, CancellationToken cancellationToken)
     {
         var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);

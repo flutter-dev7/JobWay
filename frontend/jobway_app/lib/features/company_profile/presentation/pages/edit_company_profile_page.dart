@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/widgets/inputs/app_multiline_field.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
@@ -137,10 +138,14 @@ class _EditCompanyProfilePageState
             icon: Icons.notes_rounded,
             child: Column(
               children: [
-                AppTextField(
+                AppMultilineField(
                   controller: _descriptionController,
                   label: 'Описание',
-                  icon: Icons.info_outline,
+                  hint:
+                      'Чем занимается компания, сколько человек в команде, что для вас важно',
+                  minLines: 6,
+                  maxLines: 12,
+                  maxLength: 2000,
                 ),
                 const SizedBox(height: 14),
                 AppTextField(

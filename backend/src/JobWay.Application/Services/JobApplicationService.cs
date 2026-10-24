@@ -13,12 +13,18 @@ public class JobApplicationService : IJobApplicationService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMatchingService _matchingService;
     private readonly INotificationService _notificationService;
-
-    public JobApplicationService(IUnitOfWork unitOfWork, IMatchingService matchingService, INotificationService notificationService)
+    private readonly ICacheService _cacheService;
+    
+    public JobApplicationService(
+        IUnitOfWork unitOfWork,
+        IMatchingService matchingService,
+        INotificationService notificationService,
+        ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _matchingService = matchingService;
         _notificationService = notificationService;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<JobApplicationResponse>> ApplyAsync(Guid candidateUserId, Guid vacancyId, CreateJobApplicationRequest request, CancellationToken cancellationToken)
@@ -51,6 +57,7 @@ public class JobApplicationService : IJobApplicationService
 
         _unitOfWork.JobApplications.Add(application);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.EmployerAnalytics(vacancy.CompanyProfileId), cancellationToken);
 
         await _notificationService.CreateAsync(
             vacancy.CompanyProfile.UserId,
@@ -80,6 +87,7 @@ public class JobApplicationService : IJobApplicationService
 
         _unitOfWork.JobApplications.Update(application);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.EmployerAnalytics(application.Vacancy.CompanyProfileId), cancellationToken);
 
         await _notificationService.CreateAsync(
             application.CandidateProfile.UserId,
@@ -181,8 +189,8 @@ public class JobApplicationService : IJobApplicationService
     private JobApplicationResponse MapToResponse(JobApplication application, bool hasReview)
     {
         var match = _matchingService.Calculate(application.CandidateProfile.Skills, application.Vacancy.RequiredSkills);
-        var isCandidateActive = application.CandidateProfile.User.IsActive;
-
+        var isCandidateActive = application.CandidateProfile.User?.IsActive ?? true;
+        
         return new JobApplicationResponse
         {
             Id = application.Id,

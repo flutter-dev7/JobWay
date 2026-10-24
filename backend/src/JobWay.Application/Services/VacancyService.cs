@@ -71,6 +71,7 @@ public class VacancyService : IVacancyService
 
         _unitOfWork.Vacancies.Add(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.EmployerAnalytics(companyProfile.Id), cancellationToken);
 
         await _cacheService.RemoveAsync(TodayCountCacheKey, cancellationToken);
 
@@ -115,8 +116,10 @@ public class VacancyService : IVacancyService
 
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
+        
+        await _cacheService.RemoveAsync(CacheKeys.EmployerAnalytics(companyProfile.Id), cancellationToken);
         await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.Subscription(employerUserId), cancellationToken);
 
         return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
     }
@@ -235,6 +238,7 @@ public class VacancyService : IVacancyService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.Subscription(employerUserId), cancellationToken);
 
         return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
     }
@@ -326,7 +330,9 @@ public class VacancyService : IVacancyService
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _cacheService.RemoveAsync(CacheKeys.EmployerAnalytics(companyProfile.Id), cancellationToken);
         await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.Subscription(employerUserId), cancellationToken);
 
         return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
     }

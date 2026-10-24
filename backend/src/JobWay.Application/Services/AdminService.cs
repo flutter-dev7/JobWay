@@ -87,6 +87,7 @@ public class AdminService : IAdminService
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.Subscription(vacancy.CompanyProfile.UserId), cancellationToken);
 
         return Result<string>.Ok("Vacancy archived");
     }
@@ -96,6 +97,10 @@ public class AdminService : IAdminService
         var company = await _unitOfWork.CompanyProfiles.GetByIdAsync(companyId, cancellationToken);
         if (company is null)
             return Result<CompanyModerationResponse>.Fail("Company not found", ErrorType.NotFound);
+        
+        if (request.Tier == CompanyTier.Pro && company.VerificationStatus != VerificationStatus.Verified)
+            return Result<CompanyModerationResponse>.Fail(
+                "Тариф Pro можно выдать только верифицированной компании", ErrorType.Validation);
 
         string title;
         string message;
@@ -127,6 +132,7 @@ public class AdminService : IAdminService
 
         _unitOfWork.CompanyProfiles.Update(company);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.Subscription(company.UserId), cancellationToken);
 
         await _notificationService.CreateAsync(
             company.UserId,
@@ -219,6 +225,7 @@ public class AdminService : IAdminService
 
         _unitOfWork.CompanyProfiles.Update(company);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.CompanyProfile(company.UserId), cancellationToken);
 
         var (type, title, message) = status == VerificationStatus.Verified
             ? (NotificationType.CompanyVerified, "Компания верифицирована", $"Поздравляем! «{company.CompanyName}» прошла верификацию и теперь может публиковать вакансии.")

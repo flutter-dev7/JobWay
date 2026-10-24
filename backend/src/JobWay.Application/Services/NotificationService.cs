@@ -85,8 +85,16 @@ public class NotificationService : INotificationService
         _unitOfWork.Notifications.Add(notification);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var deviceTokens = await _unitOfWork.DeviceTokens.GetTokensByUserIdAsync(userId, cancellationToken);
-        await _pushNotificationService.SendAsync(deviceTokens, title, message, cancellationToken);
+        try
+        {
+            var deviceTokens = await _unitOfWork.DeviceTokens.GetTokensByUserIdAsync(userId, cancellationToken);
+            await _pushNotificationService.SendAsync(deviceTokens, title, message, cancellationToken);
+        }
+        catch
+        {
+            // Сбой push (нет Firebase, устаревший токен) не должен ломать основное действие.
+            // Само уведомление уже сохранено в базе и видно в приложении
+        }
     }
     
     public async Task<Result<string>> RegisterDeviceTokenAsync(Guid userId, RegisterDeviceTokenRequest request, CancellationToken cancellationToken)

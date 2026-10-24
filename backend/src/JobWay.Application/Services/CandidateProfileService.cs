@@ -26,8 +26,8 @@ public class CandidateProfileService : ICandidateProfileService
         _cacheService = cacheService;
     }
 
-    private static string CacheKey(Guid userId) => $"candidate-profile:{userId}";
-
+    private static string CacheKey(Guid userId) => CacheKeys.CandidateProfile(userId);
+    
     public async Task<Result<CandidateProfileResponse>> GetMyProfileAsync(Guid userId, CancellationToken cancellationToken)
     {
         var cached = await _cacheService.GetAsync(CacheKey(userId), cancellationToken);

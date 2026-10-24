@@ -49,7 +49,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
     return 'до ${to!.toStringAsFixed(0)} $currencyLabelText $suffix';
   }
 
-  Future<void> _apply(bool hasApplied) async {
+    Future<void> _apply(bool hasApplied) async {
     if (_isApplying || hasApplied) return;
 
     setState(() => _isApplying = true);
@@ -57,12 +57,15 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
       await ref.read(applyToVacancyUseCaseProvider).call(widget.vacancyId);
       if (!mounted) return;
       AppSnackbar.showSuccess('Отклик отправлен');
-      ref.invalidate(myAppliedVacancyIdsProvider);
-      ref.invalidate(myApplicationsControllerProvider);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
-      if (mounted) setState(() => _isApplying = false);
+      // Отклик мог дойти до сервера, даже если ответ пришёл с ошибкой: списки обновляем всегда
+      if (mounted) {
+        ref.invalidate(myAppliedVacancyIdsProvider);
+        ref.invalidate(myApplicationsControllerProvider);
+        setState(() => _isApplying = false);
+      }
     }
   }
 

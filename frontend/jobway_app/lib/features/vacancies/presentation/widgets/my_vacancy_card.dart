@@ -84,15 +84,16 @@ class MyVacancyCard extends StatelessWidget {
     final isFeatured = vacancy.isFeatured;
     final actions = <Widget>[];
 
-    if (vacancy.status == 'Active' && !isFeatured && onPromote != null) {
+        if (vacancy.status == 'Active' && !isFeatured && onPromote != null) {
       actions.add(
         _ActionIcon(
-          icon: promoteLocked ? LucideIcons.lock : Icons.bolt_rounded,
+          icon: Icons.bolt_rounded,
           tooltip: promoteLocked
-              ? 'Продвинуть в топ (Pro)'
+              ? 'Продвинуть в топ (нужен Pro)'
               : 'Продвинуть в топ',
           color: VacancyTopStyle.amberDeep,
           borderColor: const Color(0xFFFDE68A),
+          badge: promoteLocked ? 'PRO' : null,
           onPressed: isUpdating ? null : onPromote,
         ),
       );
@@ -119,9 +120,9 @@ class MyVacancyCard extends StatelessWidget {
         ),
       );
     } else if (vacancy.status == 'Active') {
-      actions.add(
+            actions.add(
         _ActionIcon(
-          icon: LucideIcons.lock,
+          icon: Icons.cancel_outlined,
           tooltip: 'Закрыть вакансию',
           color: const Color(0xFFDC2626),
           borderColor: const Color(0xFFFECACA),
@@ -320,6 +321,7 @@ class _ActionIcon extends StatelessWidget {
   final String tooltip;
   final Color color;
   final Color borderColor;
+  final String? badge;
   final VoidCallback? onPressed;
 
   const _ActionIcon({
@@ -327,6 +329,7 @@ class _ActionIcon extends StatelessWidget {
     required this.tooltip,
     required this.color,
     required this.borderColor,
+    this.badge,
     required this.onPressed,
   });
 
@@ -337,17 +340,46 @@ class _ActionIcon extends StatelessWidget {
       child: SizedBox(
         width: 36,
         height: 36,
-        child: OutlinedButton(
-          onPressed: onPressed,
-          style: OutlinedButton.styleFrom(
-            padding: EdgeInsets.zero,
-            foregroundColor: color,
-            side: BorderSide(color: borderColor),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              child: OutlinedButton(
+                onPressed: onPressed,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  foregroundColor: color,
+                  side: BorderSide(color: borderColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Icon(icon, size: 17),
+              ),
             ),
-          ),
-          child: Icon(icon, size: 17),
+            if (badge != null)
+              Positioned(
+                top: -6,
+                right: -6,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      badge!,
+                      style: const TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

@@ -127,11 +127,17 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
     final filterStatus = state.filter.status;
     final leavesFilter = filterStatus != null && updated.status != filterStatus;
 
-    state = state.copyWith(
-      items: leavesFilter
-          ? state.items.where((v) => v.id != updated.id).toList()
-          : state.items.map((v) => v.id == updated.id ? updated : v).toList(),
-    );
+    final items = leavesFilter
+        ? state.items.where((v) => v.id != updated.id).toList()
+        : state.items.map((v) => v.id == updated.id ? updated : v).toList();
+
+    // Тот же порядок, что на сервере: сначала продвигаемые, затем по дате создания
+    items.sort((a, b) {
+      if (a.isFeatured != b.isFeatured) return a.isFeatured ? -1 : 1;
+      return b.createdAt.compareTo(a.createdAt);
+    });
+
+    state = state.copyWith(items: items);
   }
 }
 

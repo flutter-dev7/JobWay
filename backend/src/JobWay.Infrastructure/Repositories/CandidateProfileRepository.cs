@@ -34,13 +34,10 @@ public class CandidateProfileRepository : ICandidateProfileRepository
             .ToListAsync(cancellationToken);
     
     public async Task<(List<CandidateSearchItem> Items, int TotalCount)> SearchForEmployerAsync(
-        Guid companyProfileId, CandidateSearchRequest filter, CancellationToken cancellationToken)
+        CandidateSearchRequest filter, CancellationToken cancellationToken)
     {
-        // Кандидат виден, если он включил видимость или уже откликался на вакансии этой компании
-        var query = _context.CandidateProfiles.Where(c =>
-            c.User.IsActive
-            && (c.IsVisibleToEmployers
-                || c.Applications.Any(a => a.Vacancy.CompanyProfileId == companyProfileId)));
+        // В поиске только те, кто сам открыл профиль. Откликнувшиеся видны в списке откликов
+        var query = _context.CandidateProfiles.Where(c => c.User.IsActive && c.IsVisibleToEmployers);
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {
