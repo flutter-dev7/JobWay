@@ -89,7 +89,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("CandidateProfiles");
+                    b.ToTable("CandidateProfiles", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.ChatMessage", b =>
@@ -122,7 +122,7 @@ namespace JobWay.Infrastructure.Migrations
 
                     b.HasIndex("JobApplicationId", "CreatedAt");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessages", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.CompanyProfile", b =>
@@ -177,7 +177,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("CompanyProfiles");
+                    b.ToTable("CompanyProfiles", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.DeviceToken", b =>
@@ -210,7 +210,7 @@ namespace JobWay.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DeviceTokens");
+                    b.ToTable("DeviceTokens", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.JobApplication", b =>
@@ -248,7 +248,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasIndex("CandidateProfileId", "VacancyId")
                         .IsUnique();
 
-                    b.ToTable("JobApplications");
+                    b.ToTable("JobApplications", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.Notification", b =>
@@ -289,7 +289,7 @@ namespace JobWay.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.Review", b =>
@@ -339,7 +339,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasIndex("JobApplicationId", "Type")
                         .IsUnique();
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.SavedVacancy", b =>
@@ -367,7 +367,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasIndex("UserId", "VacancyId")
                         .IsUnique();
 
-                    b.ToTable("SavedVacancies");
+                    b.ToTable("SavedVacancies", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.Skill", b =>
@@ -398,7 +398,7 @@ namespace JobWay.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Skills");
+                    b.ToTable("Skills", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.User", b =>
@@ -448,7 +448,7 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.Vacancy", b =>
@@ -519,7 +519,7 @@ namespace JobWay.Infrastructure.Migrations
 
                     b.HasIndex("CompanyProfileId");
 
-                    b.ToTable("Vacancies");
+                    b.ToTable("Vacancies", (string)null);
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.VacancyPromotion", b =>
@@ -546,7 +546,7 @@ namespace JobWay.Infrastructure.Migrations
 
                     b.HasIndex("VacancyId");
 
-                    b.ToTable("VacancyPromotions");
+                    b.ToTable("VacancyPromotions", (string)null);
                 });
 
             modelBuilder.Entity("SkillVacancy", b =>

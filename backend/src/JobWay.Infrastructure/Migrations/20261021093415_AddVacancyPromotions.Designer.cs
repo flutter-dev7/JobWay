@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JobWay.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261023114226_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20261021093415_AddVacancyPromotions")]
+    partial class AddVacancyPromotions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,9 +65,6 @@ namespace JobWay.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<bool>("IsVisibleToEmployers")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Location")
                         .HasMaxLength(200)
@@ -492,12 +489,6 @@ namespace JobWay.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
-
-                    b.Property<string>("Requirements")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Responsibilities")
-                        .HasColumnType("text");
 
                     b.Property<decimal?>("SalaryFrom")
                         .HasPrecision(12, 2)
