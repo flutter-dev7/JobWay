@@ -15,5 +15,7 @@ public enum NotificationType
     SubscriptionChanged,
     VacancyPromoted,
     AccountBlocked,
-    AccountUnblocked
+    AccountUnblocked,
+    VacancyExpiring,
+    VacancyExpired
 }

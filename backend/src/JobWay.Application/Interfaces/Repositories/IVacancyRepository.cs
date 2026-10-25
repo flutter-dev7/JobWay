@@ -12,6 +12,8 @@ public interface IVacancyRepository
     Task<int> CountCreatedTodayAsync(CancellationToken cancellationToken);
     Task<int> CountActiveByCompanyProfileIdAsync(Guid companyProfileId, CancellationToken cancellationToken);
     Task<int> CountPromotionsSinceAsync(Guid companyProfileId, DateTime since, CancellationToken cancellationToken);
+    Task<List<Vacancy>> GetExpiredAsync(DateTime now, CancellationToken cancellationToken);
+    Task<List<Vacancy>> GetExpiringAsync(DateTime now, DateTime noticeUntil, CancellationToken cancellationToken);
     void AddPromotion(VacancyPromotion promotion);
     void Add(Vacancy vacancy);
     void Update(Vacancy vacancy);

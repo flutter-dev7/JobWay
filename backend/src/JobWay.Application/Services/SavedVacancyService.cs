@@ -143,6 +143,7 @@ public class SavedVacancyService : ISavedVacancyService
             Category = s.Category
         }).ToList(),
         FeaturedUntil = vacancy.FeaturedUntil,
+        ExpiresAt = vacancy.ExpiresAt,
         CreatedAt = vacancy.CreatedAt
     };
 }

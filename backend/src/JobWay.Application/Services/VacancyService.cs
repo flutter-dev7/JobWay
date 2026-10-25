@@ -248,6 +248,43 @@ public class VacancyService : IVacancyService
 
         return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
     }
+        
+    public async Task<Result<VacancyResponse>> RenewAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken)
+    {
+        var companyProfile = await _unitOfWork.CompanyProfiles.GetByUserIdAsync(employerUserId, cancellationToken);
+        if (companyProfile is null)
+            return Result<VacancyResponse>.Fail("Company profile not found", ErrorType.NotFound);
+
+        var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
+        if (vacancy is null)
+            return Result<VacancyResponse>.Fail("Vacancy not found", ErrorType.NotFound);
+
+        if (vacancy.CompanyProfileId != companyProfile.Id)
+            return Result<VacancyResponse>.Fail("You do not own this vacancy", ErrorType.Forbidden);
+
+        if (vacancy.Status != VacancyStatus.Active)
+            return Result<VacancyResponse>.Fail("Продлить можно только активную вакансию", ErrorType.Validation);
+
+        // Если тариф закончился и активных вакансий больше лимита, продлевать нельзя
+        var limit = TierRules.GetActiveVacancyLimit(companyProfile);
+        var activeCount = await _unitOfWork.Vacancies.CountActiveByCompanyProfileIdAsync(companyProfile.Id, cancellationToken);
+
+        if (activeCount > limit)
+            return Result<VacancyResponse>.Fail(
+                $"Активных вакансий больше лимита вашего тарифа ({limit}). Закройте лишние или перейдите на Pro.",
+                ErrorType.Forbidden);
+
+        // Срок считается от сегодняшнего дня и не накапливается
+        vacancy.ExpiresAt = DateTime.UtcNow.AddDays(VacancyRules.LifetimeDays);
+        vacancy.ExpiryNoticeSent = false;
+
+        _unitOfWork.Vacancies.Update(vacancy);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKeys.Vacancy(vacancyId), cancellationToken);
+
+        return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
+    }
 
     public async Task<Result<VacancyResponse>> GetByIdAsync(Guid vacancyId, CancellationToken cancellationToken)
     {
@@ -337,8 +374,16 @@ public class VacancyService : IVacancyService
 
         vacancy.Status = status;
         
-        if (status != VacancyStatus.Active)
+        if (status == VacancyStatus.Active)
+        {
+            vacancy.ExpiresAt = DateTime.UtcNow.AddDays(VacancyRules.LifetimeDays);
+            vacancy.ExpiryNoticeSent = false;
+        }
+        else
+        {
             vacancy.FeaturedUntil = null;
+            vacancy.ExpiresAt = null;
+        }
 
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -377,6 +422,7 @@ public class VacancyService : IVacancyService
             Category = s.Category
         }).ToList(),
         FeaturedUntil = vacancy.FeaturedUntil,
+        ExpiresAt = vacancy.ExpiresAt,
         CreatedAt = vacancy.CreatedAt
     };
 }

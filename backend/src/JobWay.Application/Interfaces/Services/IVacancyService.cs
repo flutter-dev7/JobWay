@@ -16,4 +16,5 @@ public interface IVacancyService
     Task<Result<VacancyResponse>> PromoteAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken);
     Task<Result<List<VacancyResponse>>> GetPublicCompanyVacanciesAsync(Guid companyProfileId, CancellationToken cancellationToken);
     Task<Result<int>> GetTodayCountAsync(CancellationToken cancellationToken);
+    Task<Result<VacancyResponse>> RenewAsync(Guid employerUserId, Guid vacancyId, CancellationToken cancellationToken);
 }

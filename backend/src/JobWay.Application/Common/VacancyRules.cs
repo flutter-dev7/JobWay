@@ -8,6 +8,8 @@ public static class VacancyRules
     public const int MinListLength = 10;
     public const int MaxListLength = 2000;
     public const int MaxSkills = 20;
+    public const int LifetimeDays = 30;
+    public const int ExpiryNoticeDays = 3;
 
     // Возвращает текст ошибки или null, если вакансия заполнена правильно
     public static string? Validate(

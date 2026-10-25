@@ -14,4 +14,6 @@ public static class CacheKeys
 
     public static string CompanySearch(string search, bool onlyWithVacancies, int page, int size)
         => $"search-companies:{search}:{onlyWithVacancies}:{page}:{size}";
+    
+    public static string Vacancy(Guid id) => $"vacancy:{id}";
 }

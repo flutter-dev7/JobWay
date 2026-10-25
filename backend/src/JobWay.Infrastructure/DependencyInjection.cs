@@ -27,6 +27,7 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
         
         services.AddHostedService<ReviewReminderBackgroundService>();
+        services.AddHostedService<VacancyExpiryBackgroundService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();

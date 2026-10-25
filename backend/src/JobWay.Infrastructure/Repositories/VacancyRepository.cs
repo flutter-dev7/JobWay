@@ -120,6 +120,22 @@ public class VacancyRepository : IVacancyRepository
         => _context.VacancyPromotions.CountAsync(
             p => p.Vacancy.CompanyProfileId == companyProfileId && p.CreatedAt >= since,
             cancellationToken);
+    
+    public Task<List<Vacancy>> GetExpiredAsync(DateTime now, CancellationToken cancellationToken)
+        => _context.Vacancies
+            .Include(v => v.CompanyProfile)
+            .Where(v => v.Status == VacancyStatus.Active && v.ExpiresAt != null && v.ExpiresAt <= now)
+            .ToListAsync(cancellationToken);
+
+    public Task<List<Vacancy>> GetExpiringAsync(DateTime now, DateTime noticeUntil, CancellationToken cancellationToken)
+        => _context.Vacancies
+            .Include(v => v.CompanyProfile)
+            .Where(v => v.Status == VacancyStatus.Active
+                        && !v.ExpiryNoticeSent
+                        && v.ExpiresAt != null
+                        && v.ExpiresAt > now
+                        && v.ExpiresAt <= noticeUntil)
+            .ToListAsync(cancellationToken);
 
     public void AddPromotion(VacancyPromotion promotion) => _context.VacancyPromotions.Add(promotion);
 

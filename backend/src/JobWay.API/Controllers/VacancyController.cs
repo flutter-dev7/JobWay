@@ -79,4 +79,9 @@ public class VacancyController : BaseApiController
     [HttpPost("{id:guid}/promote")]
     public async Task<IActionResult> Promote(Guid id, CancellationToken cancellationToken)
         => HandleError(await _vacancyService.PromoteAsync(CurrentUserId, id, cancellationToken));
+    
+    [Authorize(Roles = Roles.Employer)]
+    [HttpPost("{id:guid}/renew")]
+    public async Task<IActionResult> Renew(Guid id, CancellationToken cancellationToken)
+        => HandleError(await _vacancyService.RenewAsync(CurrentUserId, id, cancellationToken));
 }
