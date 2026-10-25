@@ -86,8 +86,10 @@ public class AdminService : IAdminService
 
         _unitOfWork.Vacancies.Update(vacancy);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         await _cacheService.RemoveAsync(VacancyCacheKey(vacancyId), cancellationToken);
         await _cacheService.RemoveAsync(CacheKeys.Subscription(vacancy.CompanyProfile.UserId), cancellationToken);
+        await _cacheService.RemoveAsync(CacheKeys.EmployerAnalytics(vacancy.CompanyProfileId), cancellationToken);
 
         return Result<string>.Ok("Vacancy archived");
     }

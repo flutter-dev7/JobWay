@@ -232,7 +232,6 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                   ),
                 ),
               ],
-              const SizedBox(height: 16),
               if ((profile.industry != null && profile.industry!.isNotEmpty) ||
                   (profile.website != null && profile.website!.isNotEmpty)) ...[
                 const SizedBox(height: 16),

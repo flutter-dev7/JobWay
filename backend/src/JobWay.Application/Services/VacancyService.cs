@@ -134,6 +134,12 @@ public class VacancyService : IVacancyService
             return Result<VacancyResponse>.Fail("Company must be verified by an admin before publishing vacancies", ErrorType.Forbidden);
 
         var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
+        
+        if (vacancy is not null
+            && vacancy.CompanyProfileId == companyProfile.Id
+            && vacancy.Status == VacancyStatus.Active)
+            return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
+        
         if (vacancy is not null && vacancy.CompanyProfileId == companyProfile.Id && vacancy.Status != VacancyStatus.Active)
         {
             var validationError = VacancyRules.Validate(
@@ -245,17 +251,24 @@ public class VacancyService : IVacancyService
 
     public async Task<Result<VacancyResponse>> GetByIdAsync(Guid vacancyId, CancellationToken cancellationToken)
     {
+        VacancyResponse? response = null;
+
         var cached = await _cacheService.GetAsync(VacancyCacheKey(vacancyId), cancellationToken);
         if (cached is not null)
-            return Result<VacancyResponse>.Ok(JsonSerializer.Deserialize<VacancyResponse>(cached));
+            response = JsonSerializer.Deserialize<VacancyResponse>(cached);
 
-        var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
+        if (response is null)
+        {
+            var vacancy = await _unitOfWork.Vacancies.GetByIdAsync(vacancyId, cancellationToken);
+            if (vacancy is null)
+                return Result<VacancyResponse>.Fail("Vacancy not found", ErrorType.NotFound);
 
-        if (vacancy is null)
+            response = MapToResponse(vacancy);
+            await _cacheService.SetAsync(VacancyCacheKey(vacancyId), JsonSerializer.Serialize(response), TimeSpan.FromMinutes(5), cancellationToken);
+        }
+
+        if (response.Status == VacancyStatus.Draft)
             return Result<VacancyResponse>.Fail("Vacancy not found", ErrorType.NotFound);
-
-        var response = MapToResponse(vacancy);
-        await _cacheService.SetAsync(VacancyCacheKey(vacancyId), JsonSerializer.Serialize(response), TimeSpan.FromMinutes(5), cancellationToken);
 
         return Result<VacancyResponse>.Ok(response);
     }
