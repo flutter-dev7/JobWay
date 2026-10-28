@@ -96,8 +96,11 @@ public static class DependencyInjection
         if (FirebaseAdmin.FirebaseApp.DefaultInstance is not null) return;
 
         var credentialsPath = configuration["Firebase:CredentialsPath"];
-        if (string.IsNullOrWhiteSpace(credentialsPath) || !File.Exists(credentialsPath)) return;
-
+        if (string.IsNullOrWhiteSpace(credentialsPath) || !File.Exists(credentialsPath))
+        {
+            Console.WriteLine($"[Firebase] Credentials file not found: '{credentialsPath}' (cwd: {Directory.GetCurrentDirectory()}). Push disabled.");
+            return;
+        }
         FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions
         {
             Credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromFile(credentialsPath)

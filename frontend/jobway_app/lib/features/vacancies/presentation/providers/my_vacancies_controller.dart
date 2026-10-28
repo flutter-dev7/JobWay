@@ -6,6 +6,7 @@ import '../../domain/usecases/close_vacancy_usecase.dart';
 import '../../domain/usecases/get_my_vacancies_usecase.dart';
 import '../../domain/usecases/promote_vacancy_usecase.dart';
 import '../../domain/usecases/publish_vacancy_usecase.dart';
+import '../../domain/usecases/renew_vacancy_usecase.dart';
 import 'vacancies_provider.dart';
 
 class MyVacanciesState {
@@ -49,6 +50,7 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
   final PublishVacancyUseCase _publish;
   final CloseVacancyUseCase _close;
   final PromoteVacancyUseCase _promote;
+  final RenewVacancyUseCase _renew;
   int _requestId = 0;
 
   MyVacanciesController(
@@ -56,6 +58,7 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
     this._publish,
     this._close,
     this._promote,
+    this._renew,
   ) : super(const MyVacanciesState()) {
     load();
   }
@@ -120,6 +123,8 @@ class MyVacanciesController extends StateNotifier<MyVacanciesState> {
 
   Future<void> promote(String id) async => _applyUpdated(await _promote(id));
 
+  Future<void> renew(String id) async => _applyUpdated(await _renew(id));
+
   // Обновляет вакансию в списке на месте. Если она больше не подходит
   // под выбранный статус (например, Draft → Active при фильтре «Черновики»), убирает её.
   void _applyUpdated(Vacancy updated) {
@@ -146,6 +151,7 @@ MyVacanciesController _createController(Ref ref) => MyVacanciesController(
   ref.read(publishVacancyUseCaseProvider),
   ref.read(closeVacancyUseCaseProvider),
   ref.read(promoteVacancyUseCaseProvider),
+  ref.read(renewVacancyUseCaseProvider),
 );
 
 final myVacanciesControllerProvider =

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/providers/settings_providers.dart';
 import 'package:jobway_app/core/router/app_router.dart';
+import 'package:jobway_app/core/services/local_notification_service.dart';
 import 'package:jobway_app/core/theme/app_theme.dart';
 import 'package:jobway_app/core/widgets/feedback/app_snackbar.dart';
 import 'package:jobway_app/firebase_options.dart';
@@ -10,6 +11,7 @@ import 'package:jobway_app/firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await LocalNotificationService.init();
   runApp(const ProviderScope(child: MyApp()));
 }
 

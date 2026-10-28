@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jobway_app/core/providers/navigation_providers.dart';
 import 'package:jobway_app/core/widgets/feedback/empty_state.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_exception.dart';
@@ -28,6 +30,10 @@ const _chips = [
   _NotificationChip(
     label: 'Отклики',
     types: ['NewApplication', 'ApplicationStatusChanged'],
+  ),
+  _NotificationChip(
+    label: 'Вакансии',
+    types: ['NewMatchingVacancy', 'VacancyExpiring', 'VacancyExpired'],
   ),
   _NotificationChip(label: 'Отзывы', types: ['NewReview', 'ReviewReminder']),
   _NotificationChip(label: 'Вакансии', types: ['NewMatchingVacancy']),
@@ -162,11 +168,23 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         return NotificationCard(
           notification: notification,
           onTap: () async {
-            if (notification.isRead) return;
-            try {
-              await _controller.markRead(notification.id);
-            } catch (error) {
-              AppSnackbar.showError(ApiException.extractMessage(error));
+            if (!notification.isRead) {
+              try {
+                await _controller.markRead(notification.id);
+              } catch (error) {
+                AppSnackbar.showError(ApiException.extractMessage(error));
+              }
+            }
+
+            if (!mounted) return;
+
+            final opensVacancies =
+                notification.type == 'VacancyExpiring' ||
+                notification.type == 'VacancyExpired';
+
+            if (opensVacancies) {
+              ref.read(homeTabRequestProvider.notifier).state = 0;
+              if (context.canPop()) context.pop();
             }
           },
         );

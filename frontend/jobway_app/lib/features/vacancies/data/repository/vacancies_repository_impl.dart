@@ -126,6 +126,12 @@ class VacanciesRepositoryImpl implements VacanciesRepository {
   }
 
   @override
+  Future<Vacancy> renew(String id) async {
+    final model = await _remoteDataSource.renew(id);
+    return model.toEntity();
+  }
+
+  @override
   Future<int> getTodayCount() => _remoteDataSource.getTodayCount();
 
   @override

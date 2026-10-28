@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jobway_app/core/providers/navigation_providers.dart';
+import 'package:jobway_app/core/services/local_notification_service.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/widgets/navigation/floating_nav_bar.dart';
 import 'package:jobway_app/features/admin/presentation/pages/admin_companies_page.dart';
@@ -42,6 +47,7 @@ class _HomePageState extends ConsumerState<HomePage>
   static const _refreshInterval = Duration(seconds: 20);
 
   int _currentIndex = 0;
+  StreamSubscription<RemoteMessage>? _messageSubscription;
   final _lastRefresh = <int, DateTime>{0: DateTime.now()};
 
   late final List<FloatingNavItem> _navItems = _buildNavItems();
@@ -51,11 +57,15 @@ class _HomePageState extends ConsumerState<HomePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _messageSubscription = FirebaseMessaging.onMessage.listen(
+      _onForegroundMessage,
+    );
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _messageSubscription?.cancel();
     super.dispose();
   }
 
@@ -63,6 +73,22 @@ class _HomePageState extends ConsumerState<HomePage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _refreshTab(_currentIndex, force: true);
+    }
+  }
+
+  // Push пришёл при открытом приложении: показываем баннер и обновляем данные
+  Future<void> _onForegroundMessage(RemoteMessage message) async {
+    await LocalNotificationService.showFromMessage(message);
+    if (!mounted) return;
+
+    _refreshTab(_currentIndex, force: true);
+
+    if (widget.role != 'Admin' && _currentIndex != 2) {
+      ref.read(chatThreadsControllerProvider.notifier).load();
+    }
+    if (widget.role == 'Employer' && _currentIndex != 0) {
+      ref.read(myVacanciesControllerProvider.notifier).load();
+      ref.invalidate(subscriptionProvider);
     }
   }
 
@@ -173,6 +199,31 @@ class _HomePageState extends ConsumerState<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int?>(homeTabRequestProvider, (_, index) {
+      if (index == null) return;
+      ref.read(homeTabRequestProvider.notifier).state = null;
+      if (widget.role != 'Employer' || index >= _pages.length) return;
+
+      setState(() => _currentIndex = index);
+      _refreshTab(index, force: true);
+    });
+
+    ref.listen<AsyncValue<int>>(unreadNotificationsCountProvider, (
+      previous,
+      next,
+    ) {
+      final before = previous?.valueOrNull;
+      final after = next.valueOrNull;
+      if (before == null || after == null || after <= before) return;
+
+      // Пришло новое уведомление: данные на экранах могли измениться на сервере
+      _refreshTab(_currentIndex, force: true);
+      if (widget.role == 'Employer') {
+        ref.read(myVacanciesControllerProvider.notifier).load();
+        ref.invalidate(subscriptionProvider);
+      }
+    });
+
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(

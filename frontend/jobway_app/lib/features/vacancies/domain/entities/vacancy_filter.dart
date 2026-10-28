@@ -1,4 +1,3 @@
-// features/vacancies/domain/entities/vacancy_filter.dart — заменить целиком
 class VacancyFilter {
   final String? search;
   final String? employmentType;

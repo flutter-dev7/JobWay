@@ -151,6 +151,11 @@ class VacanciesRemoteDataSource {
     return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
+    Future<VacancyModel> renew(String id) async {
+    final response = await _dio.post(ApiConstants.renewVacancy(id));
+    return VacancyModel.fromJson(ApiResponse.unwrap(response.data));
+  }
+
   Future<int> getTodayCount() async {
     final response = await _dio.get(ApiConstants.vacanciesTodayCount);
     return ApiResponse.unwrap(response.data) as int;

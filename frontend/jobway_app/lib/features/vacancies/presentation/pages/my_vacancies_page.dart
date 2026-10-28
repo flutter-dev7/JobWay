@@ -121,7 +121,7 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
         content: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: Text(
-            'Вакансия «${vacancy.title}» появится в ленте кандидатов, '
+            'Вакансия «${vacancy.title}» появится в ленте кандидатов на 30 дней, '
             'а подходящие кандидаты получат уведомление.$slots',
             textAlign: TextAlign.center,
           ),
@@ -254,6 +254,11 @@ class _MyVacanciesPageState extends ConsumerState<MyVacanciesPage> {
             await _runAction(vacancy.id, _controller.close, 'Вакансия закрыта');
           },
           onPromote: () => _promote(vacancy),
+          onRenew: () => _runAction(
+            vacancy.id,
+            _controller.renew,
+            'Вакансия продлена на 30 дней',
+          ),
           promoteLocked: !isPro,
           onEdit: () async {
             await context.push(AppRoutes.editVacancy, extra: vacancy);

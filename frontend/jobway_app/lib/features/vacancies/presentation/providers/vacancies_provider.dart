@@ -4,6 +4,7 @@ import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancie
 import 'package:jobway_app/features/vacancies/domain/usecases/get_saved_vacancy_ids_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/get_today_vacancies_count_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/promote_vacancy_usecase.dart';
+import 'package:jobway_app/features/vacancies/domain/usecases/renew_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/save_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/unsave_vacancy_usecase.dart';
 import 'package:jobway_app/features/vacancies/domain/usecases/update_vacancy_usecase.dart';
@@ -69,6 +70,10 @@ final getSavedVacanciesUseCaseProvider = Provider(
 
 final promoteVacancyUseCaseProvider = Provider(
   (ref) => PromoteVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
+);
+
+final renewVacancyUseCaseProvider = Provider(
+  (ref) => RenewVacancyUseCase(ref.read(vacanciesRepositoryProvider)),
 );
 
 final getSavedVacancyIdsUseCaseProvider = Provider(

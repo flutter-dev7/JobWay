@@ -10,7 +10,7 @@ namespace JobWay.Infrastructure.BackgroundJobs;
 
 public class VacancyExpiryBackgroundService : BackgroundService
 {
-    private static readonly TimeSpan CheckInterval = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan CheckInterval = TimeSpan.FromMinutes(1);
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<VacancyExpiryBackgroundService> _logger;

@@ -21,6 +21,7 @@ class Vacancy {
   final List<Skill> skills;
   final DateTime createdAt;
   final DateTime? featuredUntil;
+  final DateTime? expiresAt;
 
   const Vacancy({
     required this.id,
@@ -43,10 +44,20 @@ class Vacancy {
     required this.skills,
     required this.createdAt,
     this.featuredUntil,
+    this.expiresAt,
   });
 
   bool get isFeatured =>
       status == 'Active' &&
       featuredUntil != null &&
       featuredUntil!.isAfter(DateTime.now());
+
+  int? get daysLeft {
+    if (status != 'Active' || expiresAt == null) return null;
+    final minutes = expiresAt!.difference(DateTime.now()).inMinutes;
+    if (minutes <= 0) return 0;
+    return (minutes / 1440).ceil();
+  }
+
+  bool get canRenew => daysLeft != null && daysLeft! <= 7;
 }

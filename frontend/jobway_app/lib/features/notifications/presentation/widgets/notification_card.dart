@@ -44,6 +44,10 @@ class NotificationCard extends StatelessWidget {
         return (icon: Icons.workspace_premium_outlined, color: _star);
       case 'VacancyPromoted':
         return (icon: Icons.bolt_rounded, color: _amber);
+      case 'VacancyExpiring':
+        return (icon: Icons.hourglass_bottom_rounded, color: _amber);
+      case 'VacancyExpired':
+        return (icon: Icons.event_busy_outlined, color: _red);
       case 'AccountBlocked':
         return (icon: Icons.block_rounded, color: _red);
       case 'AccountUnblocked':

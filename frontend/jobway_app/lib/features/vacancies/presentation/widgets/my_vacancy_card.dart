@@ -16,6 +16,7 @@ class MyVacancyCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onPromote;
+  final VoidCallback? onRenew;
   final bool promoteLocked;
   final bool isUpdating;
 
@@ -27,9 +28,12 @@ class MyVacancyCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onPromote,
+    this.onRenew,
     this.promoteLocked = false,
     this.isUpdating = false,
   });
+
+  static const _amber = Color(0xFFD97706);
 
   Color _statusColor() {
     switch (vacancy.status) {
@@ -40,7 +44,7 @@ class MyVacancyCard extends StatelessWidget {
       case 'Archived':
         return const Color(0xFFDC2626);
       default:
-        return const Color(0xFFD97706);
+        return _amber;
     }
   }
 
@@ -79,12 +83,32 @@ class MyVacancyCard extends StatelessWidget {
     return 'скоро закончится';
   }
 
+  // Строка про срок публикации. null, если срока нет (черновик, закрыта)
+  String? _expiryLabel() {
+    final days = vacancy.daysLeft;
+    if (days == null) return null;
+    if (days == 0) return 'срок истёк';
+    return 'до ${TimeAgo.formatDate(vacancy.expiresAt!)} · ещё $days дн.';
+  }
+
   List<Widget> _buildActions(BuildContext context) {
     final colors = context.colors;
     final isFeatured = vacancy.isFeatured;
     final actions = <Widget>[];
 
-        if (vacancy.status == 'Active' && !isFeatured && onPromote != null) {
+    if (vacancy.status == 'Active' && vacancy.canRenew && onRenew != null) {
+      actions.add(
+        _ActionIcon(
+          icon: Icons.autorenew_rounded,
+          tooltip: 'Продлить на 30 дней',
+          color: const Color(0xFF059669),
+          borderColor: const Color(0xFFA7F3D0),
+          onPressed: isUpdating ? null : onRenew,
+        ),
+      );
+    }
+
+    if (vacancy.status == 'Active' && !isFeatured && onPromote != null) {
       actions.add(
         _ActionIcon(
           icon: Icons.bolt_rounded,
@@ -120,7 +144,7 @@ class MyVacancyCard extends StatelessWidget {
         ),
       );
     } else if (vacancy.status == 'Active') {
-            actions.add(
+      actions.add(
         _ActionIcon(
           icon: Icons.cancel_outlined,
           tooltip: 'Закрыть вакансию',
@@ -130,6 +154,17 @@ class MyVacancyCard extends StatelessWidget {
         ),
       );
     } else {
+      if (vacancy.status == 'Closed' && onPublish != null) {
+        actions.add(
+          _ActionIcon(
+            icon: LucideIcons.rocket,
+            tooltip: 'Опубликовать снова',
+            color: colors.textPrimary,
+            borderColor: colors.border,
+            onPressed: isUpdating ? null : onPublish,
+          ),
+        );
+      }
       actions.add(
         _ActionIcon(
           icon: LucideIcons.users,
@@ -153,6 +188,8 @@ class MyVacancyCard extends StatelessWidget {
     final salary = _formatSalary();
     final hasSalary = salary.isNotEmpty;
     final actions = _buildActions(context);
+    final expiryLabel = _expiryLabel();
+    final isExpiringSoon = (vacancy.daysLeft ?? 99) <= 3;
 
     final cardColor = isFeatured
         ? Color.alphaBlend(
@@ -225,10 +262,18 @@ class MyVacancyCard extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  TimeAgo.format(vacancy.createdAt),
+                                  expiryLabel ??
+                                      TimeAgo.format(vacancy.createdAt),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: colors.textMuted,
+                                    fontWeight: isExpiringSoon
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                    color: isExpiringSoon
+                                        ? _amber
+                                        : colors.textMuted,
                                   ),
                                 ),
                               ],

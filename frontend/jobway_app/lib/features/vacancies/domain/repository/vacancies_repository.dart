@@ -45,6 +45,7 @@ abstract class VacanciesRepository {
   Future<Vacancy> publish(String id);
   Future<Vacancy> close(String id);
   Future<Vacancy> promote(String id);
+  Future<Vacancy> renew(String id);
 
   Future<void> save(String vacancyId);
   Future<void> unsave(String vacancyId);
