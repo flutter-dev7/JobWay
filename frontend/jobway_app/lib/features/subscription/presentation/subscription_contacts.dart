@@ -8,6 +8,9 @@ class SubscriptionContacts {
   static const yearlyPrice = '499 TJS';
   static const yearlyBadge = 'Экономия 15%';
 
+  static const freeInvitations = 3;
+  static const proInvitations = 20;
+
   // Должны совпадать с TierRules.cs на backend
   static const freeLimit = 3;
   static const proLimit = 10;

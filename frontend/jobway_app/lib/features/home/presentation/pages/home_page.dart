@@ -22,6 +22,7 @@ import 'package:jobway_app/features/chat/presentation/pages/chat_threads_page.da
 import 'package:jobway_app/features/chat/presentation/providers/chat_threads_controller.dart';
 import 'package:jobway_app/features/company_profile/presentation/pages/company_profile_page.dart';
 import 'package:jobway_app/features/company_profile/presentation/providers/company_profile_provider.dart';
+import 'package:jobway_app/features/invitations/presentation/providers/invitations_provider.dart';
 import 'package:jobway_app/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
 import 'package:jobway_app/features/vacancies/presentation/pages/my_vacancies_page.dart';
@@ -115,6 +116,7 @@ class _HomePageState extends ConsumerState<HomePage>
             ref.read(chatThreadsControllerProvider.notifier).load();
           case 3:
             ref.invalidate(employerAnalyticsProvider);
+            ref.invalidate(pendingInvitationsProvider);
           case 4:
             ref.invalidate(companyProfileProvider);
             ref.invalidate(subscriptionProvider);
@@ -202,8 +204,7 @@ class _HomePageState extends ConsumerState<HomePage>
     ref.listen<int?>(homeTabRequestProvider, (_, index) {
       if (index == null) return;
       ref.read(homeTabRequestProvider.notifier).state = null;
-      if (widget.role != 'Employer' || index >= _pages.length) return;
-
+      if (widget.role == 'Admin' || index >= _pages.length) return;
       setState(() => _currentIndex = index);
       _refreshTab(index, force: true);
     });

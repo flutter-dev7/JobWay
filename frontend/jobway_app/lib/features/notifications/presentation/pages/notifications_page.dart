@@ -29,7 +29,12 @@ const _chips = [
   _NotificationChip(label: 'Непрочитанные', unreadOnly: true),
   _NotificationChip(
     label: 'Отклики',
-    types: ['NewApplication', 'ApplicationStatusChanged'],
+    types: [
+      'NewApplication',
+      'ApplicationStatusChanged',
+      'InvitationReceived',
+      'InvitationDeclined',
+    ],
   ),
   _NotificationChip(
     label: 'Вакансии',
@@ -177,6 +182,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
             }
 
             if (!mounted) return;
+
+            if (notification.type == 'InvitationReceived') {
+              ref.read(homeTabRequestProvider.notifier).state = 3;
+              if (context.canPop()) context.pop();
+              return;
+            }
 
             final opensVacancies =
                 notification.type == 'VacancyExpiring' ||

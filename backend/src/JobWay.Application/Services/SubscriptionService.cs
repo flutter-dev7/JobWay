@@ -44,7 +44,7 @@ public class SubscriptionService : ISubscriptionService
         var tier = TierRules.GetEffectiveTier(company);
         var activeCount = await _unitOfWork.Vacancies.CountActiveByCompanyProfileIdAsync(company.Id, cancellationToken);
         var promotionsUsed = await _unitOfWork.Vacancies.CountPromotionsSinceAsync(company.Id, TierRules.CurrentMonthStartUtc(), cancellationToken);
-
+        var invitationsUsed = await _unitOfWork.Invitations.CountCreatedSinceAsync(company.Id, TierRules.TodayStartUtc(), cancellationToken);
         var response = new SubscriptionResponse
         {
             Tier = tier,
@@ -53,7 +53,10 @@ public class SubscriptionService : ISubscriptionService
             ActiveVacanciesLimit = TierRules.GetActiveVacancyLimit(company),
             PromotionsUsed = promotionsUsed,
             PromotionsLimit = TierRules.GetMonthlyPromotionLimit(company),
-            PromotionDays = TierRules.PromotionDays
+            PromotionDays = TierRules.PromotionDays,
+            InvitationsUsed = invitationsUsed,
+            InvitationsLimit = TierRules.GetDailyInvitationLimit(company)
+            
         };
 
         await _cacheService.SetAsync(cacheKey, JsonSerializer.Serialize(response), CacheDuration, cancellationToken);

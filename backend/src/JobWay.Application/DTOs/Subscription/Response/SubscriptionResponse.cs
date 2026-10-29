@@ -12,4 +12,6 @@ public class SubscriptionResponse
     public int PromotionsUsed { get; set; }
     public int PromotionsLimit { get; set; }
     public int PromotionDays { get; set; }
+    public int InvitationsUsed { get; set; }
+    public int InvitationsLimit { get; set; }
 }

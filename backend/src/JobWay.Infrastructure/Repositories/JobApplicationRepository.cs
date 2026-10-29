@@ -124,6 +124,12 @@ public class JobApplicationRepository : IJobApplicationRepository
             .Include(a => a.Vacancy).ThenInclude(v => v.CompanyProfile).ThenInclude(c => c.User)
             .Where(a => ids.Contains(a.Id))
             .ToListAsync(cancellationToken);
+    
+    public Task<List<Guid>> GetVacancyIdsByCandidateAndCompanyAsync(Guid candidateProfileId, Guid companyProfileId, CancellationToken cancellationToken)
+        => _context.JobApplications
+            .Where(a => a.CandidateProfileId == candidateProfileId && a.Vacancy.CompanyProfileId == companyProfileId)
+            .Select(a => a.VacancyId)
+            .ToListAsync(cancellationToken);
 
     public void Add(JobApplication application) => _context.JobApplications.Add(application);
     public void Update(JobApplication application) => _context.JobApplications.Update(application);

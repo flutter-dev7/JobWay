@@ -25,6 +25,15 @@ public static class TierRules
 
     public static int GetMonthlyPromotionLimit(CompanyProfile company)
         => GetEffectiveTier(company) == CompanyTier.Pro ? ProPromotionsPerMonth : 0;
+    
+    // Приглашения кандидатов в сутки
+    public const int FreeInvitationsPerDay = 3;
+    public const int ProInvitationsPerDay = 20;
+
+    public static int GetDailyInvitationLimit(CompanyProfile company)
+        => GetEffectiveTier(company) == CompanyTier.Pro ? ProInvitationsPerDay : FreeInvitationsPerDay;
+
+    public static DateTime TodayStartUtc() => DateTime.UtcNow.Date;
 
     public static DateTime CurrentMonthStartUtc()
     {

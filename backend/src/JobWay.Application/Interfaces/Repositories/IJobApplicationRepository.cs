@@ -17,6 +17,7 @@ public interface IJobApplicationRepository
     Task<List<Guid>> GetVacancyIdsByCandidateProfileIdAsync(Guid candidateProfileId, CancellationToken cancellationToken);
     Task<List<JobApplication>> GetByIdsWithParticipantsAsync(List<Guid> ids, CancellationToken cancellationToken);
     Task<List<JobApplication>> GetCompletedWithoutReminderCheckAsync(DateTime updatedBefore, CancellationToken cancellationToken);
+    Task<List<Guid>> GetVacancyIdsByCandidateAndCompanyAsync(Guid candidateProfileId, Guid companyProfileId, CancellationToken cancellationToken);
     void Add(JobApplication application);
     void Update(JobApplication application);
 }

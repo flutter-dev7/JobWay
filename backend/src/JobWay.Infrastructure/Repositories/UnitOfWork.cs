@@ -19,7 +19,8 @@ public class UnitOfWork : IUnitOfWork
         ISavedVacancyRepository savedVacancies,
         IDeviceTokenRepository deviceTokens,
         IReviewRepository reviews,
-        IChatMessageRepository chatMessages)
+        IChatMessageRepository chatMessages,
+        IInvitationRepository invitations)
     {
         _context = context;
         Users = users;
@@ -33,6 +34,7 @@ public class UnitOfWork : IUnitOfWork
         DeviceTokens = deviceTokens;
         Reviews = reviews;
         ChatMessages = chatMessages;
+        Invitations = invitations;
     }
 
     public IUserRepository Users { get; }
@@ -46,6 +48,7 @@ public class UnitOfWork : IUnitOfWork
     public IDeviceTokenRepository DeviceTokens { get; }
     public IReviewRepository Reviews { get; }
     public IChatMessageRepository ChatMessages { get; }
+    public IInvitationRepository Invitations { get; }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         => _context.SaveChangesAsync(cancellationToken);

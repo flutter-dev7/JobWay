@@ -140,6 +140,11 @@ public class VacancyService : IVacancyService
             && vacancy.Status == VacancyStatus.Active)
             return Result<VacancyResponse>.Ok(MapToResponse(vacancy));
         
+        if (vacancy is not null
+            && vacancy.CompanyProfileId == companyProfile.Id
+            && vacancy.Status == VacancyStatus.Archived)
+            return Result<VacancyResponse>.Fail("Вакансия в архиве, опубликовать её нельзя", ErrorType.Forbidden);
+        
         if (vacancy is not null && vacancy.CompanyProfileId == companyProfile.Id && vacancy.Status != VacancyStatus.Active)
         {
             var validationError = VacancyRules.Validate(

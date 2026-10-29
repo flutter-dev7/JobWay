@@ -213,6 +213,49 @@ namespace JobWay.Infrastructure.Migrations
                     b.ToTable("DeviceTokens");
                 });
 
+            modelBuilder.Entity("JobWay.Domain.Entities.Invitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CandidateProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CompanyProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VacancyId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VacancyId");
+
+                    b.HasIndex("CandidateProfileId", "VacancyId")
+                        .IsUnique();
+
+                    b.HasIndex("CompanyProfileId", "CreatedAt");
+
+                    b.ToTable("Invitations");
+                });
+
             modelBuilder.Entity("JobWay.Domain.Entities.JobApplication", b =>
                 {
                     b.Property<Guid>("Id")
@@ -627,6 +670,33 @@ namespace JobWay.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JobWay.Domain.Entities.Invitation", b =>
+                {
+                    b.HasOne("JobWay.Domain.Entities.CandidateProfile", "CandidateProfile")
+                        .WithMany()
+                        .HasForeignKey("CandidateProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JobWay.Domain.Entities.CompanyProfile", "CompanyProfile")
+                        .WithMany()
+                        .HasForeignKey("CompanyProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JobWay.Domain.Entities.Vacancy", "Vacancy")
+                        .WithMany()
+                        .HasForeignKey("VacancyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CandidateProfile");
+
+                    b.Navigation("CompanyProfile");
+
+                    b.Navigation("Vacancy");
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.JobApplication", b =>

@@ -24,7 +24,8 @@ class SubscriptionCard extends ConsumerWidget {
         : context.accentColor;
     final progress = subscription.activeVacanciesLimit == 0
         ? 0.0
-        : (subscription.activeVacanciesCount / subscription.activeVacanciesLimit)
+        : (subscription.activeVacanciesCount /
+                  subscription.activeVacanciesLimit)
               .clamp(0.0, 1.0);
 
     return GestureDetector(
@@ -89,6 +90,21 @@ class SubscriptionCard extends ConsumerWidget {
                       valueColor: AlwaysStoppedAnimation<Color>(limitColor),
                     ),
                   ),
+                  if (subscription.invitationsLimit > 0) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Приглашений кандидатов сегодня: ${subscription.invitationsUsed} из ${subscription.invitationsLimit}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: subscription.isInvitationLimitReached
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: subscription.isInvitationLimitReached
+                            ? const Color(0xFFDC2626)
+                            : colors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

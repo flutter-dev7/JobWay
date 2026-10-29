@@ -37,6 +37,8 @@ public class AuthServiceTests
     public AuthServiceTests()
     {
         _unitOfWorkMock.Setup(u => u.Users).Returns(_userRepositoryMock.Object);
+        
+        SetupEmailVerified(true);
 
         _sut = new AuthService(
             _unitOfWorkMock.Object,
@@ -48,7 +50,12 @@ public class AuthServiceTests
             _notificationServiceMock.Object,
             _fileStorageServiceMock.Object);
     }
-
+    
+    private void SetupEmailVerified(bool verified)
+        => _cacheServiceMock
+            .Setup(c => c.ExistsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(verified);
+    
     [Fact]
     public async Task RegisterAsync_PasswordsDoNotMatch_ReturnsValidationError()
     {

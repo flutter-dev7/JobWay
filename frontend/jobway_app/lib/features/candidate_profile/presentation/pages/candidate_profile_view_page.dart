@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
+import 'package:jobway_app/core/widgets/buttons/app_button.dart';
 import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/core/widgets/feedback/app_snackbar.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
+import 'package:jobway_app/features/invitations/presentation/widgets/invite_candidate_sheet.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
+import 'package:jobway_app/features/subscription/presentation/providers/subscription_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_exception.dart';
@@ -34,10 +37,32 @@ class CandidateProfileViewPage extends ConsumerWidget {
       candidateProfileByIdProvider(candidateProfileId),
     );
     final colors = context.colors;
+    final isEmployer = ref.watch(subscriptionProvider).valueOrNull != null;
+    final loadedProfile = profileAsync.valueOrNull;
 
     return Scaffold(
       backgroundColor: colors.background,
       appBar: appMinimalAppBar(context),
+            bottomNavigationBar: isEmployer && loadedProfile != null
+          ? SafeArea(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+                decoration: BoxDecoration(
+                  color: colors.background,
+                  border: Border(top: BorderSide(color: colors.border)),
+                ),
+                child: AppButton(
+                  label: 'Пригласить на вакансию',
+                  icon: Icons.mail_outline_rounded,
+                  onPressed: () => InviteCandidateSheet.show(
+                    context,
+                    candidateProfileId: candidateProfileId,
+                    candidateName: loadedProfile.fullName,
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(

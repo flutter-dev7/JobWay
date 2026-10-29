@@ -17,5 +17,7 @@ public enum NotificationType
     AccountBlocked,
     AccountUnblocked,
     VacancyExpiring,
-    VacancyExpired
+    VacancyExpired,
+    InvitationReceived,
+    InvitationDeclined
 }

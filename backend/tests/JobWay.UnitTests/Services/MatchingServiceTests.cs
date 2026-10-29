@@ -62,4 +62,26 @@ public class MatchingServiceTests
 
         result.ScorePercent.Should().Be(100);
     }
+    
+    [Fact]
+    public void Calculate_CandidateHasNoSkills_Returns0Percent()
+    {
+        var csharp = new Skill { Id = Guid.NewGuid(), NameRu = "C#", NameTj = "C#" };
+
+        var result = _sut.Calculate(candidateSkills: [], requiredSkills: [csharp]);
+
+        result.ScorePercent.Should().Be(0);
+        result.MissingSkills.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Calculate_ExtraCandidateSkills_DoNotAffectScore()
+    {
+        var csharp = new Skill { Id = Guid.NewGuid(), NameRu = "C#", NameTj = "C#" };
+        var go = new Skill { Id = Guid.NewGuid(), NameRu = "Go", NameTj = "Go" };
+
+        var result = _sut.Calculate(candidateSkills: [csharp, go], requiredSkills: [csharp]);
+
+        result.ScorePercent.Should().Be(100);
+    }
 }

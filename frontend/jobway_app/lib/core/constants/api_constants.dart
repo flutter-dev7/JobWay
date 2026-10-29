@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.1.6:5025/api';
+  static const String baseUrl = 'http://192.168.31.198:5025/api';
 
   // Auth
   static const String register = '/auth/register';
@@ -83,6 +83,14 @@ class ApiConstants {
   static String publicCompany(String id) => '/companies/$id';
   static String publicCompanyVacancies(String id) => '/companies/$id/vacancies';
   static const String candidateVisibility = '/candidate-profile/me/visibility';
+
+  // Invitations
+  static const String invitations = '/invitations';
+  static const String myInvitations = '/invitations/my';
+  static String acceptInvitation(String id) => '/invitations/$id/accept';
+  static String declineInvitation(String id) => '/invitations/$id/decline';
+  static String blockedInviteVacancies(String candidateProfileId) =>
+      '/invitations/candidate/$candidateProfileId/blocked';
 
   // Analytics
   static const String employerAnalytics = '/analytics/employer';

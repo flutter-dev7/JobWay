@@ -52,6 +52,10 @@ class NotificationCard extends StatelessWidget {
         return (icon: Icons.block_rounded, color: _red);
       case 'AccountUnblocked':
         return (icon: Icons.lock_open_rounded, color: _green);
+      case 'InvitationReceived':
+        return (icon: Icons.mark_email_unread_outlined, color: _blue);
+      case 'InvitationDeclined':
+        return (icon: Icons.person_off_outlined, color: _gray);
       default:
         return (icon: Icons.info_outline, color: _gray);
     }

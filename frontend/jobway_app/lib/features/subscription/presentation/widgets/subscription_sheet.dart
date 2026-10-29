@@ -66,6 +66,8 @@ class _SubscriptionSheetState extends ConsumerState<SubscriptionSheet> {
           child: Text(
             'Free: до ${SubscriptionContacts.freeLimit} активных вакансий одновременно.\n'
             'Pro: до ${SubscriptionContacts.proLimit} активных вакансий одновременно.\n\n'
+            'Приглашения кандидатов: Free ${SubscriptionContacts.freeInvitations} в день, '
+            'Pro ${SubscriptionContacts.proInvitations} в день.\n\n'
             'В лимит входят только опубликованные (активные) вакансии. '
             'Черновики и закрытые вакансии не учитываются.\n\n'
             'Если срок Pro закончится, уже опубликованные вакансии продолжат '
@@ -242,6 +244,28 @@ class _SubscriptionSheetState extends ConsumerState<SubscriptionSheet> {
             'Черновики и закрытые вакансии не учитываются',
             style: TextStyle(fontSize: 11, color: colors.textMuted),
           ),
+          if (subscription.invitationsLimit > 0) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Приглашений кандидатов сегодня',
+                  style: TextStyle(fontSize: 13, color: colors.textSecondary),
+                ),
+                Text(
+                  '${subscription.invitationsUsed} из ${subscription.invitationsLimit}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: subscription.isInvitationLimitReached
+                        ? const Color(0xFFDC2626)
+                        : context.accentColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (subscription.isPro) ...[
             const SizedBox(height: 10),
             Row(
@@ -305,6 +329,7 @@ class _SubscriptionSheetState extends ConsumerState<SubscriptionSheet> {
       'До ${SubscriptionContacts.proLimit} активных вакансий одновременно',
       'Полная аналитика по вакансиям',
       'Продвижение в топ: 2 раза в месяц по 7 дней',
+      'Приглашения кандидатов: до ${SubscriptionContacts.proInvitations} в день (в Free ${SubscriptionContacts.freeInvitations})',
     ];
 
     return Column(

@@ -8,6 +8,8 @@ class SubscriptionModel {
   final int promotionsUsed;
   final int promotionsLimit;
   final int promotionDays;
+  final int invitationsUsed;
+  final int invitationsLimit;
 
   SubscriptionModel({
     required this.tier,
@@ -17,6 +19,8 @@ class SubscriptionModel {
     this.promotionsUsed = 0,
     this.promotionsLimit = 0,
     this.promotionDays = 7,
+    this.invitationsUsed = 0,
+    this.invitationsLimit = 0,
   });
 
   factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +34,8 @@ class SubscriptionModel {
       promotionsUsed: json['promotionsUsed'] ?? 0,
       promotionsLimit: json['promotionsLimit'] ?? 0,
       promotionDays: json['promotionDays'] ?? 7,
+      invitationsUsed: json['invitationsUsed'] ?? 0,
+      invitationsLimit: json['invitationsLimit'] ?? 0,
     );
   }
 
@@ -41,5 +47,7 @@ class SubscriptionModel {
     promotionsUsed: promotionsUsed,
     promotionsLimit: promotionsLimit,
     promotionDays: promotionDays,
+    invitationsUsed: invitationsUsed,
+    invitationsLimit: invitationsLimit,
   );
 }
