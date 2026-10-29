@@ -12,6 +12,8 @@ abstract class CompanyProfileRepository {
     String? logoUrl,
     String? website,
     String? location,
+    String? phone,
+    String? telegramUsername,
   });
 
   Future<CompanyProfile> uploadLogo(File file);

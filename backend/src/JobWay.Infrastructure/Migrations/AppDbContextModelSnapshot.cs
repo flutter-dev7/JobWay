@@ -153,6 +153,12 @@ namespace JobWay.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<string>("Phone")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TelegramUsername")
+                        .HasColumnType("text");
+
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
 

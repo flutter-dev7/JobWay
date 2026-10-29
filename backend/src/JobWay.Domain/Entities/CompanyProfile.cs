@@ -14,6 +14,8 @@ public class CompanyProfile : BaseEntity
     public string? LogoUrl { get; set; }
     public string? Website { get; set; }
     public string? Location { get; set; }
+    public string? Phone { get; set; }
+    public string? TelegramUsername { get; set; }
     public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.NotVerified;
     public CompanyTier Tier { get; set; } = CompanyTier.Free;
     public DateTime? TierExpiresAt { get; set; }

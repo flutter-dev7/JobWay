@@ -13,6 +13,8 @@ class UpdateCompanyProfileUseCase {
     String? logoUrl,
     String? website,
     String? location,
+    String? phone,
+    String? telegramUsername,
   }) =>
       _repository.updateMyProfile(
         companyName: companyName,
@@ -21,5 +23,7 @@ class UpdateCompanyProfileUseCase {
         logoUrl: logoUrl,
         website: website,
         location: location,
+        phone: phone,
+        telegramUsername: telegramUsername,
       );
 }

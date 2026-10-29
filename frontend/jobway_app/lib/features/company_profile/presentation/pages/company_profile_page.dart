@@ -202,7 +202,7 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
               const SizedBox(height: 16),
               SubscriptionCard(companyName: profile.companyName),
               ProfileCompletionCard(
-                total: 4,
+                total: 5,
                 missing: [
                   if (profile.description == null ||
                       profile.description!.trim().isEmpty)
@@ -213,6 +213,7 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                     'Сайт',
                   if (profile.location == null || profile.location!.isEmpty)
                     'Локация',
+                  if (!profile.hasContacts) 'Контакты',
                 ],
                 onFill: () => _openEdit(profile),
               ),
@@ -249,6 +250,35 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                       if (profile.website != null &&
                           profile.website!.isNotEmpty)
                         _WebsiteLine(url: profile.website!),
+                    ],
+                  ),
+                ),
+              ],
+              if (profile.hasContacts) ...[
+                const SizedBox(height: 16),
+                SectionCard(
+                  title: 'Контакты',
+                  icon: Icons.support_agent_rounded,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (profile.phone != null &&
+                          profile.phone!.isNotEmpty) ...[
+                        InfoRow(label: 'Телефон', value: profile.phone!),
+                        const SizedBox(height: 14),
+                      ],
+                      if (profile.telegramUsername != null &&
+                          profile.telegramUsername!.isNotEmpty) ...[
+                        InfoRow(
+                          label: 'Telegram',
+                          value: '@${profile.telegramUsername!}',
+                        ),
+                        const SizedBox(height: 14),
+                      ],
+                      Text(
+                        'Показываются кандидатам на странице ваших вакансий',
+                        style: TextStyle(fontSize: 12, color: colors.textMuted),
+                      ),
                     ],
                   ),
                 ),

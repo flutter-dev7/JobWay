@@ -26,4 +26,6 @@ public class VacancyResponse
     public DateTime? ExpiresAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public string? CompanyLogoUrl { get; set; }
+    public string? CompanyPhone { get; set; }
+    public string? CompanyTelegram { get; set; }
 }

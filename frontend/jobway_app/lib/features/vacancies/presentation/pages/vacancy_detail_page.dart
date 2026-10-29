@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/utils/contact_launcher.dart';
 import 'package:jobway_app/core/utils/enum_labels.dart';
 import 'package:jobway_app/core/widgets/navigation/app_page_app_bar.dart';
 import 'package:jobway_app/features/applications/presentation/providers/applications_provider.dart';
@@ -49,7 +50,7 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
     return 'до ${to!.toStringAsFixed(0)} $currencyLabelText $suffix';
   }
 
-    Future<void> _apply(bool hasApplied) async {
+  Future<void> _apply(bool hasApplied) async {
     if (_isApplying || hasApplied) return;
 
     setState(() => _isApplying = true);
@@ -311,6 +312,43 @@ class _VacancyDetailPageState extends ConsumerState<VacancyDetailPage> {
                               .toList(),
                         ),
                 ),
+                if (vacancy.status == 'Active' && vacancy.hasContacts) ...[
+                  const SizedBox(height: 16),
+                  SectionCard(
+                    title: 'Связаться с компанией',
+                    icon: Icons.support_agent_rounded,
+                    child: Column(
+                      children: [
+                        if (vacancy.companyPhone != null &&
+                            vacancy.companyPhone!.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.call_outlined,
+                            label: 'Позвонить',
+                            value: vacancy.companyPhone!,
+                            onTap: () => ContactLauncher.callPhone(
+                              vacancy.companyPhone!,
+                            ),
+                          ),
+                        if (vacancy.companyPhone != null &&
+                            vacancy.companyPhone!.isNotEmpty &&
+                            vacancy.companyTelegram != null &&
+                            vacancy.companyTelegram!.isNotEmpty)
+                          const SizedBox(height: 10),
+                        if (vacancy.companyTelegram != null &&
+                            vacancy.companyTelegram!.isNotEmpty)
+                          _ContactButton(
+                            icon: Icons.send_rounded,
+                            label: 'Написать в Telegram',
+                            value: '@${vacancy.companyTelegram!}',
+                            onTap: () => ContactLauncher.openTelegram(
+                              vacancy.companyTelegram!,
+                              'Здравствуйте! Меня заинтересовала вакансия «${vacancy.title}» в JobWay.',
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
             Positioned(
@@ -421,6 +459,72 @@ class _MetaItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ContactButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  const _ContactButton({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final accent = context.accentColor;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colors.surfaceMuted,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: accent.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 20, color: accent),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: TextStyle(fontSize: 12, color: colors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, size: 20, color: colors.textMuted),
+          ],
+        ),
+      ),
     );
   }
 }

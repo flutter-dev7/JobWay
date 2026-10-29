@@ -149,6 +149,23 @@ public class VacancyServiceTests
         result.ErrorType.Should().Be(ErrorType.Forbidden);
         _vacancyRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
+    
+    [Fact]
+    public async Task PublishAsync_CompanyWithContacts_ExposesContactsInResponse()
+    {
+        var company = TestData.MakeCompany();
+        company.Phone = "+992987654321";
+        company.TelegramUsername = "jobway_hr";
+        var vacancy = TestData.MakeVacancy(company);
+        ArrangeCompany(company);
+        ArrangeVacancy(vacancy);
+
+        var result = await _sut.PublishAsync(company.UserId, vacancy.Id, CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.CompanyPhone.Should().Be("+992987654321");
+        result.Data.CompanyTelegram.Should().Be("jobway_hr");
+    }
 
     [Fact]
     public async Task PublishAsync_ValidDraft_ActivatesVacancyAndSetsThirtyDayExpiry()

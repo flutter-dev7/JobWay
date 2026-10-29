@@ -10,6 +10,8 @@ class CompanyProfileModel {
   final String? logoUrl;
   final String? website;
   final String? location;
+  final String? phone;
+  final String? telegramUsername;
   final String verificationStatus;
 
   CompanyProfileModel({
@@ -21,6 +23,8 @@ class CompanyProfileModel {
     this.logoUrl,
     this.website,
     this.location,
+    this.phone,
+    this.telegramUsername,
     required this.verificationStatus,
   });
 
@@ -35,6 +39,8 @@ class CompanyProfileModel {
       logoUrl: data['logoUrl'],
       website: data['website'],
       location: data['location'],
+      phone: data['phone'],
+      telegramUsername: data['telegramUsername'],
       verificationStatus: data['verificationStatus'],
     );
   }
@@ -48,6 +54,8 @@ class CompanyProfileModel {
         logoUrl: logoUrl,
         website: website,
         location: location,
+        phone: phone,
+        telegramUsername: telegramUsername,
         verificationStatus: verificationStatus,
       );
 }

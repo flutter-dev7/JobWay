@@ -30,6 +30,8 @@ class _EditCompanyProfilePageState
   late final TextEditingController _industryController;
   late final TextEditingController _websiteController;
   late final TextEditingController _locationController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _telegramController;
   bool _isLoading = false;
 
   @override
@@ -50,6 +52,10 @@ class _EditCompanyProfilePageState
     _locationController = TextEditingController(
       text: widget.profile.location ?? '',
     );
+    _phoneController = TextEditingController(text: widget.profile.phone ?? '');
+    _telegramController = TextEditingController(
+      text: widget.profile.telegramUsername ?? '',
+    );
   }
 
   @override
@@ -59,7 +65,14 @@ class _EditCompanyProfilePageState
     _industryController.dispose();
     _websiteController.dispose();
     _locationController.dispose();
+    _phoneController.dispose();
+    _telegramController.dispose();
     super.dispose();
+  }
+
+  String? _valueOrNull(TextEditingController controller) {
+    final value = controller.text.trim();
+    return value.isEmpty ? null : value;
   }
 
   Future<void> _save() async {
@@ -74,18 +87,12 @@ class _EditCompanyProfilePageState
           .read(updateCompanyProfileUseCaseProvider)
           .call(
             companyName: _companyNameController.text.trim(),
-            description: _descriptionController.text.trim().isEmpty
-                ? null
-                : _descriptionController.text.trim(),
-            industry: _industryController.text.trim().isEmpty
-                ? null
-                : _industryController.text.trim(),
-            website: _websiteController.text.trim().isEmpty
-                ? null
-                : _websiteController.text.trim(),
-            location: _locationController.text.trim().isEmpty
-                ? null
-                : _locationController.text.trim(),
+            description: _valueOrNull(_descriptionController),
+            industry: _valueOrNull(_industryController),
+            website: _valueOrNull(_websiteController),
+            location: _valueOrNull(_locationController),
+            phone: _valueOrNull(_phoneController),
+            telegramUsername: _valueOrNull(_telegramController),
           );
       if (!mounted) return;
       context.pop();
@@ -152,6 +159,41 @@ class _EditCompanyProfilePageState
                   controller: _websiteController,
                   label: 'Сайт',
                   icon: Icons.link,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SectionCard(
+            title: 'Контакты',
+            icon: Icons.support_agent_rounded,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Text(
+                    'Кандидаты увидят эти контакты на странице ваших вакансий. '
+                    'Телефон укажите в международном формате (+992…), '
+                    'Telegram без значка @.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ),
+                AppTextField(
+                  controller: _phoneController,
+                  label: 'Телефон',
+                  icon: Icons.call_outlined,
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 14),
+                AppTextField(
+                  controller: _telegramController,
+                  label: 'Telegram',
+                  icon: Icons.send_rounded,
                 ),
               ],
             ),

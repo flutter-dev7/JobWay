@@ -23,6 +23,8 @@ class VacancyModel {
   final DateTime createdAt;
   final DateTime? featuredUntil;
   final DateTime? expiresAt;
+  final String? companyPhone;
+  final String? companyTelegram;
 
   VacancyModel({
     required this.id,
@@ -46,57 +48,65 @@ class VacancyModel {
     required this.createdAt,
     this.featuredUntil,
     this.expiresAt,
+    this.companyPhone,
+    this.companyTelegram,
   });
 
   factory VacancyModel.fromJson(Map<String, dynamic> json) => VacancyModel(
-        id: json['id'],
-        companyProfileId: json['companyProfileId'],
-        companyUserId: json['companyUserId'],
-        companyName: json['companyName'],
-        title: json['title'],
-        description: json['description'],
-        responsibilities: json['responsibilities'],
-        requirements: json['requirements'],
-        employmentType: json['employmentType'],
-        experienceLevel: json['experienceLevel'],
-        paymentType: json['paymentType'],
-        currency: json['currency'],
-        location: json['location'],
-        companyLogoUrl: json['companyLogoUrl'],
-        salaryFrom: (json['salaryFrom'] as num?)?.toDouble(),
-        salaryTo: (json['salaryTo'] as num?)?.toDouble(),
-        status: json['status'],
-        skills: (json['skills'] as List).map((s) => SkillModel.fromJson(s)).toList(),
-        createdAt: DateTime.parse(json['createdAt']),
-        featuredUntil: json['featuredUntil'] != null
-            ? DateTime.parse(json['featuredUntil'])
-            : null,
-        expiresAt: json['expiresAt'] != null
-            ? DateTime.parse(json['expiresAt'])
-            : null,
-      );
+    id: json['id'],
+    companyProfileId: json['companyProfileId'],
+    companyUserId: json['companyUserId'],
+    companyName: json['companyName'],
+    title: json['title'],
+    description: json['description'],
+    responsibilities: json['responsibilities'],
+    requirements: json['requirements'],
+    employmentType: json['employmentType'],
+    experienceLevel: json['experienceLevel'],
+    paymentType: json['paymentType'],
+    currency: json['currency'],
+    location: json['location'],
+    companyLogoUrl: json['companyLogoUrl'],
+    salaryFrom: (json['salaryFrom'] as num?)?.toDouble(),
+    salaryTo: (json['salaryTo'] as num?)?.toDouble(),
+    status: json['status'],
+    skills: (json['skills'] as List)
+        .map((s) => SkillModel.fromJson(s))
+        .toList(),
+    createdAt: DateTime.parse(json['createdAt']),
+    featuredUntil: json['featuredUntil'] != null
+        ? DateTime.parse(json['featuredUntil'])
+        : null,
+    expiresAt: json['expiresAt'] != null
+        ? DateTime.parse(json['expiresAt'])
+        : null,
+    companyPhone: json['companyPhone'],
+    companyTelegram: json['companyTelegram'],
+  );
 
   Vacancy toEntity() => Vacancy(
-        id: id,
-        companyProfileId: companyProfileId,
-        companyUserId: companyUserId,
-        companyName: companyName,
-        title: title,
-        description: description,
-        responsibilities: responsibilities,
-        requirements: requirements,
-        employmentType: employmentType,
-        experienceLevel: experienceLevel,
-        paymentType: paymentType,
-        currency: currency,
-        location: location,
-        companyLogoUrl: companyLogoUrl,
-        salaryFrom: salaryFrom,
-        salaryTo: salaryTo,
-        status: status,
-        skills: skills.map((s) => s.toEntity()).toList(),
-        createdAt: createdAt,
-        featuredUntil: featuredUntil,
-        expiresAt: expiresAt,
-      );
+    id: id,
+    companyProfileId: companyProfileId,
+    companyUserId: companyUserId,
+    companyName: companyName,
+    title: title,
+    description: description,
+    responsibilities: responsibilities,
+    requirements: requirements,
+    employmentType: employmentType,
+    experienceLevel: experienceLevel,
+    paymentType: paymentType,
+    currency: currency,
+    location: location,
+    companyLogoUrl: companyLogoUrl,
+    salaryFrom: salaryFrom,
+    salaryTo: salaryTo,
+    status: status,
+    skills: skills.map((s) => s.toEntity()).toList(),
+    createdAt: createdAt,
+    featuredUntil: featuredUntil,
+    expiresAt: expiresAt,
+    companyPhone: companyPhone,
+    companyTelegram: companyTelegram,
+  );
 }

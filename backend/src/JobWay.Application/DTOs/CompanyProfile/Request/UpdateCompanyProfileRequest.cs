@@ -12,4 +12,6 @@ public class UpdateCompanyProfileRequest
     public string? LogoUrl { get; set; }
     public string? Website { get; set; }
     public string? Location { get; set; }
+    public string? Phone { get; set; }
+    public string? TelegramUsername { get; set; }
 }

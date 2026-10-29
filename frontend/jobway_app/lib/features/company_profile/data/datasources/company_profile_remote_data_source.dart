@@ -20,13 +20,15 @@ class CompanyProfileRemoteDataSource {
     return CompanyProfileModel.fromJson(ApiResponse.unwrap(response.data));
   }
 
-  Future<CompanyProfileModel> updateMyProfile({
+    Future<CompanyProfileModel> updateMyProfile({
     required String companyName,
     String? description,
     String? industry,
     String? logoUrl,
     String? website,
     String? location,
+    String? phone,
+    String? telegramUsername,
   }) async {
     final response = await _dio.put(
       ApiConstants.companyProfileMe,
@@ -37,6 +39,8 @@ class CompanyProfileRemoteDataSource {
         'logoUrl': logoUrl,
         'website': website,
         'location': location,
+        'phone': phone,
+        'telegramUsername': telegramUsername,
       },
     );
     return CompanyProfileModel.fromJson(ApiResponse.unwrap(response.data));

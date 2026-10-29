@@ -135,6 +135,8 @@ public class SavedVacancyService : ISavedVacancyService
         SalaryFrom = vacancy.SalaryFrom,
         SalaryTo = vacancy.SalaryTo,
         Status = vacancy.Status,
+        CompanyPhone = vacancy.CompanyProfile.Phone,
+        CompanyTelegram = vacancy.CompanyProfile.TelegramUsername,
         Skills = vacancy.RequiredSkills.Select(s => new SkillResponse
         {
             Id = s.Id,

@@ -22,6 +22,8 @@ class Vacancy {
   final DateTime createdAt;
   final DateTime? featuredUntil;
   final DateTime? expiresAt;
+  final String? companyPhone;
+  final String? companyTelegram;
 
   const Vacancy({
     required this.id,
@@ -45,6 +47,8 @@ class Vacancy {
     required this.createdAt,
     this.featuredUntil,
     this.expiresAt,
+    this.companyPhone,
+    this.companyTelegram,
   });
 
   bool get isFeatured =>
@@ -60,4 +64,8 @@ class Vacancy {
   }
 
   bool get canRenew => daysLeft != null && daysLeft! <= 7;
+
+  bool get hasContacts =>
+      (companyPhone != null && companyPhone!.isNotEmpty) ||
+      (companyTelegram != null && companyTelegram!.isNotEmpty);
 }

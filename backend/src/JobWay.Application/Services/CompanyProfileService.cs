@@ -58,12 +58,18 @@ public class CompanyProfileService : ICompanyProfileService
 
         if (profile is null)
             return Result<CompanyProfileResponse>.Fail("Profile not found", ErrorType.NotFound);
+        
+        var contactError = ContactRules.Normalize(request.Phone, request.TelegramUsername, out var phone, out var telegram);
+        if (contactError is not null)
+            return Result<CompanyProfileResponse>.Fail(contactError, ErrorType.Validation);
 
         profile.CompanyName = request.CompanyName;
         profile.Description = request.Description;
         profile.Industry = request.Industry;
         profile.Website = request.Website;
         profile.Location = request.Location;
+        profile.Phone = phone;
+        profile.TelegramUsername = telegram;
 
         _unitOfWork.CompanyProfiles.Update(profile);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -109,6 +115,8 @@ public class CompanyProfileService : ICompanyProfileService
         LogoUrl = profile.LogoUrl,
         Website = profile.Website,
         Location = profile.Location,
+        Phone = profile.Phone,
+        TelegramUsername = profile.TelegramUsername,
         VerificationStatus = profile.VerificationStatus
     };
 }

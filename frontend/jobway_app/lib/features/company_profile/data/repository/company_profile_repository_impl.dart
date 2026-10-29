@@ -15,7 +15,7 @@ class CompanyProfileRepositoryImpl implements CompanyProfileRepository {
     return model.toEntity();
   }
 
-  @override
+    @override
   Future<CompanyProfile> updateMyProfile({
     required String companyName,
     String? description,
@@ -23,6 +23,8 @@ class CompanyProfileRepositoryImpl implements CompanyProfileRepository {
     String? logoUrl,
     String? website,
     String? location,
+    String? phone,
+    String? telegramUsername,
   }) async {
     final model = await _remoteDataSource.updateMyProfile(
       companyName: companyName,
@@ -31,6 +33,8 @@ class CompanyProfileRepositoryImpl implements CompanyProfileRepository {
       logoUrl: logoUrl,
       website: website,
       location: location,
+      phone: phone,
+      telegramUsername: telegramUsername,
     );
     return model.toEntity();
   }

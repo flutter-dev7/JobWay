@@ -7,6 +7,8 @@ class CompanyProfile {
   final String? logoUrl;
   final String? website;
   final String? location;
+  final String? phone;
+  final String? telegramUsername;
   final String verificationStatus;
 
   const CompanyProfile({
@@ -18,6 +20,12 @@ class CompanyProfile {
     this.logoUrl,
     this.website,
     this.location,
+    this.phone,
+    this.telegramUsername,
     required this.verificationStatus,
   });
+
+  bool get hasContacts =>
+      (phone != null && phone!.isNotEmpty) ||
+      (telegramUsername != null && telegramUsername!.isNotEmpty);
 }
