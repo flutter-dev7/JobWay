@@ -7,21 +7,25 @@ namespace JobWay.Infrastructure.Persistence.Seeds;
 
 public static class DataSeeder
 {
-    public static async Task SeedAsync(AppDbContext context)
+    // Учётные данные администратора берутся из конфигурации (Seed:AdminEmail, Seed:AdminPassword).
+    // Если они не заданы, администратор не создаётся
+    public static async Task SeedAsync(AppDbContext context, string? adminEmail = null, string? adminPassword = null)
     {
-        await SeedAdminAsync(context);
+        await SeedAdminAsync(context, adminEmail, adminPassword);
         await SeedSkillsAsync(context);
     }
 
-    private static async Task SeedAdminAsync(AppDbContext context)
+    private static async Task SeedAdminAsync(AppDbContext context, string? email, string? password)
     {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password)) return;
+
         if (await context.Users.AnyAsync(u => u.Role == UserRole.Admin)) return;
 
         var admin = new User
         {
             Id = Guid.NewGuid(),
-            Email = "admin@jobway.tj",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+            Email = email.Trim(),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             Role = UserRole.Admin,
             IsActive = true
         };

@@ -105,7 +105,10 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     await context.Database.MigrateAsync();
-    await DataSeeder.SeedAsync(context);
+    await DataSeeder.SeedAsync(
+        context,
+        builder.Configuration["Seed:AdminEmail"],
+        builder.Configuration["Seed:AdminPassword"]);
     await SkillCatalogSeeder.SeedMissingAsync(context);
 }
 
