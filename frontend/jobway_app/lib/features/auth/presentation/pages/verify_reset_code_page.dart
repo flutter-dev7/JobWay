@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme_extension.dart';
-import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/navigation/app_page_app_bar.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/inputs/otp_input.dart';
@@ -22,25 +21,25 @@ class VerifyResetCodePage extends ConsumerStatefulWidget {
 }
 
 class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
-  String _code = '';
   bool _isLoading = false;
   bool _isResending = false;
 
-  Future<void> _verify() async {
-    if (_code.length != 6) {
-      AppSnackbar.showError('Введите код полностью');
-      return;
-    }
+  // Меняется после неверного кода и повторной отправки: поле пересоздаётся и очищается
+  int _attempt = 0;
+
+  Future<void> _verify(String code) async {
+    if (_isLoading) return;
 
     setState(() => _isLoading = true);
     try {
       await ref
           .read(authRepositoryProvider)
-          .verifyResetCode(widget.email, _code);
+          .verifyResetCode(widget.email, code);
       if (!mounted) return;
       context.push(AppRoutes.resetPassword, extra: widget.email);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
+      if (mounted) setState(() => _attempt++);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -51,6 +50,7 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
     try {
       await ref.read(authRepositoryProvider).forgotPassword(widget.email);
       AppSnackbar.showSuccess('Код отправлен повторно');
+      if (mounted) setState(() => _attempt++);
     } catch (error) {
       AppSnackbar.showError(ApiException.extractMessage(error));
     } finally {
@@ -78,25 +78,22 @@ class _VerifyResetCodePageState extends ConsumerState<VerifyResetCodePage> {
                 style: TextStyle(fontSize: 14, color: colors.textSecondary),
               ),
               const SizedBox(height: 28),
-              OtpInput(onCompleted: (value) => setState(() => _code = value)),
-              const SizedBox(height: 24),
-              AppButton(
-                label: 'Подтвердить',
-                isLoading: _isLoading,
-                onPressed: _verify,
-              ),
+              OtpInput(key: ValueKey(_attempt), onCompleted: _verify),
               const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: _isResending ? null : _resend,
-                  style: TextButton.styleFrom(
-                    foregroundColor: colors.textSecondary,
-                  ),
-                  child: Text(
-                    _isResending ? 'Отправка...' : 'Отправить код повторно',
+              if (_isLoading)
+                const Center(child: CircularProgressIndicator())
+              else
+                Center(
+                  child: TextButton(
+                    onPressed: _isResending ? null : _resend,
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.textSecondary,
+                    ),
+                    child: Text(
+                      _isResending ? 'Отправка...' : 'Отправить код повторно',
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

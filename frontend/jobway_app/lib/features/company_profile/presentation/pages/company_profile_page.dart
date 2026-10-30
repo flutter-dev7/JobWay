@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jobway_app/core/router/app_routes.dart';
 import 'package:jobway_app/core/theme/app_theme_extension.dart';
+import 'package:jobway_app/core/utils/contact_launcher.dart';
 import 'package:jobway_app/core/utils/image_utils.dart';
+import 'package:jobway_app/core/widgets/display/contact_tile.dart';
 import 'package:jobway_app/core/widgets/display/info_row.dart';
 import 'package:jobway_app/core/widgets/display/profile_completion_card.dart';
 import 'package:jobway_app/features/review/presentation/widgets/reviews_section.dart';
@@ -262,22 +264,39 @@ class _CompanyProfilePageState extends ConsumerState<CompanyProfilePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (profile.phone != null &&
-                          profile.phone!.isNotEmpty) ...[
-                        InfoRow(label: 'Телефон', value: profile.phone!),
-                        const SizedBox(height: 14),
-                      ],
-                      if (profile.telegramUsername != null &&
-                          profile.telegramUsername!.isNotEmpty) ...[
-                        InfoRow(
-                          label: 'Telegram',
-                          value: '@${profile.telegramUsername!}',
+                      if (profile.phone != null && profile.phone!.isNotEmpty)
+                        ContactTile(
+                          icon: Icons.call_outlined,
+                          label: 'Позвонить',
+                          value: profile.phone!,
+                          onTap: () =>
+                              ContactLauncher.callPhone(profile.phone!),
                         ),
-                        const SizedBox(height: 14),
-                      ],
+                      if (profile.phone != null &&
+                          profile.phone!.isNotEmpty &&
+                          profile.telegramUsername != null &&
+                          profile.telegramUsername!.isNotEmpty)
+                        const SizedBox(height: 10),
+                      if (profile.telegramUsername != null &&
+                          profile.telegramUsername!.isNotEmpty)
+                        ContactTile(
+                          icon: Icons.send_rounded,
+                          label: 'Открыть Telegram',
+                          value: '@${profile.telegramUsername!}',
+                          onTap: () => ContactLauncher.openTelegram(
+                            profile.telegramUsername!,
+                            '',
+                          ),
+                        ),
+                      const SizedBox(height: 12),
                       Text(
-                        'Показываются кандидатам на странице ваших вакансий',
-                        style: TextStyle(fontSize: 12, color: colors.textMuted),
+                        'Эти контакты видят кандидаты на странице ваших вакансий. '
+                        'Нажмите на контакт, чтобы проверить, как он открывается.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: colors.textMuted,
+                        ),
                       ),
                     ],
                   ),

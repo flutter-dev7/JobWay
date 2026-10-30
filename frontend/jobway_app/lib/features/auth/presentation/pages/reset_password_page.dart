@@ -75,6 +75,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                 label: 'Новый пароль',
                 icon: Icons.lock_outline,
                 isPassword: true,
+                autofocus: true,
               ),
               const SizedBox(height: 14),
               AppTextField(

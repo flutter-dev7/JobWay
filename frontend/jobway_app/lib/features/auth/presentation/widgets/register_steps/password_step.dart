@@ -24,15 +24,39 @@ class PasswordStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Придумайте пароль', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colors.textPrimary)),
+        Text(
+          'Придумайте пароль',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+          ),
+        ),
         const SizedBox(height: 6),
-        Text('Минимум 6 символов', style: TextStyle(fontSize: 14, color: colors.textSecondary)),
+        Text(
+          'Минимум 6 символов',
+          style: TextStyle(fontSize: 14, color: colors.textSecondary),
+        ),
         const SizedBox(height: 28),
-        AppTextField(controller: passwordController, label: 'Пароль', icon: Icons.lock_outline, isPassword: true),
+        AppTextField(
+          controller: passwordController,
+          label: 'Пароль',
+          icon: Icons.lock_outline,
+          isPassword: true,
+          autofocus: true,
+        ),
         const SizedBox(height: 14),
-        AppTextField(controller: confirmPasswordController, label: 'Повторите пароль', icon: Icons.lock_outline, isPassword: true),
+        AppTextField(
+          controller: confirmPasswordController,
+          label: 'Повторите пароль',
+          icon: Icons.lock_outline,
+          isPassword: true,
+        ),
         const SizedBox(height: 28),
-        AppButton(label: 'Продолжить', onPressed: canContinue ? onContinue : null),
+        AppButton(
+          label: 'Продолжить',
+          onPressed: canContinue ? onContinue : null,
+        ),
       ],
     );
   }

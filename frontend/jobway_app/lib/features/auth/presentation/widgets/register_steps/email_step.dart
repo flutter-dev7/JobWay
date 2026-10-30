@@ -43,6 +43,7 @@ class EmailStep extends StatelessWidget {
           label: 'Email',
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
+          autofocus: true,
         ),
         const SizedBox(height: 28),
         AppButton(
