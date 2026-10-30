@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JobWay.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261021093415_AddVacancyPromotions")]
-    partial class AddVacancyPromotions
+    [Migration("20261030082919_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,6 +65,9 @@ namespace JobWay.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsVisibleToEmployers")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Location")
                         .HasMaxLength(200)
@@ -153,6 +156,12 @@ namespace JobWay.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<string>("Phone")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TelegramUsername")
+                        .HasColumnType("text");
+
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
 
@@ -211,6 +220,49 @@ namespace JobWay.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("DeviceTokens");
+                });
+
+            modelBuilder.Entity("JobWay.Domain.Entities.Invitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CandidateProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CompanyProfileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VacancyId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VacancyId");
+
+                    b.HasIndex("CandidateProfileId", "VacancyId")
+                        .IsUnique();
+
+                    b.HasIndex("CompanyProfileId", "CreatedAt");
+
+                    b.ToTable("Invitations");
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.JobApplication", b =>
@@ -478,6 +530,12 @@ namespace JobWay.Infrastructure.Migrations
                     b.Property<int>("ExperienceLevel")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("ExpiryNoticeSent")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("FeaturedUntil")
                         .HasColumnType("timestamp with time zone");
 
@@ -489,6 +547,12 @@ namespace JobWay.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
+
+                    b.Property<string>("Requirements")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Responsibilities")
+                        .HasColumnType("text");
 
                     b.Property<decimal?>("SalaryFrom")
                         .HasPrecision(12, 2)
@@ -615,6 +679,33 @@ namespace JobWay.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JobWay.Domain.Entities.Invitation", b =>
+                {
+                    b.HasOne("JobWay.Domain.Entities.CandidateProfile", "CandidateProfile")
+                        .WithMany()
+                        .HasForeignKey("CandidateProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JobWay.Domain.Entities.CompanyProfile", "CompanyProfile")
+                        .WithMany()
+                        .HasForeignKey("CompanyProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JobWay.Domain.Entities.Vacancy", "Vacancy")
+                        .WithMany()
+                        .HasForeignKey("VacancyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CandidateProfile");
+
+                    b.Navigation("CompanyProfile");
+
+                    b.Navigation("Vacancy");
                 });
 
             modelBuilder.Entity("JobWay.Domain.Entities.JobApplication", b =>
